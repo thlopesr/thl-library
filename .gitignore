@@ -1,0 +1,45 @@
+# Compilados OpenEdge
+*.r
+*.pl
+
+# Backups e temporários
+Backup/
+*.bak
+*.tmp
+*.temp
+*.swp
+*~
+
+# Temporários do Microsoft Office
+~$*.docx
+~$*.xlsx
+~$*.pptx
+~$*.doc
+~$*.xls
+
+# Logs
+*.log
+*.lg
+
+#
+*.pdf
+
+# Banco local / artefatos de banco
+*.db
+*.bi
+*.ai
+*.d1
+*.st
+
+# Workspace do Eclipse/PDSOE
+.metadata/
+
+# Saídas de build, caso existam
+bin/
+build/
+dist/
+target/
+
+# Sistema operacional
+Thumbs.db
+.DS_Store

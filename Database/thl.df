@@ -1,0 +1,1239 @@
+ADD TABLE "thl-ambiente"
+  AREA "Schema Area"
+  LABEL "Ambiente Execu‡Æo"
+  DESCRIPTION "Ambiente Execu‡Æo"
+  DUMP-NAME "thl001"
+
+ADD FIELD "ip" OF "thl-ambiente" AS character 
+  DESCRIPTION "IP do Ambiente"
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "IP Ambiente"
+  POSITION 2
+  MAX-WIDTH 30
+  COLUMN-LABEL "IP Ambiente"
+  HELP "IP do Ambiente"
+  ORDER 20
+
+ADD FIELD "nome-ambiente" OF "thl-ambiente" AS character 
+  DESCRIPTION "Nome do Ambeinte"
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Nome Ambiente"
+  POSITION 3
+  MAX-WIDTH 30
+  COLUMN-LABEL "Nome Ambiente"
+  HELP "Nome do Ambeinte"
+  ORDER 30
+
+ADD FIELD "cod-ambiente" OF "thl-ambiente" AS character 
+  DESCRIPTION "Codigo do ambiente relacionado a variavel configurada, utilizado para identificar o contexto da configuracao complementar."
+  FORMAT "x(3)"
+  INITIAL ""
+  LABEL "Ambiente"
+  POSITION 4
+  MAX-WIDTH 6
+  COLUMN-LABEL "Ambiente"
+  HELP "Informe o ambiente"
+  ORDER 10
+
+ADD INDEX "ch-ambiente" ON "thl-ambiente" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+
+ADD INDEX "ind-ip" ON "thl-ambiente" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "ip" ASCENDING 
+
+ADD TABLE "thl-ambiente-param"
+  AREA "Schema Area"
+  LABEL "Ambiente Parametro"
+  DESCRIPTION "Ambiente Parametro"
+  DUMP-NAME "thl002"
+
+ADD FIELD "descr-param-ambiente" OF "thl-ambiente-param" AS character 
+  DESCRIPTION "Descricao resumida do parametro de ambiente, utilizada para identificar a finalidade da configuracao cadastrada."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descricao"
+  POSITION 6
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descricao"
+  HELP "Informe a descricao do parametro."
+  ORDER 30
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param" AS character 
+  DESCRIPTION "Codigo do parametro de ambiente utilizado para identificar a configuracao tecnica da integracao."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Codigo Parametro"
+  POSITION 7
+  MAX-WIDTH 6
+  COLUMN-LABEL "Cod. Param."
+  HELP "Informe o codigo do parametro."
+  ORDER 20
+
+ADD INDEX "ch-param" ON "thl-ambiente-param" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-grupo"
+  AREA "Schema Area"
+  LABEL "Grupo do parametro"
+  DESCRIPTION "Grupo do parametro"
+  DUMP-NAME "thl017"
+
+ADD FIELD "cod-grp-usuar" OF "thl-ambiente-param-grupo" AS character 
+  DESCRIPTION "Cod. Grupo Usu rio"
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Cod. Grupo Usu rio"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Cod. Grupo Usu rio"
+  HELP "Cod. Grupo Usu rio"
+  ORDER 10
+
+ADD FIELD "descricao" OF "thl-ambiente-param-grupo" AS character 
+  DESCRIPTION "Descri‡Æo"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descri‡Æo"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descri‡Æo"
+  HELP "Descri‡Æo"
+  ORDER 20
+
+ADD INDEX "ch-cod-grp-usuar" ON "thl-ambiente-param-grupo" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-grupo-usuar"
+  AREA "Schema Area"
+  LABEL "Grupo de E-mail do Usu rio"
+  DESCRIPTION "Grupo de E-mail do Usu rio"
+  DUMP-NAME "thl014"
+
+ADD FIELD "cod-grp-usuar" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "Cod. Grupo Usu rio"
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Cod. Grupo Usu rio"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Cod. Grupo Usu rio"
+  HELP "Cod. Grupo Usu rio"
+  ORDER 10
+
+ADD FIELD "cod-usuario" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "Cod. Usu rio"
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Cod. Usu rio"
+  POSITION 3
+  MAX-WIDTH 24
+  COLUMN-LABEL "Cod. Usu rio"
+  HELP "Cod. Usu rio"
+  ORDER 20
+
+ADD FIELD "email-alternativo" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "Emial Alternativo"
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Emial Alternativo"
+  POSITION 4
+  MAX-WIDTH 400
+  COLUMN-LABEL "Emial Alternativo"
+  HELP "Emial Alternativo"
+  ORDER 30
+
+ADD INDEX "ind-cod-grp-usuar" ON "thl-ambiente-param-grupo-usuar" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+
+ADD INDEX "ch-grupo-usuar" ON "thl-ambiente-param-grupo-usuar" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+  INDEX-FIELD "cod-usuario" ASCENDING 
+  INDEX-FIELD "email-alternativo" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-prog"
+  AREA "Schema Area"
+  LABEL "Progr Parametro Ambiente"
+  DESCRIPTION "Programas vinculados ao parametro do ambiente"
+  DUMP-NAME "thl003"
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param-prog" AS character 
+  DESCRIPTION "Codigo do parametro de ambiente utilizado para identificar a configuracao tecnica da integracao."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Codigo Parametro"
+  POSITION 3
+  MAX-WIDTH 6
+  COLUMN-LABEL "Cod. Param."
+  HELP "Informe o codigo do parametro."
+  ORDER 20
+
+ADD FIELD "cod-prog-dtsul" OF "thl-ambiente-param-prog" AS character 
+  DESCRIPTION "C¢digo Programa"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "C¢digo Programa"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "C¢digo Programa"
+  HELP "C¢digo Programa"
+  ORDER 30
+
+ADD INDEX "ch-param-prog" ON "thl-ambiente-param-prog" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+  INDEX-FIELD "cod-prog-dtsul" ASCENDING 
+
+ADD INDEX "ind-param" ON "thl-ambiente-param-prog" 
+  AREA "Schema Area"
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-variavel"
+  AREA "Schema Area"
+  LABEL "Variaveis dos Param Ambiente"
+  DESCRIPTION "Variaveis dos Param Ambiente"
+  DUMP-NAME "thl005"
+
+ADD FIELD "cod-ambiente" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Codigo do ambiente relacionado a variavel configurada, utilizado para identificar o contexto da configuracao complementar."
+  FORMAT "x(3)"
+  INITIAL ""
+  LABEL "Ambiente"
+  POSITION 2
+  MAX-WIDTH 6
+  COLUMN-LABEL "Ambiente"
+  HELP "Informe o ambiente."
+  ORDER 10
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Codigo do parametro de ambiente ao qual a variavel complementar esta vinculada."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Codigo Parametro"
+  POSITION 3
+  MAX-WIDTH 6
+  COLUMN-LABEL "Cod. Param."
+  HELP "Informe o codigo do parametro."
+  ORDER 20
+
+ADD FIELD "descr-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Descricao da variavel complementar cadastrada para o parametro de ambiente, utilizada para facilitar identificacao e manutencao."
+  FORMAT "x(140)"
+  INITIAL ""
+  LABEL "Descricao Variavel"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descr. Variavel"
+  HELP "Informe a descricao da variavel."
+  ORDER 50
+
+ADD FIELD "valor-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Valor atribuido a variavel complementar do parametro de ambiente, utilizado na resolucao tecnica da configuracao."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Valor Variavel"
+  POSITION 5
+  MAX-WIDTH 400
+  COLUMN-LABEL "Valor Variavel"
+  HELP "Informe o valor da variavel."
+  ORDER 60
+
+ADD FIELD "cod-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Codigo da variavel complementar cadastrada para o parametro de ambiente, utilizado para identificacao da chave tecnica."
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Codigo Variavel"
+  POSITION 6
+  MAX-WIDTH 30
+  COLUMN-LABEL "Cod. Variavel"
+  HELP "Informe o codigo da variavel."
+  ORDER 30
+
+ADD INDEX "ind-ambiente-param-variavel" ON "thl-ambiente-param-variavel" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD INDEX "ch-ambiente-param-variavel" ON "thl-ambiente-param-variavel" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+  INDEX-FIELD "cod-variavel" ASCENDING 
+
+ADD TABLE "thl-email"
+  AREA "Schema Area"
+  LABEL "Integra‡Æo E-mail"
+  DESCRIPTION "Integra‡Æo E-mail"
+  DUMP-NAME "thl007"
+
+ADD FIELD "data-envio" OF "thl-email" AS datetime 
+  DESCRIPTION "Data Envio"
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Envio"
+  POSITION 3
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data Envio"
+  HELP "Data Envio"
+  ORDER 20
+
+ADD FIELD "cod-prog-dtsul" OF "thl-email" AS character 
+  DESCRIPTION "Programa"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Programa"
+  POSITION 4
+  MAX-WIDTH 16
+  COLUMN-LABEL "Programa"
+  HELP "Programa"
+  ORDER 30
+
+ADD FIELD "remetente" OF "thl-email" AS character 
+  DESCRIPTION "Remetente"
+  FORMAT "x(300)"
+  INITIAL ""
+  LABEL "Remetente"
+  POSITION 5
+  MAX-WIDTH 200
+  COLUMN-LABEL "Remetente"
+  HELP "Remetente"
+  ORDER 40
+
+ADD FIELD "destino" OF "thl-email" AS character 
+  DESCRIPTION "Destino"
+  FORMAT "x(300)"
+  INITIAL ""
+  LABEL "Destino"
+  POSITION 6
+  MAX-WIDTH 200
+  COLUMN-LABEL "Destino"
+  HELP "Destino"
+  ORDER 50
+
+ADD FIELD "assunto" OF "thl-email" AS character 
+  DESCRIPTION "Assunto"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Assunto"
+  POSITION 7
+  MAX-WIDTH 200
+  COLUMN-LABEL "Assunto"
+  HELP "Assunto"
+  ORDER 60
+
+ADD FIELD "arq-anexo" OF "thl-email" AS character 
+  DESCRIPTION "Arquivo Anexo"
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Arquivo Anexo"
+  POSITION 8
+  MAX-WIDTH 200
+  COLUMN-LABEL "Arquivo Anexo"
+  HELP "Arquivo Anexo"
+  ORDER 70
+
+ADD FIELD "log-envio" OF "thl-email" AS integer 
+  DESCRIPTION "Log Envio"
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Log Envio"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "Log Envio"
+  HELP "Log Envio"
+  ORDER 80
+
+ADD FIELD "mensagem" OF "thl-email" AS character 
+  DESCRIPTION "Mensagem"
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Mensagem"
+  POSITION 10
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Mensagem"
+  HELP "Mensagem"
+  ORDER 90
+
+ADD FIELD "retorno" OF "thl-email" AS character 
+  DESCRIPTION "Retorno"
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Retorno"
+  POSITION 11
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Retorno"
+  HELP "Retorno"
+  ORDER 100
+
+ADD FIELD "info-envio" OF "thl-email" AS character 
+  DESCRIPTION "Informa‡Æo de Envio"
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Informa‡Æo de Envio"
+  POSITION 12
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Informa‡Æo de Envio"
+  HELP "Informa‡Æo de Envio"
+  ORDER 110
+
+ADD FIELD "id" OF "thl-email" AS character 
+  DESCRIPTION "ID"
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "ID"
+  POSITION 14
+  MAX-WIDTH 128
+  COLUMN-LABEL "ID"
+  HELP "ID"
+  ORDER 10
+
+ADD FIELD "cod-param-ambiente" OF "thl-email" AS character 
+  DESCRIPTION "Codigo do parametro de ambiente utilizado para identificar a configuracao tecnica da integracao."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Codigo Parametro"
+  POSITION 15
+  MAX-WIDTH 30
+  COLUMN-LABEL "Cod. Param."
+  HELP "Informe o codigo do parametro."
+  ORDER 120
+
+ADD INDEX "ind-data-envio" ON "thl-email" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "cod-prog-dtsul" ASCENDING 
+  INDEX-FIELD "data-envio" ASCENDING 
+
+ADD INDEX "id-mail" ON "thl-email" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "id" ASCENDING 
+
+ADD TABLE "thl-mensagem"
+  AREA "Schema Area"
+  LABEL "Mensagem de integra‡Æo"
+  DESCRIPTION "Tabela respons vel pelo registro principal da mensagem de integra‡Æo.
+Cont‚m informa‡äes de identifica‡Æo do objeto integrado, aplica‡Æo envolvida, m‚todo, modelo de integra‡Æo, forma de execu‡Æo, destino e situa‡äes consolidadas da mensagem.
+Tamb‚m armazena dados de controle operacional, como quantidade de tentativas, data de cria‡Æo, data da £ltima tentativa e n£mero do pedido de execu‡Æo, quando houver agendamento."
+  DUMP-NAME "thl009"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem" AS character 
+  DESCRIPTION "Identificador unico da mensagem de integracao, utilizado para controle, consulta, rastreabilidade e relacionamento com historico, itens e conteudos da mensagem."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Codigo Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Cod. Msg"
+  HELP "Informe o codigo unico da mensagem."
+  ORDER 10
+
+ADD FIELD "objeto" OF "thl-mensagem" AS character 
+  DESCRIPTION "Identifica o objeto de negocio relacionado a mensagem de integracao, como pedido, item, nota fiscal, cliente ou outro cadastro configurado no processo."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 3
+  MAX-WIDTH 100
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto da integracao."
+  ORDER 20
+
+ADD FIELD "metodo" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Metodo, operacao ou acao executada pela mensagem, conforme o modelo de integracao utilizado, como verbo HTTP, operacao SOAP, comando SQL ou acao em arquivo."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Metodo"
+  POSITION 5
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i02thl011.i 2}"
+  COLUMN-LABEL "Metodo"
+  HELP "Informe o metodo da integracao."
+  ORDER 40
+
+ADD FIELD "modelo-integracao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Define o modelo tecnico utilizado pela integracao da mensagem, como REST, SOAP, Banco ou Arquivo, conforme a configuracao do processo."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Modelo Integracao"
+  POSITION 7
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i03thl011.i 2}"
+  COLUMN-LABEL "Mod. Integr."
+  HELP "Informe o modelo da integracao."
+  ORDER 60
+
+ADD FIELD "forma-execucao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Indica a forma de execucao da mensagem de integracao, como processamento online, batch ou agendado, conforme a estrategia definida para o envio ou consumo."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Forma Execucao"
+  POSITION 8
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i04thl011.i 2}"
+  COLUMN-LABEL "Forma Exec."
+  HELP "Informe a forma de execucao."
+  ORDER 70
+
+ADD FIELD "sit-requisicao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situacao consolidada da requisicao da mensagem na ultima tentativa, permitindo identificar se a etapa de requisicao esta pendente, concluida, com erro ou nao aplicavel."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Requisicao"
+  POSITION 9
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Req."
+  HELP "Informe a situacao da requisicao."
+  ORDER 80
+
+ADD FIELD "sit-retorno" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situacao consolidada do retorno da mensagem na ultima tentativa, permitindo identificar se houve retorno pendente, sucesso, erro ou situacao nao aplicavel."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Retorno"
+  POSITION 10
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Ret."
+  HELP "Informe a situacao do retorno."
+  ORDER 90
+
+ADD FIELD "sit-processamento" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situacao consolidada do processamento funcional da mensagem, indicando o resultado do tratamento do conteudo pelo sistema responsavel ou processo consumidor."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Processamento"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Proc."
+  HELP "Informe a situacao do processamento."
+  ORDER 100
+
+ADD FIELD "qtd-tentativas" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Quantidade total de tentativas ja realizadas para a mensagem de integracao, considerando execucoes normais, reenvios e reprocessamentos."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Qtde Tentativas"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tentativas"
+  HELP "Informe a quantidade de tentativas."
+  ORDER 110
+
+ADD FIELD "dt-criacao" OF "thl-mensagem" AS datetime 
+  DESCRIPTION "Data de criacao da mensagem de integracao no sistema, utilizada para controle temporal, rastreabilidade e acompanhamento do ciclo de vida do registro."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Criacao"
+  POSITION 13
+  MAX-WIDTH 8
+  COLUMN-LABEL "Dt. Criacao"
+  HELP "Informe a data de criacao."
+  ORDER 120
+
+ADD FIELD "dt-integracao" OF "thl-mensagem" AS datetime 
+  DESCRIPTION "Data da ultima tentativa de integracao da mensagem, independentemente do resultado, utilizada para monitoramento operacional e controle de reprocessamento."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Integra‡Æo"
+  POSITION 14
+  MAX-WIDTH 8
+  COLUMN-LABEL "Dt. Integra‡Æo"
+  HELP "Informe a data da ultima tentativa."
+  ORDER 130
+
+ADD FIELD "destino" OF "thl-mensagem" AS character 
+  DESCRIPTION "Identifica o destino tecnico utilizado pela mensagem, como URL, endpoint, instancia de banco, diretorio, arquivo ou outro caminho de comunicacao."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Destino"
+  POSITION 15
+  MAX-WIDTH 220
+  COLUMN-LABEL "Destino"
+  HELP "Informe o destino da mensagem."
+  ORDER 140
+
+ADD FIELD "num-ped-exec" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Numero do pedido de execucao associado a mensagem quando o processamento ocorrer por agendamento, permitindo rastrear a execucao programada."
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Pedido Execucao"
+  POSITION 16
+  MAX-WIDTH 4
+  COLUMN-LABEL "Ped. Exec."
+  HELP "Informe o pedido de execucao."
+  ORDER 150
+
+ADD FIELD "sentido-fluxo" OF "thl-mensagem" AS logical 
+  DESCRIPTION "Indica o sentido do fluxo da mensagem de integracao, identificando se a mensagem e de entrada ou de saida do ERP."
+  FORMAT "Sa¡da/Entrada"
+  INITIAL "Sa¡da"
+  LABEL "Sentido Fluxo"
+  POSITION 17
+  MAX-WIDTH 1
+  COLUMN-LABEL "Sentido"
+  HELP "Informe o sentido do fluxo."
+  ORDER 50
+
+ADD FIELD "cod-status-retorno" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Codigo tecnico de status do retorno da tentativa de integracao, utilizado para identificar o resultado retornado pelo servico, aplicacao ou processo executado."
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Codigo Status Retorno"
+  POSITION 18
+  MAX-WIDTH 4
+  COLUMN-LABEL "Cod. Status Ret"
+  HELP "Informe o codigo do status de retorno."
+  ORDER 160
+
+ADD FIELD "descr-retorno" OF "thl-mensagem" AS character 
+  DESCRIPTION "Descricao resumida do retorno da tentativa de integracao, utilizada para apresentar o resultado tecnico retornado pelo servico, aplicacao ou processo."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Descricao Retorno"
+  POSITION 19
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descr. Retorno"
+  HELP "Informe a descricao do retorno."
+  ORDER 170
+
+ADD FIELD "operacao" OF "thl-mensagem" AS character 
+  DESCRIPTION "Identifica a operacao configurada para o objeto de integracao, representando a acao funcional ou tecnica executada no processo, independentemente da tecnologia utilizada."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Operacao"
+  POSITION 20
+  MAX-WIDTH 120
+  COLUMN-LABEL "Operacao"
+  HELP "Informe a operacao da integracao."
+  ORDER 180
+
+ADD INDEX "ind-objeto-parametro" ON "thl-mensagem" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "operacao" ASCENDING 
+
+ADD INDEX "ch-mensagem" ON "thl-mensagem" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD INDEX "ind-objeto" ON "thl-mensagem" 
+  AREA "Schema Area"
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD TABLE "thl-mensagem-conteudo"
+  AREA "Schema Area"
+  LABEL "Conteudo da Mensagem"
+  DESCRIPTION "Armazena os conteudos trafegados pela mensagem de integracao, como requisicao e retorno, permitindo guardar payloads tecnicos para auditoria e analise."
+  DUMP-NAME "thl016"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-conteudo" AS character 
+  DESCRIPTION "Identificador unico da mensagem de integracao, utilizado para controle, consulta, rastreabilidade e relacionamento com historico, itens e conteudos da mensagem."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Codigo Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Cod. Msg"
+  HELP "Informe o codigo unico da mensagem."
+  ORDER 10
+
+ADD FIELD "tipo-conteudo" OF "thl-mensagem-conteudo" AS integer 
+  DESCRIPTION "Tipo do conteudo armazenado para a mensagem, como requisicao, retorno ou outro conteudo tecnico previsto no processo de integracao."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Tipo Conteudo"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tipo Cont."
+  HELP "Informe o tipo do conteudo."
+  ORDER 20
+
+ADD FIELD "conteudo" OF "thl-mensagem-conteudo" AS clob 
+  DESCRIPTION "Conteudo tecnico trafegado pela mensagem de integracao, armazenando payloads como JSON, XML, texto ou outras estruturas utilizadas no intercambio"
+  FORMAT "x(8)"
+  INITIAL ?
+  POSITION 4
+  LOB-AREA "Schema Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  CLOB-CODEPAGE "iso8859-1"
+  CLOB-COLLATION "basic"
+  CLOB-TYPE 1
+  ORDER 30
+
+ADD INDEX "ind-mensagem" ON "thl-mensagem-conteudo" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD INDEX "ch-mensagem-conteudo" ON "thl-mensagem-conteudo" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "tipo-conteudo" ASCENDING 
+
+ADD TABLE "thl-mensagem-historico"
+  AREA "Schema Area"
+  LABEL "Hist¢rico Mensagem"
+  DESCRIPTION "Armazena o historico de tentativas da mensagem de integracao, registrando datas, destino e situacoes da execucao para rastreabilidade e reprocessamento."
+  DUMP-NAME "thl008"
+
+ADD FIELD "tentativa" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Numero sequencial da tentativa registrada para a mensagem, utilizado para controle de reenvio, reprocessamento e rastreabilidade da execucao."
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Tentativa"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tentativa"
+  HELP "Informe o numero da tentativa."
+  ORDER 20
+
+ADD FIELD "sit-requisicao" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situacao consolidada da requisicao da mensagem na ultima tentativa, permitindo identificar se a etapa de requisicao esta pendente, concluida, com erro ou nao aplicavel."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Requisicao"
+  POSITION 9
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Req."
+  HELP "Informe a situacao da requisicao."
+  ORDER 30
+
+ADD FIELD "sit-retorno" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situacao consolidada do retorno da mensagem na ultima tentativa, permitindo identificar se houve retorno pendente, sucesso, erro ou situacao nao aplicavel."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Retorno"
+  POSITION 10
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Ret."
+  HELP "Informe a situacao do retorno."
+  ORDER 40
+
+ADD FIELD "sit-processamento" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situacao consolidada do processamento funcional da mensagem, indicando o resultado do tratamento do conteudo pelo sistema responsavel ou processo consumidor."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situacao Processamento"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Sit. Proc."
+  HELP "Informe a situacao do processamento."
+  ORDER 50
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Identificador unico da mensagem de integracao, utilizado para controle, consulta, rastreabilidade e relacionamento com historico, itens e conteudos da mensagem."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Codigo Mensagem"
+  POSITION 12
+  MAX-WIDTH 128
+  COLUMN-LABEL "Cod. Msg"
+  HELP "Informe o codigo unico da mensagem."
+  ORDER 10
+
+ADD FIELD "dt-criacao" OF "thl-mensagem-historico" AS datetime 
+  DESCRIPTION "Data de criacao da mensagem de integracao no sistema, utilizada para controle temporal, rastreabilidade e acompanhamento do ciclo de vida do registro."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Criacao"
+  POSITION 13
+  MAX-WIDTH 8
+  COLUMN-LABEL "Dt. Criacao"
+  HELP "Informe a data de criacao."
+  ORDER 60
+
+ADD FIELD "dt-integracao" OF "thl-mensagem-historico" AS datetime 
+  DESCRIPTION "Data da ultima tentativa de integracao da mensagem, independentemente do resultado, utilizada para monitoramento operacional e controle de reprocessamento."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Integra‡Æo"
+  POSITION 14
+  MAX-WIDTH 8
+  COLUMN-LABEL "Dt. Integra‡Æo"
+  HELP "Informe a data da ultima tentativa."
+  ORDER 70
+
+ADD FIELD "destino" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Identifica o destino tecnico utilizado pela mensagem, como URL, endpoint, instancia de banco, diretorio, arquivo ou outro caminho de comunicacao."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Destino"
+  POSITION 15
+  MAX-WIDTH 220
+  COLUMN-LABEL "Destino"
+  HELP "Informe o destino da mensagem."
+  ORDER 80
+
+ADD FIELD "cod-status-retorno" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Codigo tecnico de status do retorno da tentativa de integracao, utilizado para identificar o resultado retornado pelo servico, aplicacao ou processo executado."
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Codigo Status Retorno"
+  POSITION 21
+  MAX-WIDTH 4
+  COLUMN-LABEL "Cod. Status Ret"
+  HELP "Informe o codigo do status de retorno."
+  ORDER 90
+
+ADD FIELD "descr-retorno" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Descricao resumida do retorno da tentativa de integracao, utilizada para apresentar o resultado tecnico retornado pelo servico, aplicacao ou processo."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Descricao Retorno"
+  POSITION 22
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descr. Retorno"
+  HELP "Informe a descricao do retorno."
+  ORDER 100
+
+ADD INDEX "ch-mensagem-histor" ON "thl-mensagem-historico" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "tentativa" ASCENDING 
+
+ADD INDEX "ind-mensagem" ON "thl-mensagem-historico" 
+  AREA "Schema Area"
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD TABLE "thl-mensagem-item"
+  AREA "Schema Area"
+  LABEL "Itens da Mensagem"
+  DESCRIPTION "Armazena os itens ou registros vinculados a mensagem de integracao, permitindo relacionar a mensagem aos objetos e chaves de negocio envolvidos no processamento."
+  DUMP-NAME "thl015"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Identificador unico da mensagem de integracao, utilizado para controle, consulta, rastreabilidade e relacionamento com historico, itens e conteudos da mensagem."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Codigo Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Cod. Msg"
+  HELP "Informe o codigo unico da mensagem."
+  ORDER 10
+
+ADD FIELD "chave-registro" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Chave do Registro "
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Chave do Registro"
+  POSITION 3
+  MAX-WIDTH 120
+  COLUMN-LABEL "Chave do Registro"
+  HELP "Chave do Registro"
+  ORDER 30
+
+ADD FIELD "chave-registro-ext" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Chave do Registro Externo"
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Chave Externa"
+  POSITION 4
+  MAX-WIDTH 120
+  COLUMN-LABEL "Chave Externa"
+  HELP "Chave do Registro Externo"
+  ORDER 40
+
+ADD INDEX "ind-chave-registro" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "chave-registro" ASCENDING 
+
+ADD INDEX "ch-mensagem-item" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "chave-registro" ASCENDING 
+  INDEX-FIELD "chave-registro-ext" ASCENDING 
+
+ADD INDEX "ind-mensagem" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD TABLE "thl-objeto"
+  AREA "Schema Area"
+  LABEL "Objeto da Integra‡Æo"
+  DESCRIPTION "Objeto da Integra‡Æo"
+  DUMP-NAME "thl010"
+
+ADD FIELD "objeto" OF "thl-objeto" AS character 
+  DESCRIPTION "Identifica o objeto de negocio utilizado na integracao, como pedido, item, nota fiscal, cliente ou outro elemento configurado no processo."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto da integracao."
+  ORDER 10
+
+ADD FIELD "programa-consulta" OF "thl-objeto" AS character 
+  DESCRIPTION "Programa utilizado para consulta, posicionamento ou recuperacao do registro relacionado ao objeto de integracao no ERP."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Programa Consulta"
+  POSITION 6
+  MAX-WIDTH 60
+  COLUMN-LABEL "Prog. Consulta"
+  HELP "Informe o programa de consulta."
+  ORDER 50
+
+ADD FIELD "ind-inativo" OF "thl-objeto" AS logical 
+  DESCRIPTION "Indica se o cadastro do objeto de integracao esta inativo, impedindo seu uso em novos processamentos ou configuracoes."
+  FORMAT "Sim/NÆo"
+  INITIAL "NÆo"
+  LABEL "Inativo"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "Inativo"
+  HELP "Indica se o objeto esta inativo."
+  ORDER 60
+
+ADD FIELD "ind-gera-historico" OF "thl-objeto" AS logical 
+  DESCRIPTION "Indica se o objeto deve manter historico das tentativas e execucoes da integracao para fins de rastreabilidade e auditoria."
+  FORMAT "Sim/NÆo"
+  INITIAL "Sim"
+  LABEL "Gera Historico"
+  POSITION 8
+  MAX-WIDTH 1
+  COLUMN-LABEL "Historico"
+  HELP "Indica se gera historico."
+  ORDER 70
+
+ADD FIELD "sentido-fluxo" OF "thl-objeto" AS logical 
+  DESCRIPTION "Define o sentido do fluxo da integracao do objeto, identificando se a mensagem sera de entrada no ERP ou de saida para sistema externo."
+  FORMAT "Sa¡da/Entrada"
+  INITIAL "Sa¡da"
+  LABEL "Sentido Fluxo"
+  POSITION 9
+  MAX-WIDTH 1
+  COLUMN-LABEL "Sentido"
+  HELP "Informe o sentido do fluxo."
+  ORDER 80
+
+ADD FIELD "aplicacao" OF "thl-objeto" AS character 
+  DESCRIPTION "Nome da aplicacao, sistema ou servico externo relacionado ao objeto de integracao, utilizado para identificar a origem ou o destino funcional."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplica‡Æo"
+  POSITION 10
+  MAX-WIDTH 100
+  COLUMN-LABEL "Aplica‡Æo"
+  HELP "Informe a aplicacao externa."
+  ORDER 90
+
+ADD FIELD "modelo-integracao" OF "thl-objeto" AS integer 
+  DESCRIPTION "Define o modelo tecnico utilizado pela integracao do objeto, como REST, SOAP, Banco ou Arquivo, conforme a estrategia configurada."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Modelo Integracao"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "VIEW-AS COMBO-BOX LIST-ITEM-PAIRS {thl/include/i03thl011.i 02}"
+  COLUMN-LABEL "Mod. Integr."
+  HELP "Informe o modelo da integracao."
+  ORDER 100
+
+ADD FIELD "classe-objeto" OF "thl-objeto" AS character 
+  DESCRIPTION "Nome da classe responsavel pela implementacao do objeto de integracao, utilizada para instanciamento e execucao da regra de negocio."
+  FORMAT "x(150)"
+  INITIAL ""
+  LABEL "Classe Objeto"
+  POSITION 13
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe"
+  HELP "Informe a classe do objeto."
+  ORDER 110
+
+ADD INDEX "ch-objeto" ON "thl-objeto" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD TABLE "thl-objeto-parametro"
+  AREA "Schema Area"
+  LABEL "Objeto Verso Integra‡Æo"
+  DESCRIPTION "Objeto Verso Integra‡Æo "
+  DUMP-NAME "thl011"
+
+ADD FIELD "metodo" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Metodo, operacao ou acao configurada para o objeto de integracao, conforme o modelo utilizado, como REST, SOAP, Banco ou Arquivo.
+"
+  FORMAT ">9"
+  INITIAL "99"
+  LABEL "M‚todo"
+  POSITION 3
+  MAX-WIDTH 4
+  VIEW-AS "VIEW-AS COMBO-BOX LIST-ITEM-PAIRS {thl\include\i02thl011.i 02}"
+  COLUMN-LABEL "M‚todo"
+  HELP "Informe o metodo da integracao."
+  ORDER 30
+
+ADD FIELD "objeto" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Objeto de integracao relacionado ao parametro configurado, utilizado para vincular a regra tecnica ao cadastro principal do objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 4
+  MAX-WIDTH 100
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto da configuracao."
+  ORDER 20
+
+ADD FIELD "cod-estabel" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Estabelecimento"
+  FORMAT "x(5)"
+  INITIAL ""
+  LABEL "Estab"
+  POSITION 6
+  MAX-WIDTH 10
+  COLUMN-LABEL "Estab"
+  HELP "Estabelecimento"
+  ORDER 10
+
+ADD FIELD "ind-persistente" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se a integracao associada ao objeto deve utilizar comportamento persistente conforme a regra definida para o processo."
+  FORMAT "Sim/Nao"
+  INITIAL "Nao"
+  LABEL "Persistente"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "Persist."
+  HELP "Indica se a configuracao e persistente."
+  ORDER 60
+
+ADD FIELD "frequencia-execucao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Frequencia configurada para execucao, repeticao ou controle operacional do processamento associado ao objeto de integracao."
+  FORMAT ">>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Frequencia Execucao"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "Freq. Exec."
+  HELP "Informe a frequencia de execucao."
+  ORDER 80
+
+ADD FIELD "cod-servid-exec" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Codigo do servidor de execucao utilizado no processamento da integracao, especialmente em cenarios agendados, batch ou distribuidos."
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Cod. Servidor"
+  POSITION 10
+  MAX-WIDTH 24
+  COLUMN-LABEL "Cod. Servidor"
+  HELP "Informe o servidor de execucao."
+  ORDER 90
+
+ADD FIELD "qtd-tentativas-persist" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Quantidade de tentativas de persistencia configuradas para o objeto de integracao, utilizada em regras de repeticao ou tolerancia a falhas."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Tentativas Persist."
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tent. Persist."
+  HELP "Informe as tentativas de persistencia."
+  ORDER 100
+
+ADD FIELD "qtd-dias-persist" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Quantidade de dias de persistencia ou retencao configurada para o objeto de integracao, conforme a politica definida para o processo."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Dias Persistencia"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "Dias Persist."
+  HELP "Informe os dias de persistencia."
+  ORDER 110
+
+ADD FIELD "tipo-log-requisicao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Define o comportamento de registro da requisicao da integracao, conforme a politica configurada para rastreabilidade e auditoria."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Tipo Log Requisicao"
+  POSITION 14
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Log Req."
+  HELP "Informe o tipo de log da requisicao."
+  ORDER 130
+
+ADD FIELD "ind-gera-historico" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se a configuracao do objeto deve manter historico das tentativas e execucoes da integracao para fins de rastreabilidade."
+  FORMAT "Sim/NÆo"
+  INITIAL "Sim"
+  LABEL "Gera Historico"
+  POSITION 17
+  MAX-WIDTH 1
+  COLUMN-LABEL "Historico"
+  HELP "Indica se gera historico."
+  ORDER 160
+
+ADD FIELD "cod-param-ambiente" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Codigo do parametro de ambiente associado ao objeto de integracao, utilizado para resolver configuracoes tecnicas como URL, usuario, senha ou token."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Codigo Parametro"
+  POSITION 22
+  MAX-WIDTH 30
+  COLUMN-LABEL "Cod. Param."
+  HELP "Informe o codigo do parametro."
+  ORDER 210
+
+ADD FIELD "cod-param-ambiente-destino" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Codigo do parametro utilizado para resolver rota, path ou complemento do destino tecnico da integracao configurada para o objeto."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parametro Destino"
+  POSITION 25
+  MAX-WIDTH 30
+  COLUMN-LABEL "Param. Dest."
+  HELP "Informe o parametro do destino."
+  ORDER 240
+
+ADD FIELD "tipo-log-retorno" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Define o comportamento de registro do retorno da integracao, conforme a politica configurada para rastreabilidade e suporte."
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Tipo Log Retorno"
+  POSITION 26
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Log Ret."
+  HELP "Informe o tipo de log do retorno."
+  ORDER 140
+
+ADD FIELD "ind-inativo" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se a configuracao parametrica do objeto esta inativa, impedindo seu uso em novos processamentos ou resolucoes de configuracao."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Inativo"
+  POSITION 27
+  MAX-WIDTH 1
+  COLUMN-LABEL "Inativo"
+  HELP "Indica se a configuracao esta inativa."
+  ORDER 120
+
+ADD FIELD "forma-execucao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Define a forma de execucao da integracao configurada para o objeto, como online, batch agendado ou batch em fila, conforme a estrategia operacional adotada."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Forma Execucao"
+  POSITION 28
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i04thl011.i 2}"
+  COLUMN-LABEL "Forma Exec."
+  HELP "Informe a forma de execucao."
+  ORDER 250
+
+ADD FIELD "ind-mensagem-simples" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se o objeto de integracao utiliza mensagem simples no processamento. Quando desligado, a mensagem sera tratada como multiplo."
+  FORMAT "Sim/NÆo"
+  INITIAL "Sim"
+  LABEL "Mensagem Simples"
+  POSITION 29
+  MAX-WIDTH 1
+  COLUMN-LABEL "Msg Simples"
+  HELP "Indica se a mensagem e simples."
+  ORDER 260
+
+ADD FIELD "operacao" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Identifica a operacao configurada para o objeto de integracao, representando a acao funcional ou tecnica executada no processo, independentemente da tecnologia utilizada."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Operacao"
+  POSITION 30
+  MAX-WIDTH 120
+  COLUMN-LABEL "Operacao"
+  HELP "Informe a operacao da integracao."
+  ORDER 270
+
+ADD INDEX "ind-objeto" ON "thl-objeto-parametro" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD INDEX "ch-objeto-parametro" ON "thl-objeto-parametro" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "cod-estabel" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "operacao" ASCENDING 
+
+ADD TABLE "thl-objeto-usuario"
+  AREA "Schema Area"
+  LABEL "Usuario verso Objeto"
+  DESCRIPTION "Usu rio verso objeto"
+  DUMP-NAME "thl012"
+
+ADD FIELD "objeto" OF "thl-objeto-usuario" AS character 
+  DESCRIPTION "Objeto de integracao relacionado ao parametro configurado, utilizado para vincular a regra tecnica ao cadastro principal do objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto da configuracao."
+  ORDER 10
+
+ADD FIELD "cod-usuario" OF "thl-objeto-usuario" AS character 
+  DESCRIPTION "C¢digo Usu rio"
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Usu rio"
+  POSITION 3
+  MAX-WIDTH 24
+  COLUMN-LABEL "Usu rio"
+  HELP "C¢digo Usu rio"
+  ORDER 20
+
+ADD INDEX "ind-objeto" ON "thl-objeto-usuario" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD INDEX "ch-objeto-usuario" ON "thl-objeto-usuario" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "cod-usuario" ASCENDING 
+
+.
+PSC
+cpstream=ibm850
+.
+0000039940
