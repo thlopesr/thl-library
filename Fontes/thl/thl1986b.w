@@ -4,6 +4,10 @@
 */
 &Scoped-define WINDOW-NAME w-livre
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS w-livre 
+
+using System.Diagnostics.*.
+using thl-lib.integration.messaging.outbound.service.OutboundMessageService.
+
 /*:T *******************************************************************************
 ** Copyright TOTVS S.A. (2009)
 ** Todos os Direitos Reservados.
@@ -12,15 +16,15 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i thl1896c 12.00.00.000}
+{include/i-prgvrs.i thl1896b 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licenï¿½as. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <mï¿½dulo>:  Informar qual o mï¿½dulo a qual o programa pertence.                  */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
-    {include/i-license-manager.i <programa> <m¢dulo>}
+    {include/i-license-manager.i <programa> <mï¿½dulo>}
 &ENDIF
 
 /* Create an unnamed pool to store all the widgets created 
@@ -36,9 +40,18 @@ create widget-pool.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-define new global shared variable c-codigo-objeto
+define shared variable c-codigo-mensagem
     as character
     no-undo.
+    
+define temp-table tt-conteudo no-undo
+    field tipo-conteudo like thl-mensagem-conteudo.tipo-conteudo
+    field descr-tipo    as character
+    field conteudo      like thl-mensagem-conteudo.conteudo.
+    
+define temp-table tt-item  no-undo
+    field chave-registro     like thl-mensagem-item.chave-registro
+    field chave-registro-ext like thl-mensagem-item.chave-registro-ext.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -55,27 +68,41 @@ define new global shared variable c-codigo-objeto
 
 /* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME f-cad
-&Scoped-define BROWSE-NAME br-item
+&Scoped-define BROWSE-NAME br-conteudo
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
-&Scoped-define INTERNAL-TABLES <record-phrase>
+&Scoped-define INTERNAL-TABLES tt-conteudo tt-item
+
+/* Definitions for BROWSE br-conteudo                                   */
+&Scoped-define FIELDS-IN-QUERY-br-conteudo tt-conteudo.descr-tipo tt-conteudo.descr-tipo   
+&Scoped-define ENABLED-FIELDS-IN-QUERY-br-conteudo   
+&Scoped-define SELF-NAME br-conteudo
+&Scoped-define QUERY-STRING-br-conteudo FOR EACH tt-conteudo
+&Scoped-define OPEN-QUERY-br-conteudo OPEN QUERY {&SELF-NAME} FOR EACH tt-conteudo.
+&Scoped-define TABLES-IN-QUERY-br-conteudo tt-conteudo
+&Scoped-define FIRST-TABLE-IN-QUERY-br-conteudo tt-conteudo
+
 
 /* Definitions for BROWSE br-item                                       */
+&Scoped-define FIELDS-IN-QUERY-br-item tt-item.chave-registro tt-item.chave-registro-ext   
+&Scoped-define ENABLED-FIELDS-IN-QUERY-br-item   
 &Scoped-define SELF-NAME br-item
-&Scoped-define QUERY-STRING-br-item FOR EACH <record-phrase>
-&Scoped-define OPEN-QUERY-br-item OPEN QUERY {&SELF-NAME} FOR EACH <record-phrase>.
-&Scoped-define TABLES-IN-QUERY-br-item <record-phrase>
-&Scoped-define FIRST-TABLE-IN-QUERY-br-item <record-phrase>
+&Scoped-define QUERY-STRING-br-item FOR EACH tt-item
+&Scoped-define OPEN-QUERY-br-item OPEN QUERY {&SELF-NAME} FOR EACH tt-item.
+&Scoped-define TABLES-IN-QUERY-br-item tt-item
+&Scoped-define FIRST-TABLE-IN-QUERY-br-item tt-item
 
 
 /* Definitions for FRAME f-cad                                          */
 &Scoped-define OPEN-BROWSERS-IN-QUERY-f-cad ~
+    ~{&OPEN-QUERY-br-conteudo}~
     ~{&OPEN-QUERY-br-item}
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS rt-button rtMain-3 rtMain rtMain-4 rtMain-2 ~
 fi-codigo fi-objeto fi-data-criacao fi-operacao fi-data-integracao ~
-fi-aplicacao fi-destino fi-cod-status fi-desc-retorno br-item 
+fi-aplicacao fi-destino fi-cod-status fi-desc-retorno br-item br-conteudo ~
+bt-detalhar bt-reenviar
 &Scoped-Define DISPLAYED-OBJECTS fi-codigo fi-objeto fi-data-criacao ~
 fi-operacao fi-data-integracao fi-aplicacao cb-metodo cb-dispositivo ~
 cb-retorno cb-requisicao cb-processamento fi-destino fi-cod-status ~
@@ -92,154 +119,176 @@ fi-desc-retorno
 /* ***********************  Control Definitions  ********************** */
 
 /* Define the widget handle for the window                              */
-define var w-livre as widget-handle no-undo.
+DEFINE VAR w-livre AS WIDGET-HANDLE NO-UNDO.
 
 /* Menu Definitions                                                     */
-define sub-menu mi-programa 
-       menu-item mi-consultas   label "Co&nsultas"     accelerator "CTRL-L"
-       menu-item mi-imprimir    label "&Relat¢rios"    accelerator "CTRL-P"
-       rule
-       menu-item mi-sair        label "&Sair"          accelerator "CTRL-X".
+DEFINE SUB-MENU mi-programa 
+       MENU-ITEM mi-consultas   LABEL "Co&nsultas"     ACCELERATOR "CTRL-L"
+       MENU-ITEM mi-imprimir    LABEL "&Relatï¿½rios"    ACCELERATOR "CTRL-P"
+       RULE
+       MENU-ITEM mi-sair        LABEL "&Sair"          ACCELERATOR "CTRL-X".
 
-define sub-menu m_Ajuda 
-       menu-item mi-conteudo    label "&Conteudo"     
-       menu-item mi-sobre       label "&Sobre..."     .
+DEFINE SUB-MENU m_Ajuda 
+       MENU-ITEM mi-conteudo    LABEL "&Conteudo"     
+       MENU-ITEM mi-sobre       LABEL "&Sobre..."     .
 
-define menu m-livre menubar
-       sub-menu  mi-programa    label "&Nome-do-Programa"
-       sub-menu  m_Ajuda        label "&Ajuda"        .
+DEFINE MENU m-livre MENUBAR
+       SUB-MENU  mi-programa    LABEL "&Nome-do-Programa"
+       SUB-MENU  m_Ajuda        LABEL "&Ajuda"        .
 
 
 /* Definitions of handles for SmartObjects                              */
-define variable h_folder as handle no-undo.
-define variable h_p-exihel as handle no-undo.
+DEFINE VARIABLE h_folder AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_p-exihel AS HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
-define variable cb-dispositivo as logical format "Sa¡da/Entrada" initial no 
-     label "Dispositivo" 
-     view-as combo-box inner-lines 2
-     list-items "Yes","No" 
-     drop-down-list
-     size 18 by 1 no-undo.
+DEFINE BUTTON bt-detalhar
+     LABEL "Detalhar"
+     SIZE 15 BY 1.13.
 
-define variable cb-metodo as integer format "9":U initial 1 
-     label "Metodo" 
-     view-as combo-box inner-lines 5
-     list-item-pairs "Post",1,
+DEFINE BUTTON bt-reenviar
+     LABEL "Reenviar"
+     SIZE 15 BY 1.13.
+
+DEFINE VARIABLE cb-dispositivo AS LOGICAL FORMAT "Saï¿½da/Entrada" INITIAL NO 
+     LABEL "Dispositivo" 
+     VIEW-AS COMBO-BOX INNER-LINES 2
+     LIST-ITEMS "Yes","No" 
+     DROP-DOWN-LIST
+     SIZE 18 BY 1 NO-UNDO.
+
+DEFINE VARIABLE cb-metodo AS INTEGER FORMAT "9":U INITIAL 1 
+     LABEL "Metodo" 
+     VIEW-AS COMBO-BOX INNER-LINES 5
+     LIST-ITEM-PAIRS "Post",1,
                      "Delete",2,
                      "Get",3,
                      "Update",4,
                      "Insert",5,
                      "Select",6
-     drop-down-list
-     size 18 by 1 no-undo.
+     DROP-DOWN-LIST
+     SIZE 18 BY 1 NO-UNDO.
 
-define variable cb-processamento as integer format "9":U initial 4 
-     label "Processamento" 
-     view-as combo-box inner-lines 5
-     list-item-pairs "Pendente",1,
+DEFINE VARIABLE cb-processamento AS INTEGER FORMAT "9":U INITIAL 4 
+     LABEL "Processamento" 
+     VIEW-AS COMBO-BOX INNER-LINES 5
+     LIST-ITEM-PAIRS "Pendente",1,
                      "Erro",2,
                      "Sucesso",3,
-                     "NÆo Cont‚m",4
-     drop-down-list
-     size 18 by 1 no-undo.
+                     "Nï¿½o Contï¿½m",4
+     DROP-DOWN-LIST
+     SIZE 18 BY 1 NO-UNDO.
 
-define variable cb-requisicao as integer format "9":U initial 4 
-     label "Requisi‡Æo" 
-     view-as combo-box inner-lines 5
-     list-item-pairs "Pendente",1,
+DEFINE VARIABLE cb-requisicao AS INTEGER FORMAT "9":U INITIAL 4 
+     LABEL "Requisiï¿½ï¿½o" 
+     VIEW-AS COMBO-BOX INNER-LINES 5
+     LIST-ITEM-PAIRS "Pendente",1,
                      "Erro",2,
                      "Sucesso",3,
-                     "NÆo Cont‚m",4
-     drop-down-list
-     size 18 by 1 no-undo.
+                     "Nï¿½o Contï¿½m",4
+     DROP-DOWN-LIST
+     SIZE 18 BY 1 NO-UNDO.
 
-define variable cb-retorno as integer format "9":U initial 4 
-     label "Retorno" 
-     view-as combo-box inner-lines 5
-     list-item-pairs "Pendente",1,
+DEFINE VARIABLE cb-retorno AS INTEGER FORMAT "9":U INITIAL 4 
+     LABEL "Retorno" 
+     VIEW-AS COMBO-BOX INNER-LINES 5
+     LIST-ITEM-PAIRS "Pendente",1,
                      "Erro",2,
                      "Sucesso",3,
-                     "NÆo Cont‚m",4
-     drop-down-list
-     size 18 by 1 no-undo.
+                     "Nï¿½o Contï¿½m",4
+     DROP-DOWN-LIST
+     SIZE 18 BY 1 NO-UNDO.
 
-define variable fi-aplicacao as character format "x(80)" 
-     label "Aplica‡Æo" 
-     view-as fill-in 
-     size 27.57 by .88.
+DEFINE VARIABLE fi-aplicacao AS CHARACTER FORMAT "x(80)" 
+     LABEL "Aplicaï¿½ï¿½o" 
+     VIEW-AS FILL-IN 
+     SIZE 27.57 BY .88.
 
-define variable fi-cod-status as integer format ">>>9":U initial 0 
-     label "C¢d. Status" 
-     view-as fill-in 
-     size 6.57 by .88 no-undo.
+DEFINE VARIABLE fi-cod-status AS INTEGER FORMAT ">>>>>9":U INITIAL 0 
+     LABEL "Cï¿½d. Status" 
+     VIEW-AS FILL-IN 
+     SIZE 6.57 BY .88 NO-UNDO.
 
-define variable fi-codigo as character format "X(64)" 
-     label "Codigo" 
-     view-as fill-in 
-     size 40 by .88.
+DEFINE VARIABLE fi-codigo AS CHARACTER FORMAT "X(64)" 
+     LABEL "Codigo" 
+     VIEW-AS FILL-IN 
+     SIZE 40 BY .88.
 
-define variable fi-data-criacao as datetime format "99/99/9999 HH:MM:SS" 
-     label "Data Criacao" 
-     view-as fill-in 
-     size 21 by .88.
+DEFINE VARIABLE fi-data-criacao AS DATETIME FORMAT "99/99/9999 HH:MM:SS" 
+     LABEL "Data Criacao" 
+     VIEW-AS FILL-IN 
+     SIZE 21 BY .88.
 
-define variable fi-data-integracao as datetime format "99/99/9999 HH:MM:SS" 
-     label "Data Integracao" 
-     view-as fill-in 
-     size 21 by .88.
+DEFINE VARIABLE fi-data-integracao AS DATETIME FORMAT "99/99/9999 HH:MM:SS" 
+     LABEL "Data Integracao" 
+     VIEW-AS FILL-IN 
+     SIZE 21 BY .88.
 
-define variable fi-desc-retorno as character format "X(256)":U 
-     view-as fill-in 
-     size 59.14 by .88 no-undo.
+DEFINE VARIABLE fi-desc-retorno AS CHARACTER FORMAT "X(256)":U 
+     VIEW-AS FILL-IN 
+     SIZE 59.14 BY .88 NO-UNDO.
 
-define variable fi-destino as character format "X(256)":U 
-     label "Destino" 
-     view-as fill-in 
-     size 66 by .88 no-undo.
+DEFINE VARIABLE fi-destino AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Destino" 
+     VIEW-AS FILL-IN 
+     SIZE 66 BY .88 NO-UNDO.
 
-define variable fi-objeto as character format "x(80)" 
-     label "Objeto" 
-     view-as fill-in 
-     size 20 by .88.
+DEFINE VARIABLE fi-objeto AS CHARACTER FORMAT "x(80)" 
+     LABEL "Objeto" 
+     VIEW-AS FILL-IN 
+     SIZE 20 BY .88.
 
-define variable fi-operacao as character format "x(80)" 
-     label "Operacao" 
-     view-as fill-in 
-     size 27.57 by .88.
+DEFINE VARIABLE fi-operacao AS CHARACTER FORMAT "x(80)" 
+     LABEL "Operacao" 
+     VIEW-AS FILL-IN 
+     SIZE 27.57 BY .88.
 
-define rectangle rt-button
-     edge-pixels 2 graphic-edge    
-     size 88.57 by 1.46
-     bgcolor 7 .
+DEFINE RECTANGLE rt-button
+     EDGE-PIXELS 2 GRAPHIC-EDGE    
+     SIZE 88.57 BY 1.46
+     BGCOLOR 7 .
 
-define rectangle rtMain
-     edge-pixels 2 graphic-edge  no-fill   
-     size 88.57 by 1.25.
+DEFINE RECTANGLE rtMain
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 88.57 BY 1.25.
 
-define rectangle rtMain-2
-     edge-pixels 2 graphic-edge  no-fill   
-     size 88.57 by 5.25.
+DEFINE RECTANGLE rtMain-2
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 88.57 BY 5.25.
 
-define rectangle rtMain-3
-     edge-pixels 2 graphic-edge  no-fill   
-     size 88.57 by 1.25.
+DEFINE RECTANGLE rtMain-3
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 88.57 BY 1.25.
 
-define rectangle rtMain-4
-     edge-pixels 2 graphic-edge  no-fill   
-     size 88.57 by 1.25.
+DEFINE RECTANGLE rtMain-4
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 88.57 BY 1.25.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
-define query br-item for 
-      <record-phrase> SCROLLING.
+DEFINE QUERY br-conteudo FOR 
+      tt-conteudo SCROLLING.
+
+DEFINE QUERY br-item FOR 
+      tt-item SCROLLING.
 &ANALYZE-RESUME
 
 /* Browse definitions                                                   */
-define browse br-item
+DEFINE BROWSE br-conteudo
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS br-conteudo w-livre _FREEFORM
+  QUERY br-conteudo DISPLAY
+        tt-conteudo.tipo-conteudo
+        tt-conteudo.descr-tipo      column-label 'Descriï¿½ï¿½o' format 'x(15)'
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 84.14 BY 6.92
+         FONT 4 FIT-LAST-COLUMN.
+
+DEFINE BROWSE br-item
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS br-item w-livre _FREEFORM
-  query br-item display
-      
+  QUERY br-item DISPLAY
+      tt-item.chave-registro
+      tt-item.chave-registro-ext
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS SIZE 84.14 BY 6.92
@@ -248,33 +297,36 @@ define browse br-item
 
 /* ************************  Frame Definitions  *********************** */
 
-define frame f-cad
-     fi-codigo at row 2.92 col 14 colon-aligned widget-id 88
-     fi-objeto at row 4.42 col 14 colon-aligned widget-id 96
-     fi-data-criacao at row 4.42 col 59 colon-aligned widget-id 90
-     fi-operacao at row 5.42 col 14 colon-aligned widget-id 98
-     fi-data-integracao at row 5.42 col 59 colon-aligned widget-id 92
-     fi-aplicacao at row 6.42 col 14 colon-aligned widget-id 68
-     cb-metodo at row 6.42 col 59 colon-aligned widget-id 78
-     cb-dispositivo at row 7.42 col 14 colon-aligned help
-          "Dispositivo" widget-id 76
-     cb-retorno at row 7.42 col 58.86 colon-aligned widget-id 84
-     cb-requisicao at row 8.42 col 14 colon-aligned widget-id 82
-     cb-processamento at row 8.42 col 58.86 colon-aligned widget-id 80
-     fi-destino at row 10 col 14 colon-aligned widget-id 94
-     fi-cod-status at row 11.46 col 14 colon-aligned widget-id 86
-     fi-desc-retorno at row 11.46 col 20.86 colon-aligned no-label widget-id 74
-     br-item at row 14.29 col 4.57 widget-id 200
-     rt-button at row 1.08 col 1.86
-     rtMain-3 at row 9.79 col 1.86 widget-id 70
-     rtMain at row 2.75 col 1.86 widget-id 100
-     rtMain-4 at row 11.29 col 1.86 widget-id 72
-     rtMain-2 at row 4.25 col 1.86 widget-id 102
-    with 1 down no-box keep-tab-order overlay 
-         side-labels no-underline three-d 
-         at col 1 row 1
-         size 90 by 21.79
-         font 4 widget-id 100.
+DEFINE FRAME f-cad
+     fi-codigo AT ROW 2.92 COL 14 COLON-ALIGNED WIDGET-ID 88
+     fi-objeto AT ROW 4.42 COL 14 COLON-ALIGNED WIDGET-ID 96
+     fi-data-criacao AT ROW 4.42 COL 59 COLON-ALIGNED WIDGET-ID 90
+     fi-operacao AT ROW 5.42 COL 14 COLON-ALIGNED WIDGET-ID 98
+     fi-data-integracao AT ROW 5.42 COL 59 COLON-ALIGNED WIDGET-ID 92
+     fi-aplicacao AT ROW 6.42 COL 14 COLON-ALIGNED WIDGET-ID 68
+     cb-metodo AT ROW 6.42 COL 59 COLON-ALIGNED WIDGET-ID 78
+     cb-dispositivo AT ROW 7.42 COL 14 COLON-ALIGNED HELP
+          "Dispositivo" WIDGET-ID 76
+     cb-retorno AT ROW 7.42 COL 58.86 COLON-ALIGNED WIDGET-ID 84
+     cb-requisicao AT ROW 8.42 COL 14 COLON-ALIGNED WIDGET-ID 82
+     cb-processamento AT ROW 8.42 COL 58.86 COLON-ALIGNED WIDGET-ID 80
+     fi-destino AT ROW 10 COL 14 COLON-ALIGNED WIDGET-ID 94
+     fi-cod-status AT ROW 11.46 COL 14 COLON-ALIGNED WIDGET-ID 86
+     fi-desc-retorno AT ROW 11.46 COL 20.86 COLON-ALIGNED NO-LABEL WIDGET-ID 74
+     br-item AT ROW 14.29 COL 4.57 WIDGET-ID 200
+     br-conteudo AT ROW 14.29 COL 4.57 WIDGET-ID 300
+     bt-detalhar AT ROW 21.25 COL 4.72  WIDGET-ID 104
+     bt-reenviar AT ROW 21.25 COL 21.0 WIDGET-ID 106
+     rt-button AT ROW 1.08 COL 1.86
+     rtMain-3 AT ROW 9.79 COL 1.86 WIDGET-ID 70
+     rtMain AT ROW 2.75 COL 1.86 WIDGET-ID 100
+     rtMain-4 AT ROW 11.29 COL 1.86 WIDGET-ID 72
+     rtMain-2 AT ROW 4.25 COL 1.86 WIDGET-ID 102
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 1
+         SIZE 90 BY 21.79
+         FONT 4 WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -283,7 +335,7 @@ define frame f-cad
 /* Settings for THIS-PROCEDURE
    Type: SmartWindow
    Allow: Basic,Browse,DB-Fields,Query,Smart,Window
-   Design Page: 2
+   Design Page: 1
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
@@ -291,27 +343,27 @@ define frame f-cad
 /* *************************  Create Window  ************************** */
 
 &ANALYZE-SUSPEND _CREATE-WINDOW
-if session:display-type = "GUI":U then
-  create window w-livre assign
-         hidden             = yes
-         title              = "Template Livre <Insira complemento>"
-         height             = 21.79
-         width              = 90
-         max-height         = 24.29
-         max-width          = 90
-         virtual-height     = 24.29
-         virtual-width      = 90
-         resize             = yes
-         scroll-bars        = no
-         status-area        = yes
-         bgcolor            = ?
-         fgcolor            = ?
-         three-d            = yes
-         message-area       = no
-         sensitive          = yes.
-else {&WINDOW-NAME} = current-window.
+IF SESSION:DISPLAY-TYPE = "GUI":U THEN
+  CREATE WINDOW w-livre ASSIGN
+         HIDDEN             = YES
+         TITLE              = "Template Livre <Insira complemento>"
+         HEIGHT             = 21.79
+         WIDTH              = 90
+         MAX-HEIGHT         = 24.29
+         MAX-WIDTH          = 90
+         VIRTUAL-HEIGHT     = 24.29
+         VIRTUAL-WIDTH      = 90
+         RESIZE             = yes
+         SCROLL-BARS        = no
+         STATUS-AREA        = yes
+         BGCOLOR            = ?
+         FGCOLOR            = ?
+         THREE-D            = yes
+         MESSAGE-AREA       = no
+         SENSITIVE          = yes.
+ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
-assign {&WINDOW-NAME}:MENUBAR    = menu m-livre:HANDLE.
+ASSIGN {&WINDOW-NAME}:MENUBAR    = MENU m-livre:HANDLE.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
 
@@ -336,6 +388,7 @@ assign {&WINDOW-NAME}:MENUBAR    = menu m-livre:HANDLE.
 /* SETTINGS FOR FRAME f-cad
    FRAME-NAME L-To-R                                                    */
 /* BROWSE-TAB br-item fi-desc-retorno f-cad */
+/* BROWSE-TAB br-conteudo br-item f-cad */
 /* SETTINGS FOR COMBO-BOX cb-dispositivo IN FRAME f-cad
    NO-ENABLE                                                            */
 /* SETTINGS FOR COMBO-BOX cb-metodo IN FRAME f-cad
@@ -346,35 +399,35 @@ assign {&WINDOW-NAME}:MENUBAR    = menu m-livre:HANDLE.
    NO-ENABLE                                                            */
 /* SETTINGS FOR COMBO-BOX cb-retorno IN FRAME f-cad
    NO-ENABLE                                                            */
-assign 
-       fi-aplicacao:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-aplicacao:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-cod-status:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-cod-status:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-codigo:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-codigo:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-data-criacao:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-data-criacao:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-data-integracao:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-data-integracao:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-desc-retorno:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-desc-retorno:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-destino:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-destino:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-objeto:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-objeto:READ-ONLY IN FRAME f-cad        = TRUE.
 
-assign 
-       fi-operacao:READ-ONLY in frame f-cad        = true.
+ASSIGN 
+       fi-operacao:READ-ONLY IN FRAME f-cad        = TRUE.
 
-if session:display-type = "GUI":U and VALID-HANDLE(w-livre)
-then w-livre:hidden = yes.
+IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-livre)
+THEN w-livre:HIDDEN = yes.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -382,10 +435,19 @@ then w-livre:hidden = yes.
 
 /* Setting information for Queries and Browse Widgets fields            */
 
+&ANALYZE-SUSPEND _QUERY-BLOCK BROWSE br-conteudo
+/* Query rebuild information for BROWSE br-conteudo
+     _START_FREEFORM
+OPEN QUERY {&SELF-NAME} FOR EACH tt-conteudo.
+     _END_FREEFORM
+     _Query            is OPENED
+*/  /* BROWSE br-conteudo */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _QUERY-BLOCK BROWSE br-item
 /* Query rebuild information for BROWSE br-item
      _START_FREEFORM
-OPEN QUERY {&SELF-NAME} FOR EACH <record-phrase>.
+OPEN QUERY {&SELF-NAME} FOR EACH tt-item.
      _END_FREEFORM
      _Query            is OPENED
 */  /* BROWSE br-item */
@@ -399,7 +461,7 @@ OPEN QUERY {&SELF-NAME} FOR EACH <record-phrase>.
 
 &Scoped-define SELF-NAME w-livre
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-livre w-livre
-on end-error of w-livre /* Template Livre <Insira complemento> */
+ON end-error OF w-livre /* Template Livre <Insira complemento> */
 or endkey of {&WINDOW-NAME} anywhere do:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
@@ -412,7 +474,7 @@ end.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-livre w-livre
-on window-close of w-livre /* Template Livre <Insira complemento> */
+ON window-close OF w-livre /* Template Livre <Insira complemento> */
 do:
   /* This ADM code must be left here in order for the SmartWindow
      and its descendents to terminate properly on exit. */
@@ -424,9 +486,112 @@ end.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME bt-reenviar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-reenviar w-livre
+on choose of bt-reenviar in frame f-cad /* Reenviar */
+do.
+
+    define variable svc     as OutboundMessageService no-undo.
+    define variable success as logical                no-undo.
+
+    find first thl-mensagem no-lock
+        where thl-mensagem.codigo-mensagem = c-codigo-mensagem no-error.
+
+    if not available thl-mensagem then do:
+        message 'Mensagem nao localizada.' view-as alert-box error title 'Reenviar Mensagem'.
+        return.
+    end.
+
+    find first thl-objeto no-lock
+        where thl-objeto.objeto = thl-mensagem.objeto no-error.
+
+    /* Somente mensagens de saida (outbound) podem ser reenviadas */
+    if available thl-objeto and not thl-objeto.sentido-fluxo then do:
+        message 'Reenvio disponivel apenas para mensagens de saida (Dispositivo = Saida).'
+            view-as alert-box warning title 'Reenviar Mensagem'.
+        return.
+    end.
+
+    /* Confirmacao do usuario */
+    run utp/ut-msgs.p ( input 'show':U,
+                        input 27100,
+                        input substitute( 'Confirma o reenvio da mensagem &1?',
+                                          c-codigo-mensagem ) ).
+    if return-value <> 'yes':U then return.
+
+    do on error undo, leave:
+
+        svc     = new OutboundMessageService( thl-mensagem.objeto,
+                                              thl-mensagem.operacao ).
+        success = svc:reprocess( c-codigo-mensagem ).
+
+        if success then
+            message 'Mensagem reenviada com sucesso.'
+                view-as alert-box information title 'Reenviar Mensagem'.
+        else
+            message 'Reenvio finalizado com advertencia. Verifique o retorno da mensagem.'
+                view-as alert-box warning title 'Reenviar Mensagem'.
+
+        catch err as Progress.Lang.Error:
+            message substitute( 'Erro no reenvio:~n&1', err:GetMessage(1) )
+                view-as alert-box error title 'Reenviar Mensagem'.
+        end catch.
+
+    end.
+
+    delete object svc no-error.
+
+    /* Recarregar detalhe para refletir novo status */
+    run local-initialize.
+
+end.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bt-detalhar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-detalhar w-livre
+on choose of bt-detalhar in frame f-cad /* Detalhar */
+do.
+
+    define variable process_ as Process   no-undo.
+    define variable arquivo     as character no-undo.
+    define variable arquivoJson as character no-undo.
+    
+    if available tt-conteudo then do.
+        
+        output to value( substitute( '&1&2', session:temp-directory, 'conteudo.txt' ) ).
+        export tt-conteudo.conteudo.
+        output close.
+        
+        input from value( substitute( '&1&2', session:temp-directory, 'conteudo.txt' ) ).
+        import unformatted arquivo.
+        input close.
+        
+        assign arquivo     = replace( arquivo, '"', '')
+               arquivo     = substitute( '&1&2', session:temp-directory, arquivo )
+               arquivoJson = replace( arquivo, 'blb', 'json').
+               
+        os-copy value(arquivo) value(arquivoJson).
+        
+        assign process_ = new Process()
+               process_:StartInfo:FileName  = 'chrome.exe'
+               process_:StartInfo:Arguments = substitute( '"&1"', arquivoJson).
+        
+        process_:Start().
+        
+    end.
+    
+end.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME mi-consultas
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-consultas w-livre
-on choose of menu-item mi-consultas /* Consultas */
+ON choose OF MENU-ITEM mi-consultas /* Consultas */
 do:
   run pi-consulta in h_p-exihel.
 end.
@@ -437,7 +602,7 @@ end.
 
 &Scoped-define SELF-NAME mi-conteudo
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-conteudo w-livre
-on choose of menu-item mi-conteudo /* Conteudo */
+ON choose OF MENU-ITEM mi-conteudo /* Conteudo */
 or help of frame {&FRAME-NAME}
 do:
   run pi-ajuda in h_p-exihel.
@@ -449,7 +614,7 @@ end.
 
 &Scoped-define SELF-NAME mi-imprimir
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-imprimir w-livre
-on choose of menu-item mi-imprimir /* Relat¢rios */
+ON choose OF MENU-ITEM mi-imprimir /* Relatï¿½rios */
 do:
   run pi-imprimir in h_p-exihel.
 end.
@@ -460,7 +625,7 @@ end.
 
 &Scoped-define SELF-NAME mi-programa
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-programa w-livre
-on menu-drop of menu mi-programa /* Nome-do-Programa */
+ON menu-drop OF MENU mi-programa /* Nome-do-Programa */
 do:
   run pi-disable-menu.
 end.
@@ -471,7 +636,7 @@ end.
 
 &Scoped-define SELF-NAME mi-sair
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sair w-livre
-on choose of menu-item mi-sair /* Sair */
+ON choose OF MENU-ITEM mi-sair /* Sair */
 do:
   run pi-sair in h_p-exihel.
 end.
@@ -482,7 +647,7 @@ end.
 
 &Scoped-define SELF-NAME mi-sobre
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sobre w-livre
-on choose of menu-item mi-sobre /* Sobre... */
+ON choose OF MENU-ITEM mi-sobre /* Sobre... */
 do:
   {include/sobre.i}
 end.
@@ -491,7 +656,7 @@ end.
 &ANALYZE-RESUME
 
 
-&Scoped-define BROWSE-NAME br-item
+&Scoped-define BROWSE-NAME br-conteudo
 &UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK w-livre 
@@ -509,61 +674,61 @@ end.
 /* **********************  Internal Procedures  *********************** */
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects w-livre  _ADM-CREATE-OBJECTS
-procedure adm-create-objects :
+PROCEDURE adm-create-objects :
 /*------------------------------------------------------------------------------
   Purpose:     Create handles for all SmartObjects used in this procedure.
                After SmartObjects are initialized, then SmartLinks are added.
   Parameters:  <none>
 ------------------------------------------------------------------------------*/
-  define variable adm-current-page  as integer no-undo.
+  DEFINE VARIABLE adm-current-page  AS INTEGER NO-UNDO.
 
-  run get-attribute in THIS-PROCEDURE ('Current-Page':U).
-  assign adm-current-page = integer(return-value).
+  RUN get-attribute IN THIS-PROCEDURE ('Current-Page':U).
+  ASSIGN adm-current-page = INTEGER(RETURN-VALUE).
 
-  case adm-current-page: 
+  CASE adm-current-page: 
 
-    when 0 then do:
-       run init-object in THIS-PROCEDURE (
-             input  'panel/p-exihel.w':U ,
-             input  frame f-cad:HANDLE ,
-             input  'Edge-Pixels = 2,
+    WHEN 0 THEN DO:
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'panel/p-exihel.w':U ,
+             INPUT  FRAME f-cad:HANDLE ,
+             INPUT  'Edge-Pixels = 2,
                      SmartPanelType = NAV-ICON,
                      Right-to-Left = First-On-Left':U ,
-             output h_p-exihel ).
-       run set-position in h_p-exihel ( 1.21 , 73.57 ) no-error.
+             OUTPUT h_p-exihel ).
+       RUN set-position IN h_p-exihel ( 1.21 , 73.57 ) NO-ERROR.
        /* Size in UIB:  ( 1.25 , 16.00 ) */
 
-       run init-object in THIS-PROCEDURE (
-             input  'adm/objects/folder.r':U ,
-             input  frame f-cad:HANDLE ,
-             input  'FOLDER-LABELS = ':U + 'Requisi‡Æo|Retorno' + ',
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'adm/objects/folder.r':U ,
+             INPUT  FRAME f-cad:HANDLE ,
+             INPUT  'FOLDER-LABELS = ':U + 'Itens|Conteudos' + ',
                      FOLDER-TAB-TYPE = 1':U ,
-             output h_folder ).
-       run set-position in h_folder ( 12.75 , 2.00 ) no-error.
-       run set-size in h_folder ( 9.88 , 88.57 ) no-error.
+             OUTPUT h_folder ).
+       RUN set-position IN h_folder ( 12.75 , 2.00 ) NO-ERROR.
+       RUN set-size IN h_folder ( 9.88 , 88.57 ) NO-ERROR.
 
        /* Links to SmartPanel h_p-exihel. */
-       run add-link in adm-broker-hdl ( h_p-exihel , 'State':U , this-procedure ).
+       RUN add-link IN adm-broker-hdl ( h_p-exihel , 'State':U , THIS-PROCEDURE ).
 
        /* Links to SmartFolder h_folder. */
-       run add-link in adm-broker-hdl ( h_folder , 'Page':U , this-procedure ).
+       RUN add-link IN adm-broker-hdl ( h_folder , 'Page':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
-       run adjust-tab-order in adm-broker-hdl ( h_p-exihel ,
-             fi-codigo:HANDLE in frame f-cad , 'BEFORE':U ).
-       run adjust-tab-order in adm-broker-hdl ( h_folder ,
-             fi-desc-retorno:HANDLE in frame f-cad , 'AFTER':U ).
-    end. /* Page 0 */
+       RUN adjust-tab-order IN adm-broker-hdl ( h_p-exihel ,
+             fi-codigo:HANDLE IN FRAME f-cad , 'BEFORE':U ).
+       RUN adjust-tab-order IN adm-broker-hdl ( h_folder ,
+             fi-desc-retorno:HANDLE IN FRAME f-cad , 'AFTER':U ).
+    END. /* Page 0 */
 
-  end case.
+  END CASE.
 
-end procedure.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-row-available w-livre  _ADM-ROW-AVAILABLE
-procedure adm-row-available :
+PROCEDURE adm-row-available :
 /*------------------------------------------------------------------------------
   Purpose:     Dispatched to this procedure when the Record-
                Source has a new row available.  This procedure
@@ -579,13 +744,13 @@ procedure adm-row-available :
      open queries, and/or pass records on to any RECORD-TARGETS).    */
   {src/adm/template/row-end.i}
 
-end procedure.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI w-livre  _DEFAULT-DISABLE
-procedure disable_UI :
+PROCEDURE disable_UI :
 /*------------------------------------------------------------------------------
   Purpose:     DISABLE the User Interface
   Parameters:  <none>
@@ -595,16 +760,16 @@ procedure disable_UI :
                we are ready to "clean-up" after running.
 ------------------------------------------------------------------------------*/
   /* Delete the WINDOW we created */
-  if session:display-type = "GUI":U and VALID-HANDLE(w-livre)
-  then delete widget w-livre.
-  if this-procedure:persistent then delete procedure this-procedure.
-end procedure.
+  IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-livre)
+  THEN DELETE WIDGET w-livre.
+  IF THIS-PROCEDURE:PERSISTENT THEN DELETE PROCEDURE THIS-PROCEDURE.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enable_UI w-livre  _DEFAULT-ENABLE
-procedure enable_UI :
+PROCEDURE enable_UI :
 /*------------------------------------------------------------------------------
   Purpose:     ENABLE the User Interface
   Parameters:  <none>
@@ -614,23 +779,23 @@ procedure enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  display fi-codigo fi-objeto fi-data-criacao fi-operacao fi-data-integracao 
+  DISPLAY fi-codigo fi-objeto fi-data-criacao fi-operacao fi-data-integracao 
           fi-aplicacao cb-metodo cb-dispositivo cb-retorno cb-requisicao 
           cb-processamento fi-destino fi-cod-status fi-desc-retorno 
-      with frame f-cad in window w-livre.
-  enable rt-button rtMain-3 rtMain rtMain-4 rtMain-2 fi-codigo fi-objeto 
-         fi-data-criacao fi-operacao fi-data-integracao fi-aplicacao fi-destino 
-         fi-cod-status fi-desc-retorno br-item 
-      with frame f-cad in window w-livre.
+      WITH FRAME f-cad IN WINDOW w-livre.
+  ENABLE rt-button rtMain-3 rtMain rtMain-4 rtMain-2 fi-codigo fi-objeto
+         fi-data-criacao fi-operacao fi-data-integracao fi-aplicacao fi-destino
+         fi-cod-status fi-desc-retorno br-item br-conteudo bt-detalhar bt-reenviar
+      WITH FRAME f-cad IN WINDOW w-livre.
   {&OPEN-BROWSERS-IN-QUERY-f-cad}
-  view w-livre.
-end procedure.
+  VIEW w-livre.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-change-page w-livre 
-procedure local-change-page :
+PROCEDURE local-change-page :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>
@@ -642,10 +807,17 @@ procedure local-change-page :
     case return-value.
         when '1' or
         when '0' then 
-            assign br-item             :visible in frame f-cad = true.
+            assign br-item    :visible in frame f-cad = true
+                   br-conteudo:visible in frame f-cad = false
+                   bt-detalhar:visible in frame f-cad = false
+                   .
 
         when '2' then 
-            assign br-item            :visible in frame f-cad = false.
+            assign br-item    :visible in frame f-cad = false
+                   br-conteudo:visible in frame f-cad = true
+                   bt-detalhar:visible in frame f-cad = true
+                   .
+                   
     end case.
     
 end procedure.
@@ -654,7 +826,7 @@ end procedure.
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-destroy w-livre 
-procedure local-destroy :
+PROCEDURE local-destroy :
 /*------------------------------------------------------------------------------
   Purpose:     Override standard ADM method
   Notes:       
@@ -674,7 +846,7 @@ end procedure.
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-exit w-livre 
-procedure local-exit :
+PROCEDURE local-exit :
 /* -----------------------------------------------------------
   Purpose:  Starts an "exit" by APPLYing CLOSE event, which starts "destroy".
   Parameters:  <none>
@@ -689,62 +861,67 @@ end procedure.
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-initialize w-livre 
-procedure local-initialize :
+PROCEDURE local-initialize :
 /*------------------------------------------------------------------------------
   Purpose:     Override standard ADM method
   Notes:       
 ------------------------------------------------------------------------------*/
 
-    /* Code placed here will execute PRIOR to standard behavior. */
+    //Code placed here will execute PRIOR to standard behavior
     run pi-before-initialize.
     
     {include/win-size.i}
     
-    {utp/ut9000.i "thl1986" "12.00.00.000"}
+    {utp/ut9000.i "thl1986b" "12.00.00.000"}
     
-    /* Dispatch standard ADM method.                             */
+    //Dispatch standard ADM method.
     run dispatch in THIS-PROCEDURE ( input 'initialize':U ) .
     
-    /* Code placed here will execute AFTER standard behavior.    */
-    //run pi-after-initialize.
+    //Code placed here will execute AFTER standard behavior
+    run pi-after-initialize.
+    run local-change-page.
     
-    /*FIND FIRST thl-mensagem NO-LOCK
-        WHERE thl-mensagem.codigo = i-codigo-objeto NO-ERROR.
+    empty temp-table tt-conteudo no-error.
+    empty temp-table tt-item     no-error.
+    
+    find first thl-mensagem no-lock
+        where thl-mensagem.codigo-mensagem = c-codigo-mensagem no-error.
 
-    FIND FIRST thl-objeto no-lock
-        WHERE thl-objeto.objeto = thl-mensagem.objeto NO-ERROR.
+    find first thl-objeto no-lock
+        where thl-objeto.objeto = thl-mensagem.objeto no-error.
         
-    IF AVAILABLE thl-mensagem THEN
-        ASSIGN fi-codigo:SCREEN-VALUE IN FRAME {&FRAME-NAME}            = string( thl-mensagem.codigo )
-               fi-chave-registro:SCREEN-VALUE IN FRAME {&FRAME-NAME}    = thl-mensagem.chave-registro
-               fi-objeto:SCREEN-VALUE IN FRAME {&FRAME-NAME}            = thl-mensagem.objeto
-               fi-pacote:SCREEN-VALUE IN FRAME {&FRAME-NAME}            = thl-mensagem.pacote
-               fi-data-criacao:SCREEN-VALUE IN FRAME {&FRAME-NAME}      = string( thl-mensagem.data-criacao )
-               cb-metodo:SCREEN-VALUE IN FRAME {&FRAME-NAME}            = string( thl-mensagem.metodo )
-               cb-retorno:SCREEN-VALUE IN FRAME {&FRAME-NAME}           = string( '1' )
-               cb-requisicao:SCREEN-VALUE IN FRAME {&FRAME-NAME}        = string( '1' )
-               cb-processamento:SCREEN-VALUE IN FRAME {&FRAME-NAME}     = string( '4' )
-               cb-dispositivo:SCREEN-VALUE IN FRAME {&FRAME-NAME}       = string( thl-objeto.dispositivo )
-               fi-chave-registro:SENSITIVE     IN FRAME {&FRAME-NAME}   = YES
-               fi-chave-registro:read-only   IN FRAME {&FRAME-NAME}     = YES.
+    if available thl-mensagem then do.
+        
+        assign fi-aplicacao      :screen-value in frame f-cad = thl-objeto.aplicacao
+               fi-cod-status     :screen-value in frame f-cad = string ( thl-mensagem.cod-status-retorno )
+               fi-codigo         :screen-value in frame f-cad = thl-mensagem.codigo-mensagem
+               fi-data-criacao   :screen-value in frame f-cad = string( thl-mensagem.dt-criacao )
+               fi-data-integracao:screen-value in frame f-cad = string( thl-mensagem.dt-integracao )
+               fi-destino        :screen-value in frame f-cad = thl-mensagem.destino
+               fi-objeto         :screen-value in frame f-cad = thl-mensagem.objeto
+               fi-operacao       :screen-value in frame f-cad = thl-mensagem.operacao
+               fi-desc-retorno   :screen-value in frame f-cad = thl-mensagem.descr-retorno
+               cb-dispositivo    :screen-value in frame f-cad = string( thl-objeto.sentido-fluxo )
+               cb-metodo         :screen-value in frame f-cad = string( thl-mensagem.metodo )
+               cb-processamento  :screen-value in frame f-cad = string( thl-mensagem.sit-processamento )
+               cb-requisicao     :screen-value in frame f-cad = string( thl-mensagem.sit-requisicao )
+               cb-retorno        :screen-value in frame f-cad = string( thl-mensagem.sit-retorno    ). 
                
-    find first thl-historico-mensagem of thl-mensagem no-lock no-error.   
-    
-    if available  thl-historico-mensagem then DO.
-        ASSIGN //ed-corpo-requisicao:screen-value in frame {&FRAME-NAME}  = thl-historico-mensagem.corpo-requisicao
-               //ed-corpo-retorno:screen-value in frame {&FRAME-NAME}     = thl-historico-mensagem.corpo-retorno 
-               fi-tentativa:SCREEN-VALUE IN FRAME {&FRAME-NAME}         = string( thl-historico-mensagem.tentativa )
-               fi-codigo-fila:SCREEN-VALUE IN FRAME {&FRAME-NAME}       = string( thl-historico-mensagem.codigo-fila )
-               fi-data-integracao:SCREEN-VALUE IN FRAME {&FRAME-NAME}   = string( thl-historico-mensagem.data-integracao )
-               fi-destino:SCREEN-VALUE IN FRAME {&FRAME-NAME}           =         thl-historico-mensagem.destino
-               fi-status-code:SCREEN-VALUE IN FRAME {&FRAME-NAME}       = STRING( thl-historico-mensagem.status-code )
-               cb-retorno:SCREEN-VALUE IN FRAME {&FRAME-NAME}           = string( thl-historico-mensagem.log-retorno )
-               cb-requisicao:SCREEN-VALUE IN FRAME {&FRAME-NAME}        = string( thl-historico-mensagem.log-requisicao )
-               cb-processamento:SCREEN-VALUE IN FRAME {&FRAME-NAME}     = string( thl-historico-mensagem.log-processamento ).   
+        for each thl-mensagem-conteudo of thl-mensagem.
+            create tt-conteudo.
+            buffer-copy thl-mensagem-conteudo to tt-conteudo
+                assign tt-conteudo.descr-tipo = if thl-mensagem-conteudo.tipo-conteudo = 1 then 'Saida' else 'Entrada'. 
+        end. 
         
-        publish 'definir-valor' ( INPUT ROWID(thl-historico-mensagem) ).
-
-    END.*/
+        for each thl-mensagem-item of thl-mensagem.
+            create tt-item.
+            buffer-copy thl-mensagem-item to tt-item.
+        end. 
+        
+        {&open-query-br-item}
+        {&open-query-br-conteudo}        
+        
+    end.
 
 end procedure.
 
@@ -752,7 +929,7 @@ end procedure.
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE send-records w-livre  _ADM-SEND-RECORDS
-procedure send-records :
+PROCEDURE send-records :
 /*------------------------------------------------------------------------------
   Purpose:     Send record ROWID's for all tables used by
                this file.
@@ -763,18 +940,19 @@ procedure send-records :
   {src/adm/template/snd-head.i}
 
   /* For each requested table, put it's ROWID in the output list.      */
-  {src/adm/template/snd-list.i "<record-phrase>"}
+  {src/adm/template/snd-list.i "tt-item"}
+  {src/adm/template/snd-list.i "tt-conteudo"}
 
   /* Deal with any unexpected table requests before closing.           */
   {src/adm/template/snd-end.i}
 
-end procedure.
+END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE state-changed w-livre 
-procedure state-changed :
+PROCEDURE state-changed :
 /*:T -----------------------------------------------------------
   Purpose:     Manuseia trocas de estado dos SmartObjects
   Parameters:  <none>

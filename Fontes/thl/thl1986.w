@@ -13,13 +13,14 @@
 ** autorizacao expressa.
 *******************************************************************************/
 //using thl.objeto.Mensagem from propath.
+using thl-lib.integration.messaging.outbound.service.OutboundMessageService.
 
 {include/i-prgvrs.i thl1986 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licenï¿½as. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <mï¿½dulo>:  Informar qual o mï¿½dulo a qual o programa pertence.                  */
 
 {include/i-license-manager.i thl1986 THL}
 
@@ -75,6 +76,10 @@ define variable dWinYC        as decimal                  no-undo.
 
 define variable hConsulta as handle  no-undo.
 
+define new shared variable c-codigo-mensagem
+    as character
+    no-undo.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -128,26 +133,28 @@ define var wWindow as widget-handle no-undo.
 /* Menu Definitions                                                     */
 define sub-menu smFile 
        menu-item miQueryJoins   label "&Consultas"    
-       menu-item miReportsJoins label "&Relat¢rios"   
+       menu-item miReportsJoins label "&Relatï¿½rios"   
        rule
        menu-item miExit         label "&Sair"          accelerator "CTRL-X".
 
 define sub-menu smHelp 
-       menu-item miContents     label "&Conte£do"     
+       menu-item miContents     label "&Conteï¿½do"     
        menu-item miAbout        label "&Sobre..."     .
 
 define menu mbMain menubar
        sub-menu  smFile         label "&Arquivo"      
        sub-menu  smHelp         label "&Ajuda"        .
 
-define menu POPUP-MENU-brIntegracao 
-       menu-item m_Integrao     label "Integrar"      
+define menu POPUP-MENU-brIntegracao
+       menu-item m_Integrao     label "Integrar"
        rule
        menu-item m_Consulta_Mensagem label "Consultar Mensagem"
        menu-item m_Consulta_TOTVS label "Consultar TOTVS"
-       menu-item m_Consultar_Historico label "Consultar Hist¢rico"
+       menu-item m_Consultar_Historico label "Consultar Histï¿½rico"
        rule
-       menu-item m_Gerar_Contedo_Integrao label "Gerar Conte£do Integra‡Æo".
+       menu-item m_Reenviar            label "Reenviar"
+       rule
+       menu-item m_Gerar_Contedo_Integrao label "Gerar Conteï¿½do Integraï¿½ï¿½o".
 
 
 /* Definitions of the field level widgets                               */
@@ -182,7 +189,7 @@ define button btReportsJoins
 define button btSelecao 
      image-up file "image\im-ran":U
      image-insensitive file "image\ii-ran":U
-     label "Sele‡Æo" 
+     label "Seleï¿½ï¿½o" 
      size 4 by 1.25
      font 4.
 
@@ -219,7 +226,7 @@ define browse brIntegracao
     tt-thl-mensagem.desc-processamento   width 10 format 'x(15)'         column-label 'Proces.' 
     tt-thl-mensagem.destino              width 20 format 'x(60)'
     tt-thl-mensagem.cod-status-retorno   
-    tt-thl-mensagem.descr-retorno        width 10 format 'x(50)'  
+    tt-thl-mensagem.descr-retorno        width 10 format 'x(4000)'  
     //enable 
     //tt-thl-mensagem.dt-integracao  
     //tt-thl-mensagem.objeto
@@ -233,11 +240,11 @@ define browse brIntegracao
 
 define frame fpage0
      btSelecao at row 1.25 col 2.72 help
-          "Parƒmetros de Sele‡Æo" widget-id 6
+          "Parï¿½metros de Seleï¿½ï¿½o" widget-id 6
      btQueryJoins at row 1.25 col 73.57 help
           "Consultas relacionadas"
      btReportsJoins at row 1.25 col 77.57 help
-          "Relat¢rios relacionados"
+          "Relatï¿½rios relacionados"
      btExit at row 1.25 col 81.57 help
           "Sair"
      btHelp at row 1.25 col 85.57 help
@@ -543,7 +550,7 @@ end.
 
 &Scoped-define SELF-NAME btSelecao
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btSelecao wWindow
-on choose of btSelecao in frame fpage0 /* Sele‡Æo */
+on choose of btSelecao in frame fpage0 /* Seleï¿½ï¿½o */
 do.
     run thl\thl1986a.w.
     if log-atualizar then
@@ -567,7 +574,7 @@ end.
 
 &Scoped-define SELF-NAME m_Consultar_Historico
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Consultar_Historico wWindow
-on choose of menu-item m_Consultar_Historico /* Consultar Hist¢rico */
+on choose of menu-item m_Consultar_Historico /* Consultar Histï¿½rico */
 do:
     /*if available tt-thl-mensagem then do.
         
@@ -594,20 +601,20 @@ end.
 on choose of menu-item m_Consulta_Mensagem /* Consultar Mensagem */
 do:
 
-    /*if available tt-thl-mensagem then do.
+    if  available tt-thl-mensagem then do.
         
-        assign i-codigo-objeto = tt-thl-mensagem.codigo.
+        assign c-codigo-mensagem = tt-thl-mensagem.codigo-mensagem.
 
-        RUN thl\thl1986c.w PERSISTENT SET hConsulta.
+        run thl\thl1986b.w persistent set hConsulta.
 
         run dispatch         in hConsulta ( input 'initialize':U  ).
-        RUN local-initialize in hConsulta.
+        run local-initialize in hConsulta.
 
         wait-for close of hConsulta.
 
-        delete OBJECT  hConsulta NO-ERROR.
-        
-    end.*/
+        delete object  hConsulta no-error.
+
+    end.
 
 end.
 
@@ -641,7 +648,7 @@ end.
 
 &Scoped-define SELF-NAME m_Gerar_Contedo_Integrao
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Gerar_Contedo_Integrao wWindow
-on choose of menu-item m_Gerar_Contedo_Integrao /* Gerar Conte£do Integra‡Æo */
+on choose of menu-item m_Gerar_Contedo_Integrao /* Gerar Conteï¿½do Integraï¿½ï¿½o */
 do:
     /*if available tt-thl-mensagem then do.
 
@@ -666,7 +673,60 @@ end.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Integrao wWindow
 on choose of menu-item m_Integrao /* Integrar */
 do:
-    apply 'mouse-select-dblclick' to brIntegracao IN FRAME {&FRAME-NAME}.
+    //apply 'mouse-select-dblclick' to brIntegracao IN FRAME {&FRAME-NAME}.
+end.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME m_Reenviar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Reenviar wWindow
+on choose of menu-item m_Reenviar /* Reenviar */
+do:
+
+    define variable svc     as OutboundMessageService no-undo.
+    define variable success as logical                no-undo.
+
+    if not available tt-thl-mensagem then return.
+
+    /* Somente mensagens de saida (outbound) podem ser reenviadas */
+    if not tt-thl-mensagem.dispositivo then do:
+        message 'Reenvio disponivel apenas para mensagens de saida (Dispositivo = Saida).'
+            view-as alert-box warning title 'Reenviar Mensagem'.
+        return.
+    end.
+
+    /* Confirmacao do usuario */
+    run utp/ut-msgs.p ( input 'show':U,
+                        input 27100,
+                        input substitute( 'Confirma o reenvio da mensagem &1?',
+                                          tt-thl-mensagem.codigo-mensagem ) ).
+    if return-value <> 'yes':U then return.
+
+    do on error undo, leave:
+
+        svc     = new OutboundMessageService( tt-thl-mensagem.objeto,
+                                              tt-thl-mensagem.operacao ).
+        success = svc:reprocess( tt-thl-mensagem.codigo-mensagem ).
+
+        if success then
+            message 'Mensagem reenviada com sucesso.'
+                view-as alert-box information title 'Reenviar Mensagem'.
+        else
+            message 'Reenvio finalizado com advertencia. Verifique o retorno da mensagem.'
+                view-as alert-box warning title 'Reenviar Mensagem'.
+
+        catch err as Progress.Lang.Error:
+            message substitute( 'Erro no reenvio:~n&1', err:GetMessage(1) )
+                view-as alert-box error title 'Reenviar Mensagem'.
+        end catch.
+
+    end.
+
+    run piObterInegracao.
+    delete object svc no-error.
+
 end.
 
 /* _UIB-CODE-BLOCK-END */
