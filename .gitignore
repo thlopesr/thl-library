@@ -2,6 +2,15 @@
 *.r
 *.pl
 
+# Listagens/depuração de compilação ABL e traces do AVM
+*.xref
+*.lst
+*.dbg
+protrace.*
+
+# Saída criptografada do xcode (gerada por Utils/scripts/xcode-encrypt-all.ps1)
+Xcode/
+
 # Backups e temporários
 Backup/
 *.bak
@@ -9,6 +18,10 @@ Backup/
 *.temp
 *.swp
 *~
+*.stackdump
+
+# Pacotes compactados (backups, deploy web)
+*.zip
 
 # Temporários do Microsoft Office
 ~$*.docx
@@ -40,6 +53,25 @@ build/
 dist/
 target/
 
+# Front-end web (reforço do Fontes/web/.gitignore)
+node_modules/
+.angular/
+
+# Variáveis de ambiente locais (raiz e subpastas)
+.env
+.env.*
+
+# Claude Code: configuração pessoal e worktrees temporárias
+**/.claude/settings.local.json
+.claude/worktrees/
+
+# Obsidian: estado da interface e cache (a configuração em .obsidian/ é versionada)
+**/.obsidian/workspace.json
+**/.obsidian/workspace-mobile.json
+**/.obsidian/cache/
+.trash/
+
 # Sistema operacional
 Thumbs.db
 .DS_Store
+desktop.ini

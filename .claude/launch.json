@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mensageria-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ng", "serve", "web", "--open"],
+      "port": 4200,
+      "cwd": "Fontes/web"
+    },
+    {
+      "name": "cadastro-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ng", "serve", "cadastro", "--open"],
+      "port": 4201,
+      "cwd": "Fontes/web"
+    }
+  ]
+}

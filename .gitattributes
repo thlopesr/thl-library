@@ -1,0 +1,86 @@
+# .gitattributes — THL-Library
+#
+# Padrão de codificação do projeto: fontes ABL em ISO-8859-1 (ver Documentos/.claude/convencoes.md).
+# Front-end web e documentação: UTF-8.
+#
+# Este arquivo controla só o FINAL DE LINHA e o que é binário. Ele NÃO converte codificação
+# (sem working-tree-encoding): os bytes ISO-8859-1 dos fontes são preservados como estão.
+# No repositório todo texto é guardado com LF; no disco, o final de linha segue as regras abaixo.
+
+# Padrão: o Git detecta texto/binário automaticamente
+*               text=auto
+
+# ---------------------------------------------------------------------------
+# OpenEdge ABL / Datasul — CRLF no disco (PDSOE/Windows), codificação ISO-8859-1
+# ---------------------------------------------------------------------------
+*.cls           text eol=crlf encoding=ISO-8859-1
+*.p             text eol=crlf encoding=ISO-8859-1
+*.w             text eol=crlf encoding=ISO-8859-1
+*.i             text eol=crlf encoding=ISO-8859-1
+*.df            text eol=crlf encoding=ISO-8859-1
+*.d             text eol=crlf encoding=ISO-8859-1
+*.e             text eol=crlf encoding=ISO-8859-1
+*.pf            text eol=crlf
+*.ini           text eol=crlf
+
+# Configuração do Progress Developer Studio (Eclipse)
+.project        text eol=crlf
+.propath        text eol=crlf
+build.config    text eol=crlf
+*.prefs         text eol=crlf
+*.xml           text eol=crlf
+
+# Scripts Windows
+*.ps1           text eol=crlf
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+
+# ---------------------------------------------------------------------------
+# Front-end web (Angular / PO UI) — LF, UTF-8
+# ---------------------------------------------------------------------------
+*.ts            text eol=lf
+*.js            text eol=lf
+*.mjs           text eol=lf
+*.html          text eol=lf
+*.scss          text eol=lf
+*.css           text eol=lf
+*.json          text eol=lf
+.editorconfig   text eol=lf
+.prettierrc     text eol=lf
+
+# ---------------------------------------------------------------------------
+# Documentação e configuração geral — LF, UTF-8
+# ---------------------------------------------------------------------------
+*.md            text eol=lf
+*.txt           text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+# ---------------------------------------------------------------------------
+# Binários — nunca converter nem gerar diff
+# ---------------------------------------------------------------------------
+*.r             binary
+*.pl            binary
+*.db            binary
+*.d1            binary
+*.b1            binary
+*.bi            binary
+*.xlsx          binary
+*.xls           binary
+*.docx          binary
+*.doc           binary
+*.pdf           binary
+*.zip           binary
+*.ico           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.woff          binary
+*.woff2         binary
+*.ttf           binary
+*.eot           binary
+*.dll           binary
+*.exe           binary
