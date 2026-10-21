@@ -75,3 +75,6 @@ node_modules/
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# Front-end: proxy de desenvolvimento aponta para host de cliente (nao versionar)
+Fontes/web/proxy.conf.json
