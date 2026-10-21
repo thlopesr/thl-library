@@ -6,7 +6,6 @@ programa: thl0030
 titulo: Conexões REST
 grupo: thl003 Conexão REST
 tabela: thl-conexao-rest
-notion: https://www.notion.so/3f1d3a2b48158157a588f5060bd88484
 tags: [thl, cadastro, thl003]
 updated: 2026-10-19
 ---

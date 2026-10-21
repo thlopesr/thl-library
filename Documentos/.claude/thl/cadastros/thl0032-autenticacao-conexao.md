@@ -6,7 +6,6 @@ programa: thl0032
 titulo: Autenticação da conexão
 grupo: thl003 Conexão REST
 tabela: thl-conexao-rest-autenticacao
-notion: https://www.notion.so/3f1d3a2b481581feb315d1c4f9f9dc36
 tags: [thl, cadastro, thl003]
 updated: 2026-10-19
 ---

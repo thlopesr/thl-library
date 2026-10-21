@@ -6,7 +6,6 @@ programa: thl0031
 titulo: Paths da conexão
 grupo: thl003 Conexão REST
 tabela: thl-conexao-rest-path
-notion: https://www.notion.so/3f1d3a2b481581a2a22fd855e9cbac07
 tags: [thl, cadastro, thl003]
 updated: 2026-10-19
 ---

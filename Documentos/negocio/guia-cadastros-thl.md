@@ -2,6 +2,8 @@
 
 > Revisado em 2026-09-24 contra o código e as telas atuais.
 >
+> Por funcionalidade (integração, e-mail, variável de ambiente e auditoria), veja [funcionalidades-thl.md](funcionalidades-thl.md).
+>
 > ⚠️ **Desatualizado desde então.** Não acompanhou as mudanças de outubro de 2026: a rota deixou de ser cadastro próprio e virou aba do objeto (thl0040), a aplicação ganhou o campo Origem, o método entrou na chave da operação e o thl0022 ganhou classes por operação e aba REST. Até a revisão, confirme no código ou use o guia das telas web, que está atualizado: [guia-telas-web.md](guia-telas-web.md) — mesmos campos e mesmas tabelas, pela outra interface.
 
 Este guia detalha como utilizar cada cadastro da biblioteca THL para configurar integrações e serviços.  Os passos estão descritos de forma prática para usuários de negócio.

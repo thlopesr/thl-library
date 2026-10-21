@@ -3,7 +3,7 @@ tipo: modulo
 camada: ambos
 status: vigente
 tags: [datasul, telas, rpw]
-updated: 2026-10-13
+updated: 2026-10-21
 ---
 
 # Camada Datasul (`Fontes\thl\`)
@@ -66,6 +66,10 @@ Essas chamadas criam dependência da `thl-lib` para a camada Datasul (diagnósti
 ## 5. Endpoint REST
 
 `integration\api\v1\resourcen.p` — procedure `piPrincipal` registrada via `utp/ut-api-action.i` para POST/PATCH/PUT/GET/DELETE nas rotas `/*/*` e `/*/*/*`. Monta o `InboundObjectContext`, resolve a rota com `InboundRouteResolver` e chama `InboundMessageService:receive`. Fluxo completo em `integration/messaging-inbound.md`. URL usada pelo app web: `/api/thl/integration/v1/resourcen/<rota>`.
+
+## 5.1 Módulo no menu Datasul
+
+Os programas estão cadastrados no módulo **TOTVS Helper Library**, no menu **Foundation** (informado pelo usuário em 2026-10-21, com capturas do menu; conferido só nas imagens, não no cadastro do Datasul). A tela do módulo agrupa por abas — **Tarefas** (5: `thl0210`, `thl0220`, `thl0221`, `thl0222`, `thl0250`), **Relatórios** (0), **Consultas** (4) e **Cadastros** (15). Os mesmos recursos de consulta e cadastro existem em PO UI, nos apps `web` (Consulta Geral: métricas gerais, de mensageria, de e-mail e de auditoria) e `cadastro` (Painel de Cadastros), descritos em [web/app-web.md](../web/app-web.md). Rascunho do comunicado aos usuários: [relatorios/comunicado-programas-thl.md](../../relatorios/comunicado-programas-thl.md).
 
 ## 6. Includes
 

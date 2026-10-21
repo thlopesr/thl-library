@@ -6,7 +6,6 @@ programa: thl0033
 titulo: Header provider da conexão
 grupo: thl003 Conexão REST
 tabela: thl-conexao-rest-header
-notion: https://www.notion.so/3f1d3a2b481581c3804fc72a2375d799
 tags: [thl, cadastro, thl003]
 updated: 2026-10-19
 ---

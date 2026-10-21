@@ -12,14 +12,22 @@ Relaciona cada nota publicada no Notion à sua página. A fonte de verdade conti
 
 | Nota (link relativo) | Página Notion (id/URL) | Observação |
 |---|---|---|
-| [thl0030-conexoes-rest.md](thl/cadastros/thl0030-conexoes-rest.md) | https://www.notion.so/3f1d3a2b48158157a588f5060bd88484 | Id vindo do frontmatter da nota; página não conferida no Notion |
-| [thl0031-paths-conexao.md](thl/cadastros/thl0031-paths-conexao.md) | https://www.notion.so/3f1d3a2b481581a2a22fd855e9cbac07 | Idem |
-| [thl0032-autenticacao-conexao.md](thl/cadastros/thl0032-autenticacao-conexao.md) | https://www.notion.so/3f1d3a2b481581feb315d1c4f9f9dc36 | Idem |
-| [thl0033-header-provider-conexao.md](thl/cadastros/thl0033-header-provider-conexao.md) | https://www.notion.so/3f1d3a2b481581c3804fc72a2375d799 | Idem |
+| [funcionalidades-thl.md](../negocio/funcionalidades-thl.md) | https://app.notion.com/p/400d3a2b48158145a8f9d772d649f593 | Índice. Espaço Informações THL, página "THL-Library — Funcionalidades". Criada em 21/10/2026 |
+| [funcionalidade-utils.md](../negocio/funcionalidade-utils.md) | https://app.notion.com/p/400d3a2b481581848467f6f77ff3b9bd | Subpágina do índice |
+| [funcionalidade-integracao.md](../negocio/funcionalidade-integracao.md) | https://app.notion.com/p/400d3a2b481581d298eef16af727b205 | Subpágina do índice |
+| [funcionalidade-email.md](../negocio/funcionalidade-email.md) | https://app.notion.com/p/400d3a2b48158194a4f3cae9ae320600 | Subpágina do índice |
+| [funcionalidade-variavel-ambiente.md](../negocio/funcionalidade-variavel-ambiente.md) | https://app.notion.com/p/400d3a2b481581fab4f8f4aaa0b30f91 | Subpágina do índice |
+| [funcionalidade-auditoria.md](../negocio/funcionalidade-auditoria.md) | https://app.notion.com/p/400d3a2b481581e0a118d1b6d20f9758 | Subpágina do índice |
+
+As páginas "THL-Library — Parte Web" e "THL-Library — Como funciona", do mesmo espaço, já existiam (09/10/2026), foram escritas fora desta skill e **não estão mapeadas**: não atualizar sem decisão do usuário.
+
+## Páginas do Notion que não são publicação
+
+As páginas citadas no campo `notion:` do frontmatter das notas `thl0030` a `thl0033` (em [thl/cadastros/](thl/cadastros/cadastros-thl.md)) pertencem ao banco **Testes de telas .w — Cadastros THL**: são checklists de teste (status, prioridade e roteiro), conferidas em 21/10/2026. **Não eram cópias das notas.** O banco foi apagado a pedido do usuário em 21/10/2026 (o Notion o mostra na lixeira, e dá para restaurar de lá). Os links `notion:` das quatro notas apontavam para essas páginas e foram removidos.
 
 ## Candidatas a publicação
 
-Nenhuma foi criada no Notion nem mapeada; ids ficam em branco até a decisão de publicar.
+Ainda não criadas no Notion nem mapeadas; ids ficam em branco até a decisão de publicar.
 
 ### Guias para usuário e operação (`Documentos/negocio/`)
 

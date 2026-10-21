@@ -3,7 +3,7 @@ tipo: guia
 camada: core
 status: vigente
 tags: [moc, rest, conectores, autenticacao]
-updated: 2026-10-13
+updated: 2026-10-21
 ---
 
 # MOC — REST e conectores

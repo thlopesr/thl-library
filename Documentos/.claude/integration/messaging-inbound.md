@@ -100,7 +100,7 @@ Propriedades públicas (get): `payload` (JsonObject), `queryParameters` (JsonObj
 
 Antes de habilitar esse cenário, definir como persistir/restaurar o contexto e validar cada rota pelo RPW. Esta nota registra uma limitação; não implementa correção nem comprova falha em ambiente implantado.
 
-Evidências: [InboundMessageService.cls](../../../Fontes/thl-lib/integration/messaging/inbound/service/InboundMessageService.cls), [InboundMessage.cls](../../../Fontes/thl-lib/integration/messaging/inbound/core/InboundMessage.cls), [ObjetoMessage.cls](../../../Fontes/thl-extensions/integration/thl/messaging/inbound/message/ObjetoMessage.cls) e [NotaFiscalMessage.cls](../../../Fontes/thl-lib/integration/messaging/inbound/message/NotaFiscalMessage.cls).
+Evidências: [InboundMessageService.cls](../../../Fontes/thl-lib/integration/messaging/inbound/service/InboundMessageService.cls), [InboundMessage.cls](../../../Fontes/thl-lib/integration/messaging/inbound/core/InboundMessage.cls) e, na análise de 02/10/2026, `ObjetoMessage.cls` e `NotaFiscalMessage.cls` (inbound). Essas duas classes **não existem mais na árvore atual** (os objetos passaram à Message padrão); o código analisado fica só no histórico do git, e os links foram retirados por apontarem para arquivos inexistentes.
 
 ## InboundSchedulingService
 

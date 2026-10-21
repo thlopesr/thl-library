@@ -21,7 +21,7 @@ Entrada de navegação do Obsidian. Estrutura apenas; o conteúdo vive nas notas
 
 ## Transversais
 
-[Convenções](../convencoes.md) · [Arquitetura](../arquitetura.md) · [Schema](../data/schema.md) · [Camada Datasul](../thl/camada-datasul.md) · [App web](../web/app-web.md) · [Registro de dívida](../tech-debt/REGISTRO.md) · [Changelog](../CHANGELOG.md) · [Mapa Notion](../notion-map.md)
+[Convenções](../convencoes.md) · [Arquitetura](../arquitetura.md) · [Schema](../data/schema.md) · [Camada Datasul](../thl/camada-datasul.md) · [Dicionário de cadastros](../thl/cadastros/cadastros-thl.md) · [App web](../web/app-web.md) · [Registro de dívida](../tech-debt/REGISTRO.md) · [Changelog](../CHANGELOG.md) · [Mapa Notion](../notion-map.md)
 
 ## Vocabulário do frontmatter
 
