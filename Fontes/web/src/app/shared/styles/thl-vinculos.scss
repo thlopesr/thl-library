@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  padding: 16px 0 8px;
+}
+
+.thl-vinculos__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: var(--color-neutral-dark-70);
+}
+
+.thl-vinculos__vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  border: 1px dashed var(--color-neutral-light-20);
+  border-radius: 4px;
+  color: var(--color-neutral-mid-60);
+  text-align: center;
+}

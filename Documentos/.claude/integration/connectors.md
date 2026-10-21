@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, rest, conectores]
+updated: 2026-10-13
+---
+
 # Pacote: integration/connectors
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

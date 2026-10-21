@@ -1,6 +1,6 @@
  
  /*------------------------------------------------------------------------
-    File        : message_Repository
+    File        : MessageFactory
     Purpose     : 
     Syntax      : 
     Description : 
@@ -12,14 +12,15 @@
 using Progress.Lang.*. 
 using thl-lib.integration.messaging.outbound.strategy.*.
 using thl-lib.integration.messaging.core.*.
-using thl-lib.integration.messaging.Outbound.core.OutboundMessage.
+using thl-lib.integration.messaging.outbound.core.OutboundMessage.
+using thl-lib.core.error.ThlError.
 
 block-level on error undo, throw.
 
 class thl-lib.integration.messaging.factory.MessageFactory.
       
     define private   property isSingle as logical  no-undo get. set.
-    define protected property message_ as Message  no-undo get. set.
+    define protected property message_ as Message  no-undo get. private set.
 
     constructor public MessageFactory( configuration as MessageConfig ).
         
@@ -28,16 +29,31 @@ class thl-lib.integration.messaging.factory.MessageFactory.
         assign this-object:isSingle = configuration:isSingle
                messageClass         = configuration:messageClass.
         
-        message_ = dynamic-new messageClass( configuration:objectName          , 
-                                             configuration:integrationOperation,
-                                             configuration:methodType          , 
-                                             configuration:connectorType       , 
-                                             configuration:integrationDirection,
-                                             configuration:executionMode       ).                          
-               
-    end constructor. 
+        message_ = dynamic-new messageClass( configuration:objectName           ,
+                                             configuration:applicationName      ,
+                                             configuration:integrationOperation ,
+                                             configuration:methodType           ,
+                                             configuration:connectorType        ,
+                                             configuration:integrationDirection ,
+                                             configuration:executionModeValue   ).
+
+        //so valid-object: error-status:error pode estar ligado por um find ... no-error
+        //anterior que nao achou registro (ex.: operacao sem extensao REST no carregador),
+        //e o dynamic-new que falha ja lanca o proprio erro (block-level undo, throw)
+        if not valid-object(message_) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'constructor',
+                substitute( 'Nao foi possivel instanciar a classe de mensagem: &1', messageClass ) ).
+
+        //fora do construtor de 7 parametros das Messages, que nao muda
+        message_:setContentStorage( configuration:contentStorage ).
+
+    end constructor.
 
     method public MessageStructureStrategy createStructureStrategy().
+
+        if not type-of(message_, OutboundMessage) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'createStructureStrategy',
+                substitute( 'Classe de mensagem &1 nao e uma subclasse valida de OutboundMessage.', message_:GetClass():TypeName ) ).
 
         if isSingle then return new SingleMessageStructure( cast( message_, OutboundMessage ) ).
         return new MultipleMessageStructure( cast( message_, OutboundMessage ) ).

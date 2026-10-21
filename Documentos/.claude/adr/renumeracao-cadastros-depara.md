@@ -3,6 +3,8 @@ tipo: adr
 modulo: cadastros
 status: aceita
 updated: 2026-09-25
+camada: ambos
+tags: [adr, cadastros]
 ---
 
 # ADR — Renumeração dos programas de cadastro (DE-PARA inicial)

@@ -1,0 +1,28 @@
+<po-page-list p-title="">
+
+  <thl-page-header title="Painel de Cadastros"
+    subtitle="Escolha o grupo que você precisa configurar.">
+  </thl-page-header>
+
+  <div class="po-row thl-inicio__grupos">
+    @for (grupo of grupos; track grupo.titulo) {
+      <div class="po-md-6 po-lg-4">
+        <po-widget [p-title]="grupo.titulo">
+          <p class="thl-inicio__descricao">{{ grupo.descricao }}</p>
+
+          @for (card of grupo.cards; track card.rota) {
+            <thl-nav-card [card]="card"></thl-nav-card>
+          }
+
+          @if (grupo.nota) {
+            <p class="thl-inicio__nota">
+              <span class="an an-info" aria-hidden="true"></span>
+              {{ grupo.nota }}
+            </p>
+          }
+        </po-widget>
+      </div>
+    }
+  </div>
+
+</po-page-list>

@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # TABLE-COMPONENTS.md
 
 ## 4.1 po-table

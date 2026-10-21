@@ -20,6 +20,7 @@ A THL-Library foi concebida para centralizar recursos comuns de infraestrutura e
 - **IDE:** Progress Developer Studio for OpenEdge
 - **Integração principal:** REST / JSON
 - **Persistência:** tabelas customizadas da THL
+- **Codificação dos fontes:** **ISO-8859-1** (padrão do projeto para `.cls`, `.p`, `.w` e `.i`)
 
 ## Estrutura do repositório
 
@@ -49,13 +50,22 @@ Contém a camada ligada ao ERP Datasul:
 
 Exemplos de programas:
 
-- `thl0002` — cadastro de ambiente/IP;
-- `thl0003` — cadastro de parâmetros e variáveis por ambiente;
-- `thl0004` — cadastro de grupos e usuários;
-- `thl0005` — cadastro de objetos de integração;
-- `thl0006` — cadastro de métodos/parâmetros e permissões;
-- `thl1986` — monitor de mensageria;
-- `thl2000` — monitor de comunicação/e-mail.
+- `thl0001` — cadastro de ambiente/IP;
+- `thl0002` — cadastro de parâmetros e variáveis por ambiente;
+- `thl0011` — cadastro de grupos e usuários;
+- `thl0021` — cadastro de objetos de integração;
+- `thl0022` — cadastro de métodos/parâmetros e permissões;
+- `thl0030`–`thl0033` — conexão REST (URI, path, autenticação, cabeçalho);
+- `thl0040` — rotas inbound;
+- `thl0050`/`thl0051` — auditoria (tabela e parâmetros);
+- `thl0020` — cadastro de aplicações (sistemas externos);
+- `thl0110` — monitor de comunicação/e-mail;
+- `thl0120` — monitor de mensageria;
+- `thl0150` — consulta de auditoria;
+- `thl0210` / `thl0222` / `thl0250` — expurgo de e-mails, mensagens e auditoria (RPW);
+- `thl0220` / `thl0221` — reprocessamento outbound e processamento inbound agendado (RPW).
+
+Numeração: `thl00NN` cadastro, `thl01NN` consulta, `thl02NN` tarefa, com o mesmo `NN` do assunto (ver `Documentos/.claude/convencoes.md` §7).
 
 ### `Fontes/thl-lib`
 
@@ -155,7 +165,7 @@ Principais componentes:
 
 ## Tabelas principais
 
-O arquivo `Database/thl.df` contém as tabelas utilizadas pela biblioteca.
+O arquivo `Database/Definition/thl.df` contém as tabelas utilizadas pela biblioteca.
 
 ### Configuração de ambiente
 
@@ -241,6 +251,8 @@ Endpoint TOTVS
 
 ## Convenções de desenvolvimento
 
+- Codificação: fontes ABL (`.cls`, `.p`, `.w`, `.i`) sempre em **ISO-8859-1** — nunca UTF-8 nem com BOM;
+- Pacote ABL idêntico à pasta, sempre em minúsculas (ex.: `thl-lib.integration.messaging.inbound.core.InboundMessage`);
 - Código técnico em inglês: classes, métodos e propriedades;
 - Interface ERP pode permanecer em português;
 - Evitar variáveis públicas; preferir propriedades;
@@ -274,7 +286,7 @@ Endpoint TOTVS
 
 1. Importe o projeto no Progress Developer Studio for OpenEdge;
 2. Ajuste o `PROPATH` conforme o ambiente Datasul;
-3. Importe a estrutura de banco de `Database/thl.df` no banco de destino;
+3. Importe a estrutura de banco de `Database/Definition/thl.df` no banco de destino;
 4. Configure ambientes, parâmetros, objetos de integração e permissões pelas telas THL;
 5. Utilize as classes de `thl-lib` nos fluxos de integração desejados.
 

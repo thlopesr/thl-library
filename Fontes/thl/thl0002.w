@@ -2,8 +2,8 @@
 &ANALYZE-RESUME
 /* Connected Databases 
 */
-&Scoped-define WINDOW-NAME w-cadsim
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS w-cadsim 
+&Scoped-define WINDOW-NAME w-cadpaifilho-ambos
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS w-cadpaifilho-ambos 
 /*:T *******************************************************************************
 ** Copyright TOTVS S.A. (2009)
 ** Todos os Direitos Reservados.
@@ -12,15 +12,15 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i XX9999 9.99.99.999}
+{include/i-prgvrs.i thl0002 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
-    {include/i-license-manager.i <programa> <m¢dulo>}
+    {include/i-license-manager.i <programa> <modulo>}
 &ENDIF
 
 /* Create an unnamed pool to store all the widgets created 
@@ -37,6 +37,8 @@ CREATE WIDGET-POOL.
 
 /* Local Variable Definitions ---                                       */
 
+def var p-table as rowid.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -45,12 +47,12 @@ CREATE WIDGET-POOL.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
-&Scoped-define PROCEDURE-TYPE w-cadsim
+&Scoped-define PROCEDURE-TYPE SmartWindow
 &Scoped-define DB-AWARE no
 
 &Scoped-define ADM-CONTAINER WINDOW
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME f-cad
 
 /* Standard List Definitions                                            */
@@ -67,15 +69,15 @@ CREATE WIDGET-POOL.
 /* ***********************  Control Definitions  ********************** */
 
 /* Define the widget handle for the window                              */
-DEFINE VAR w-cadsim AS WIDGET-HANDLE NO-UNDO.
+DEFINE VAR w-cadpaifilho-ambos AS WIDGET-HANDLE NO-UNDO.
 
 /* Menu Definitions                                                     */
 DEFINE SUB-MENU mi-arquivo 
        MENU-ITEM mi-primeiro    LABEL "&Primeiro"      ACCELERATOR "CTRL-HOME"
        MENU-ITEM mi-anterior    LABEL "An&terior"      ACCELERATOR "CTRL-CURSOR-LEFT"
-       MENU-ITEM mi-proximo     LABEL "Pr&¢ximo"       ACCELERATOR "CTRL-CURSOR-RIGHT"
-       MENU-ITEM mi-ultimo      LABEL "&éltimo"        ACCELERATOR "CTRL-END"
-       MENU-ITEM mi-va-para     LABEL "&V  para"       ACCELERATOR "CTRL-T"
+       MENU-ITEM mi-proximo     LABEL "Pr&oximo"       ACCELERATOR "CTRL-CURSOR-RIGHT"
+       MENU-ITEM mi-ultimo      LABEL "&Ultimo"        ACCELERATOR "CTRL-END"
+       MENU-ITEM mi-va-para     LABEL "&Va para"       ACCELERATOR "CTRL-T"
        MENU-ITEM mi-pesquisa    LABEL "Pes&quisa"      ACCELERATOR "CTRL-F5"
        RULE
        MENU-ITEM mi-incluir     LABEL "&Incluir"       ACCELERATOR "CTRL-INS"
@@ -83,13 +85,8 @@ DEFINE SUB-MENU mi-arquivo
        MENU-ITEM mi-alterar     LABEL "A&lterar"       ACCELERATOR "CTRL-A"
        MENU-ITEM mi-eliminar    LABEL "&Eliminar"      ACCELERATOR "CTRL-DEL"
        RULE
-       MENU-ITEM mi-desfazer    LABEL "&Desfazer"      ACCELERATOR "CTRL-U"
-       MENU-ITEM mi-cancelar    LABEL "&Cancelar"      ACCELERATOR "CTRL-F4"
-       RULE
-       MENU-ITEM mi-salvar      LABEL "Sal&var"        ACCELERATOR "CTRL-S"
-       RULE
        MENU-ITEM mi-consultas   LABEL "Co&nsultas"     ACCELERATOR "CTRL-L"
-       MENU-ITEM mi-imprimir    LABEL "&Relat¢rios"    ACCELERATOR "CTRL-P"
+       MENU-ITEM mi-imprimir    LABEL "&Relatorios"    ACCELERATOR "CTRL-P"
        RULE
        MENU-ITEM mi-sair        LABEL "&Sair"          ACCELERATOR "CTRL-X".
 
@@ -99,13 +96,16 @@ DEFINE SUB-MENU mi-ajuda
 
 DEFINE MENU m-cadastro MENUBAR
        SUB-MENU  mi-arquivo     LABEL "&Arquivo"      
-       SUB-MENU  mi-ajuda       LABEL "A&juda"        .
+       SUB-MENU  mi-ajuda       LABEL "&Ajuda"        .
 
 
 /* Definitions of handles for SmartObjects                              */
-DEFINE VARIABLE h_p-cadsim AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_folder AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_p-cadpai AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_p-exihel AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_p-navega AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_thl0002-b01 AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_thl0002-b02 AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_thl0002-q01 AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_thl0002-v01 AS HANDLE NO-UNDO.
 
@@ -119,20 +119,20 @@ DEFINE RECTANGLE rt-button
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME f-cad
-     rt-button AT ROW 1.21 COL 1.57
+     rt-button AT ROW 1 COL 1.43
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 90 BY 6.04 WIDGET-ID 100.
+         SIZE 90 BY 15.54 WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
 
 &ANALYZE-SUSPEND _PROCEDURE-SETTINGS
 /* Settings for THIS-PROCEDURE
-   Type: w-cadsim
-   Allow: Basic,Browse,DB-Fields,Smart,Window,Query
-   Add Fields to: Neither
+   Type: SmartWindow
+   Allow: Basic,Browse,DB-Fields,Query,Smart,Window
+   Design Page: 2
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
@@ -141,15 +141,15 @@ DEFINE FRAME f-cad
 
 &ANALYZE-SUSPEND _CREATE-WINDOW
 IF SESSION:DISPLAY-TYPE = "GUI":U THEN
-  CREATE WINDOW w-cadsim ASSIGN
+  CREATE WINDOW w-cadpaifilho-ambos ASSIGN
          HIDDEN             = YES
-         TITLE              = "Manuten‡Æo <Insira o complemento>"
-         HEIGHT             = 5.88
+         TITLE              = "Manutencao Parametro de Ambiente"
+         HEIGHT             = 15.58
          WIDTH              = 90
-         MAX-HEIGHT         = 17
-         MAX-WIDTH          = 90
-         VIRTUAL-HEIGHT     = 17
-         VIRTUAL-WIDTH      = 90
+         MAX-HEIGHT         = 21.21
+         MAX-WIDTH          = 114.29
+         VIRTUAL-HEIGHT     = 21.21
+         VIRTUAL-WIDTH      = 114.29
          RESIZE             = yes
          SCROLL-BARS        = no
          STATUS-AREA        = yes
@@ -164,11 +164,11 @@ ASSIGN {&WINDOW-NAME}:MENUBAR    = MENU m-cadastro:HANDLE.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _INCLUDED-LIB w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _INCLUDED-LIB w-cadpaifilho-ambos 
 /* ************************* Included-Libraries *********************** */
 
 {src/adm/method/containr.i}
-{include/w-cadsim.i}
+{include/w-paiamb.i}
 {utp/ut-glob.i}
 
 /* _UIB-CODE-BLOCK-END */
@@ -180,45 +180,38 @@ ASSIGN {&WINDOW-NAME}:MENUBAR    = MENU m-cadastro:HANDLE.
 /* ***********  Runtime Attributes and AppBuilder Settings  *********** */
 
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
-/* SETTINGS FOR WINDOW w-cadsim
+/* SETTINGS FOR WINDOW w-cadpaifilho-ambos
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME f-cad
-   L-To-R                                                               */
-IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-cadsim)
-THEN w-cadsim:HIDDEN = yes.
+   FRAME-NAME L-To-R                                                    */
+IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-cadpaifilho-ambos)
+THEN w-cadpaifilho-ambos:HIDDEN = yes.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 
  
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _XFTR "SmartWindowCues" w-cadsim _INLINE
-/* Actions: adecomm/_so-cue.w ? adecomm/_so-cued.p ? adecomm/_so-cuew.p */
-/*:T SmartWindow,uib,50060
-Destroy on next read */
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 
 
 /* ************************  Control Triggers  ************************ */
 
-&Scoped-define SELF-NAME w-cadsim
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-cadsim w-cadsim
-ON END-ERROR OF w-cadsim /* Manuten‡Æo <Insira o complemento> */
+&Scoped-define SELF-NAME w-cadpaifilho-ambos
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-cadpaifilho-ambos w-cadpaifilho-ambos
+ON END-ERROR OF w-cadpaifilho-ambos /* Manutencao Parametro de Ambiente */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
      application would exit. */
-   RETURN NO-APPLY.
+  IF THIS-PROCEDURE:PERSISTENT THEN RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-cadsim w-cadsim
-ON WINDOW-CLOSE OF w-cadsim /* Manuten‡Æo <Insira o complemento> */
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-cadpaifilho-ambos w-cadpaifilho-ambos
+ON WINDOW-CLOSE OF w-cadpaifilho-ambos /* Manutencao Parametro de Ambiente */
 DO:
   /* This ADM code must be left here in order for the SmartWindow
      and its descendents to terminate properly on exit. */
@@ -231,10 +224,10 @@ END.
 
 
 &Scoped-define SELF-NAME mi-alterar
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-alterar w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-alterar w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-alterar /* Alterar */
 DO:
-  RUN pi-alterar IN h_p-cadsim.
+  RUN pi-alterar IN h_p-cadpai.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -242,7 +235,7 @@ END.
 
 
 &Scoped-define SELF-NAME mi-anterior
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-anterior w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-anterior w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-anterior /* Anterior */
 DO:
   RUN pi-anterior IN h_p-navega.
@@ -253,7 +246,7 @@ END.
 
 
 &Scoped-define SELF-NAME mi-arquivo
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-arquivo w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-arquivo w-cadpaifilho-ambos
 ON MENU-DROP OF MENU mi-arquivo /* Arquivo */
 DO:
   run pi-disable-menu.
@@ -263,30 +256,8 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME mi-cancelar
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-cancelar w-cadsim
-ON CHOOSE OF MENU-ITEM mi-cancelar /* Cancelar */
-DO:
-  RUN pi-cancelar IN h_p-cadsim.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME mi-consultas
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-consultas w-cadsim
-ON CHOOSE OF MENU-ITEM mi-consultas /* Consultas */
-DO:
-  RUN pi-consulta IN h_p-exihel.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME mi-conteudo
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-conteudo w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-conteudo w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-conteudo /* Conteudo */
 OR HELP OF FRAME {&FRAME-NAME}
 DO:
@@ -298,21 +269,10 @@ END.
 
 
 &Scoped-define SELF-NAME mi-copiar
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-copiar w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-copiar w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-copiar /* Copiar */
 DO:
-  RUN pi-copiar IN h_p-cadsim.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME mi-desfazer
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-desfazer w-cadsim
-ON CHOOSE OF MENU-ITEM mi-desfazer /* Desfazer */
-DO:
-  RUN pi-desfazer IN h_p-cadsim.
+  RUN pi-copiar IN h_p-cadpai.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -320,10 +280,10 @@ END.
 
 
 &Scoped-define SELF-NAME mi-eliminar
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-eliminar w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-eliminar w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-eliminar /* Eliminar */
 DO:
-  RUN pi-eliminar IN h_p-cadsim.
+  RUN pi-eliminar IN h_p-cadpai.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -331,8 +291,8 @@ END.
 
 
 &Scoped-define SELF-NAME mi-imprimir
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-imprimir w-cadsim
-ON CHOOSE OF MENU-ITEM mi-imprimir /* Relat¢rios */
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-imprimir w-cadpaifilho-ambos
+ON CHOOSE OF MENU-ITEM mi-imprimir /* Relatorios */
 DO:
   RUN pi-imprimir IN h_p-exihel.
 END.
@@ -342,10 +302,10 @@ END.
 
 
 &Scoped-define SELF-NAME mi-incluir
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-incluir w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-incluir w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-incluir /* Incluir */
 DO:
-  RUN pi-incluir IN h_p-cadsim.
+  RUN pi-incluir IN h_p-cadpai.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -353,7 +313,7 @@ END.
 
 
 &Scoped-define SELF-NAME mi-pesquisa
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-pesquisa w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-pesquisa w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-pesquisa /* Pesquisa */
 DO:
   RUN pi-pesquisa IN h_p-navega.
@@ -364,7 +324,7 @@ END.
 
 
 &Scoped-define SELF-NAME mi-primeiro
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-primeiro w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-primeiro w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-primeiro /* Primeiro */
 DO:
   RUN pi-primeiro IN h_p-navega.
@@ -375,8 +335,8 @@ END.
 
 
 &Scoped-define SELF-NAME mi-proximo
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-proximo w-cadsim
-ON CHOOSE OF MENU-ITEM mi-proximo /* Pr¢ximo */
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-proximo w-cadpaifilho-ambos
+ON CHOOSE OF MENU-ITEM mi-proximo /* Proximo */
 DO:
   RUN pi-proximo IN h_p-navega.
 END.
@@ -386,7 +346,7 @@ END.
 
 
 &Scoped-define SELF-NAME mi-sair
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sair w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sair w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-sair /* Sair */
 DO:
   RUN pi-sair IN h_p-exihel.
@@ -396,19 +356,8 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME mi-salvar
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-salvar w-cadsim
-ON CHOOSE OF MENU-ITEM mi-salvar /* Salvar */
-DO:
-  RUN pi-salvar IN h_p-cadsim.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME mi-sobre
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sobre w-cadsim
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-sobre w-cadpaifilho-ambos
 ON CHOOSE OF MENU-ITEM mi-sobre /* Sobre... */
 DO:
   {include/sobre.i}
@@ -419,8 +368,8 @@ END.
 
 
 &Scoped-define SELF-NAME mi-ultimo
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-ultimo w-cadsim
-ON CHOOSE OF MENU-ITEM mi-ultimo /* éltimo */
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-ultimo w-cadpaifilho-ambos
+ON CHOOSE OF MENU-ITEM mi-ultimo /* Ultimo */
 DO:
   RUN pi-ultimo IN h_p-navega.
 END.
@@ -430,8 +379,8 @@ END.
 
 
 &Scoped-define SELF-NAME mi-va-para
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-va-para w-cadsim
-ON CHOOSE OF MENU-ITEM mi-va-para /* V  para */
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mi-va-para w-cadpaifilho-ambos
+ON CHOOSE OF MENU-ITEM mi-va-para /* Va para */
 DO:
   RUN pi-vapara IN h_p-navega.
 END.
@@ -442,12 +391,13 @@ END.
 
 &UNDEFINE SELF-NAME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK w-cadpaifilho-ambos 
 
 
 /* ***************************  Main Block  *************************** */
 
 /* Include custom  Main Block code for SmartWindows. */
+
 {src/adm/template/windowmn.i}
 
 /* _UIB-CODE-BLOCK-END */
@@ -456,7 +406,7 @@ END.
 
 /* **********************  Internal Procedures  *********************** */
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects w-cadsim  _ADM-CREATE-OBJECTS
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects w-cadpaifilho-ambos  _ADM-CREATE-OBJECTS
 PROCEDURE adm-create-objects :
 /*------------------------------------------------------------------------------
   Purpose:     Create handles for all SmartObjects used in this procedure.
@@ -478,18 +428,18 @@ PROCEDURE adm-create-objects :
                      SmartPanelType = NAV-ICON,
                      Right-to-Left = First-On-Left':U ,
              OUTPUT h_p-navega ).
-       RUN set-position IN h_p-navega ( 1.33 , 2.14 ) NO-ERROR.
+       RUN set-position IN h_p-navega ( 1.17 , 2.14 ) NO-ERROR.
        /* Size in UIB:  ( 1.25 , 24.00 ) */
 
        RUN init-object IN THIS-PROCEDURE (
-             INPUT  'panel/p-cadsim.w':U ,
+             INPUT  'panel/p-cadpai.w':U ,
              INPUT  FRAME f-cad:HANDLE ,
-             INPUT  'Edge-Pixels = 0,
+             INPUT  'Edge-Pixels = 2,
                      SmartPanelType = Update,
                      AddFunction = One-Record':U ,
-             OUTPUT h_p-cadsim ).
-       RUN set-position IN h_p-cadsim ( 1.33 , 27.29 ) NO-ERROR.
-       /* Size in UIB:  ( 1.25 , 28.00 ) */
+             OUTPUT h_p-cadpai ).
+       RUN set-position IN h_p-cadpai ( 1.17 , 27.29 ) NO-ERROR.
+       /* Size in UIB:  ( 1.25 , 16.00 ) */
 
        RUN init-object IN THIS-PROCEDURE (
              INPUT  'panel/p-exihel.w':U ,
@@ -498,7 +448,7 @@ PROCEDURE adm-create-objects :
                      SmartPanelType = NAV-ICON,
                      Right-to-Left = First-On-Left':U ,
              OUTPUT h_p-exihel ).
-       RUN set-position IN h_p-exihel ( 1.33 , 73.57 ) NO-ERROR.
+       RUN set-position IN h_p-exihel ( 1.17 , 73.29 ) NO-ERROR.
        /* Size in UIB:  ( 1.25 , 16.00 ) */
 
        RUN init-object IN THIS-PROCEDURE (
@@ -506,49 +456,114 @@ PROCEDURE adm-create-objects :
              INPUT  FRAME f-cad:HANDLE ,
              INPUT  'Layout = ':U ,
              OUTPUT h_thl0002-v01 ).
-       RUN set-position IN h_thl0002-v01 ( 2.83 , 1.57 ) NO-ERROR.
-       /* Size in UIB:  ( 3.75 , 88.57 ) */
+       RUN set-position IN h_thl0002-v01 ( 2.67 , 1.43 ) NO-ERROR.
+       /* Size in UIB:  ( 2.75 , 88.57 ) */
+
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'adm/objects/folder.w':U ,
+             INPUT  FRAME f-cad:HANDLE ,
+             INPUT  'FOLDER-LABELS = ':U + 'Variavel|Programa' + ',
+                     FOLDER-TAB-TYPE = 1':U ,
+             OUTPUT h_folder ).
+       RUN set-position IN h_folder ( 5.71 , 1.43 ) NO-ERROR.
+       RUN set-size IN h_folder ( 10.50 , 88.57 ) NO-ERROR.
 
        RUN init-object IN THIS-PROCEDURE (
              INPUT  'thl/thl0002-q01.w':U ,
              INPUT  FRAME f-cad:HANDLE ,
              INPUT  'ProgPesquisa = thl\thl0002-z01.w,
                      ProgVaPara = thl\thl0002-g01.w,
-                     ProgIncMod = ,
+                     ProgIncMod = thl\thl0002a.w,
                      Implantar = no':U ,
              OUTPUT h_thl0002-q01 ).
-       RUN set-position IN h_thl0002-q01 ( 1.50 , 62.00 ) NO-ERROR.
+       RUN set-position IN h_thl0002-q01 ( 1.50 , 58.00 ) NO-ERROR.
        /* Size in UIB:  ( 1.63 , 7.72 ) */
 
        /* Links to SmartPanel h_p-exihel. */
-       RUN add-link IN adm-broker-hdl ( h_p-cadsim , 'State':U , h_p-exihel ).
+       RUN add-link IN adm-broker-hdl ( h_p-exihel , 'State':U , THIS-PROCEDURE ).
 
        /* Links to SmartViewer h_thl0002-v01. */
-       RUN add-link IN adm-broker-hdl ( h_p-cadsim , 'TableIO':U , h_thl0002-v01 ).
+       RUN add-link IN adm-broker-hdl ( h_p-cadpai , 'TableIO':U , h_thl0002-v01 ).
        RUN add-link IN adm-broker-hdl ( h_thl0002-q01 , 'Record':U , h_thl0002-v01 ).
 
+       /* Links to SmartFolder h_folder. */
+       RUN add-link IN adm-broker-hdl ( h_folder , 'Page':U , THIS-PROCEDURE ).
+
        /* Links to SmartQuery h_thl0002-q01. */
-       RUN add-link IN adm-broker-hdl ( h_p-exihel , 'State':U , h_thl0002-q01 ).
+       RUN add-link IN adm-broker-hdl ( h_p-cadpai , 'State':U , h_thl0002-q01 ).
        RUN add-link IN adm-broker-hdl ( h_p-navega , 'Navigation':U , h_thl0002-q01 ).
        RUN add-link IN adm-broker-hdl ( h_p-navega , 'State':U , h_thl0002-q01 ).
 
        /* Adjust the tab order of the smart objects. */
-       RUN adjust-tab-order IN adm-broker-hdl ( h_p-cadsim ,
+       RUN adjust-tab-order IN adm-broker-hdl ( h_p-cadpai ,
              h_p-navega , 'AFTER':U ).
        RUN adjust-tab-order IN adm-broker-hdl ( h_p-exihel ,
-             h_p-cadsim , 'AFTER':U ).
+             h_p-cadpai , 'AFTER':U ).
        RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-v01 ,
              h_p-exihel , 'AFTER':U ).
+       RUN adjust-tab-order IN adm-broker-hdl ( h_folder ,
+             h_thl0002-v01 , 'AFTER':U ).
     END. /* Page 0 */
+    WHEN 1 THEN DO:
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'thl/thl0002-b01.w':U ,
+             INPUT  FRAME f-cad:HANDLE ,
+             INPUT  'Initial-Lock = NO-LOCK,
+                     Hide-on-Init = no,
+                     Disable-on-Init = no,
+                     Layout = ,
+                     Create-On-Add = ?,
+                     ProgAtributo = ,
+                     ProgIncMod = thl\thl0002b.w,
+                     MessageNum = 0,
+                     MessageParam = ':U ,
+             OUTPUT h_thl0002-b01 ).
+       RUN set-position IN h_thl0002-b01 ( 7.58 , 2.43 ) NO-ERROR.
+       /* Size in UIB:  ( 7.50 , 86.00 ) */
+
+       /* Links to BrowserCadastro2 h_thl0002-b01. */
+       RUN add-link IN adm-broker-hdl ( h_thl0002-q01 , 'Record':U , h_thl0002-b01 ).
+
+       /* Adjust the tab order of the smart objects. */
+       RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-b01 ,
+             h_folder , 'AFTER':U ).
+    END. /* Page 1 */
+    WHEN 2 THEN DO:
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'thl/thl0002-b02.w':U ,
+             INPUT  FRAME f-cad:HANDLE ,
+             INPUT  'Initial-Lock = NO-LOCK,
+                     Hide-on-Init = no,
+                     Disable-on-Init = no,
+                     Layout = ,
+                     Create-On-Add = ?,
+                     ProgAtributo = ,
+                     ProgIncMod = thl\thl0002c.w,
+                     MessageNum = 0,
+                     MessageParam = ':U ,
+             OUTPUT h_thl0002-b02 ).
+       RUN set-position IN h_thl0002-b02 ( 7.58 , 2.43 ) NO-ERROR.
+       /* Size in UIB:  ( 7.50 , 86.00 ) */
+
+       /* Links to BrowserCadastro2 h_thl0002-b02. */
+       RUN add-link IN adm-broker-hdl ( h_thl0002-q01 , 'Record':U , h_thl0002-b02 ).
+
+       /* Adjust the tab order of the smart objects. */
+       RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-b02 ,
+             h_folder , 'AFTER':U ).
+    END. /* Page 2 */
 
   END CASE.
+  /* Select a Startup page. */
+  IF adm-current-page eq 0 
+  THEN RUN select-page IN THIS-PROCEDURE ( 1 ).
 
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-row-available w-cadsim  _ADM-ROW-AVAILABLE
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-row-available w-cadpaifilho-ambos  _ADM-ROW-AVAILABLE
 PROCEDURE adm-row-available :
 /*------------------------------------------------------------------------------
   Purpose:     Dispatched to this procedure when the Record-
@@ -570,7 +585,7 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI w-cadsim  _DEFAULT-DISABLE
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI w-cadpaifilho-ambos  _DEFAULT-DISABLE
 PROCEDURE disable_UI :
 /*------------------------------------------------------------------------------
   Purpose:     DISABLE the User Interface
@@ -581,15 +596,15 @@ PROCEDURE disable_UI :
                we are ready to "clean-up" after running.
 ------------------------------------------------------------------------------*/
   /* Delete the WINDOW we created */
-  IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-cadsim)
-  THEN DELETE WIDGET w-cadsim.
+  IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(w-cadpaifilho-ambos)
+  THEN DELETE WIDGET w-cadpaifilho-ambos.
   IF THIS-PROCEDURE:PERSISTENT THEN DELETE PROCEDURE THIS-PROCEDURE.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enable_UI w-cadsim  _DEFAULT-ENABLE
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE enable_UI w-cadpaifilho-ambos  _DEFAULT-ENABLE
 PROCEDURE enable_UI :
 /*------------------------------------------------------------------------------
   Purpose:     ENABLE the User Interface
@@ -601,15 +616,15 @@ PROCEDURE enable_UI :
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
   ENABLE rt-button 
-      WITH FRAME f-cad IN WINDOW w-cadsim.
+      WITH FRAME f-cad IN WINDOW w-cadpaifilho-ambos.
   {&OPEN-BROWSERS-IN-QUERY-f-cad}
-  VIEW w-cadsim.
+  VIEW w-cadpaifilho-ambos.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-destroy w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-destroy w-cadpaifilho-ambos 
 PROCEDURE local-destroy :
 /*------------------------------------------------------------------------------
   Purpose:     Override standard ADM method
@@ -629,7 +644,7 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-exit w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-exit w-cadpaifilho-ambos 
 PROCEDURE local-exit :
 /* -----------------------------------------------------------
   Purpose:  Starts an "exit" by APPLYing CLOSE event, which starts "destroy".
@@ -644,7 +659,7 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-initialize w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-initialize w-cadpaifilho-ambos 
 PROCEDURE local-initialize :
 /*------------------------------------------------------------------------------
   Purpose:     Override standard ADM method
@@ -656,20 +671,20 @@ PROCEDURE local-initialize :
 
   run pi-before-initialize.
 
-  {utp/ut9000.i "XX9999" "9.99.99.999"}
-
+  {utp/ut9000.i "thl0002" "12.00.00.000"}
+  
   /* Dispatch standard ADM method.                             */
   RUN dispatch IN THIS-PROCEDURE ( INPUT 'initialize':U ) .
 
   /* Code placed here will execute AFTER standard behavior.    */
- 
+
   run pi-after-initialize.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE send-records w-cadsim  _ADM-SEND-RECORDS
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE send-records w-cadpaifilho-ambos  _ADM-SEND-RECORDS
 PROCEDURE send-records :
 /*------------------------------------------------------------------------------
   Purpose:     Send record ROWID's for all tables used by
@@ -678,7 +693,7 @@ PROCEDURE send-records :
 ------------------------------------------------------------------------------*/
 
   /* SEND-RECORDS does nothing because there are no External
-     Tables specified for this w-cadsim, and there are no
+     Tables specified for this SmartWindow, and there are no
      tables specified in any contained Browse, Query, or Frame. */
 
 END PROCEDURE.
@@ -686,7 +701,7 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE state-changed w-cadsim 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE state-changed w-cadpaifilho-ambos 
 PROCEDURE state-changed :
 /*:T -----------------------------------------------------------
   Purpose:     Manuseia trocas de estado dos SmartObjects

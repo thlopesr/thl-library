@@ -1,0 +1,21 @@
+.thl-barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.thl-dica {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-neutral-mid-60);
+}
+
+/* Filtro vindo da URL: a tag e o botão de limpar na mesma linha. */
+.thl-filtro-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}

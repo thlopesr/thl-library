@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, iheaderprovider]
+updated: 2026-10-13
+---
+
 # IHeaderProvider
 
 > **Interface** · `thl-lib.integration.connectors.headers.interfaces.IHeaderProvider` · `Fontes\thl-lib\integration\connectors\headers\interfaces\IHeaderProvider.cls` · volta ao [hub de arquitetura](../arquitetura.md)

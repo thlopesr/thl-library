@@ -1,4 +1,14 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, service]
+updated: 2026-10-13
+---
+
 # Service
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** O `execute` saiu do Service e foi para o [Processor](../adr/inbound-message-processor-service.md); os verbos ficaram públicos. O bloco "Contrato para as filhas" abaixo está atualizado na seção final desta nota.
 
 > Classe-base **abstrata** · `thl-lib.erp.core.Service` · `Fontes\thl-lib\erp\core\Service.cls` · volta ao [hub de arquitetura](../arquitetura.md)
 
@@ -64,10 +74,31 @@ classDiagram
 
 **Concretas diretas em `thl-lib.erp.service`** (6): `CentroCustoService`, `EmitenteService`, `ItemService`, `LocalEntregaService`, `SaldoService`, `TransporteService`. (`AuditoriaService`, `EmailService`, `MensageriaService` e `MensageriaConteudoService` passaram para `thl-extensions.erp.thl.service` — conferido em disco em 2026-10-02.)
 
-**Concretas diretas em `thl-extensions.erp.<sistema>.service`:** `LpcoService` ([automatizador](../extensions/automatizador.md)), `FretePrevistoService` ([dvv](../extensions/dvv.md)), `AmbienteService`, `ParametroAmbienteService`, `ParametroVariavelService`, `ParametroProgramaService`, `AplicacaoService`, `AuditoriaService`, `EmailService`, `MensageriaService`, `MensageriaConteudoService`, `AuditoriaTabela*Service` (5), `ConexaoRest*Service` (4), `ObjetoService`, `ObjetoParametroService`, `ObjetoUsuarioService`, `InboundRotaService`, `EmailParametroService`, `GrupoEmailService`, `GrupoEmailUsuarioService` ([thl](../extensions/thl.md)).
+**Concretas diretas em `thl-extensions.erp.<sistema>.service`:** `LpcoService` ([automatizador](../extensions/automatizador.md)), `FretePrevistoService` ([dvv](../extensions/dvv.md)), `AmbienteService`, `ParametroAmbienteService`, `ParametroVariavelService`, `ParametroProgramaService`, `AplicacaoService`, `AuditoriaService`, `EmailService`, `MensageriaService`, `MensageriaConteudoService`, `AuditoriaTabela*Service` (5), `ConexaoRest*Service` (4), `ObjetoService`, `ObjetoParametroService`, `ObjetoUsuarioService`, `ObjetoRotaService`, `EmailParametroService`, `GrupoEmailService`, `GrupoEmailUsuarioService` ([thl](../extensions/thl.md)).
 
 ⚠️ `thl-extensions.erp.thl.service.EmailService` (serviço ERP chamado pela `EmailMessage`) não é o mesmo que `thl-lib.communication.email.EmailService` (envio de e-mail) — ver [communication/email.md](../communication/email.md).
 
 ## Relacionados
 
 [InboundMessage](InboundMessage.md) · [BusinessObject](BusinessObject.md) · [erp/erp-services.md](../erp/erp-services.md)
+
+## Consulta no contrato (2026-10-03, não compilado)
+
+O Template Method `execute` passou a cobrir os quatro verbos: além de `create()`, `update()` e `delete()`, despacha a ação `Consultado` para `consult()`, sem passar pelo `initialize()`. Detalhe em [erp/erp-services.md](../erp/erp-services.md) e [adr/get-no-execute-do-service.md](../adr/get-no-execute-do-service.md). Aplicado nos 24 Services do sistema [thl](../extensions/thl.md).
+
+## Service sem `execute` (2026-10-04, não compilado)
+
+O Service ficou só com a regra, os dados e o JSON da entidade. A orquestração é do `thl-lib.integration.messaging.inbound.core.Processor` ([ADR](../adr/inbound-message-processor-service.md)).
+
+| Membro (todos **públicos**) | Obrigatório? | Uso |
+|---|---|---|
+| `prepare( operation, context )` | base | Recebe o payload (`inContext`) e a operação, antes dos verbos de escrita |
+| `prepareQuery( operation, context )` | base | Recebe os parâmetros da query e cria `queryParameters`, antes do `consult()` |
+| `initialize()` | opcional | Valida a chave (`JsonUtil:requireProperties`) e posiciona o registro |
+| `create()` / `update()` / `delete()` | opcional | Padrão lança "Acao nao suportada" |
+| `consult()` → `JsonConstruct` | opcional | GET: lê `queryParameters`, devolve `JsonArray` ou `JsonObject` |
+| `buildQueryResponse( result )` | base | Array vira `{ items, hasNext: false }` |
+| `buildResponse( action, referenceCode )` | opcional | Resposta dos verbos de escrita |
+| `loadReferenceCode()` / `getEntityName()` | **abstratos** | Código do registro e nome da entidade |
+
+Filha sobrescreve com `method public override` — uma sobrescrita não pode ser mais restrita que o método da base. As 211 declarações das filhas do repositório foram ajustadas.

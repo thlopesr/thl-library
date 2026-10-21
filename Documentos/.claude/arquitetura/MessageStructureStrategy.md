@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, messagestructurestrategy]
+updated: 2026-10-13
+---
+
 # MessageStructureStrategy
 
 > Classe-base **abstrata** (Strategy) · `thl-lib.integration.messaging.outbound.strategy.MessageStructureStrategy` · `Fontes\thl-lib\integration\messaging\outbound\strategy\MessageStructureStrategy.cls` · volta ao [hub de arquitetura](../arquitetura.md)

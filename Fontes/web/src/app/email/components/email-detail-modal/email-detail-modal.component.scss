@@ -1,0 +1,103 @@
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0 12px;
+  border-bottom: 1px solid var(--color-neutral-light-20);
+  margin-bottom: 4px;
+
+  &-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.status-descricao {
+  font-size: 13px;
+  color: var(--color-neutral-dark-70);
+}
+
+.status-code-label {
+  font-size: 13px;
+  color: var(--color-neutral-dark-40);
+}
+
+.status-code-value {
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--color-neutral-light-05);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-neutral-light-20);
+  color: var(--color-neutral-dark-70);
+  user-select: all;
+}
+
+.tab-content {
+  padding: 8px 0;
+}
+
+.field-label {
+  font-size: 12px;
+  color: var(--color-neutral-dark-40);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.po-row {
+  margin-bottom: 12px;
+}
+
+.email-body-preview {
+  border: 1px solid var(--color-neutral-light-20);
+  border-radius: 4px;
+  padding: 16px;
+  max-height: 280px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  background: var(--color-neutral-light-00, #fff);
+}
+
+.retorno-block {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 4px;
+  padding: 16px;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+  /* `pre-wrap` porque o retorno traz mensagens longas de uma linha só — com `pre` elas
+     corriam para fora do modal e só se liam arrastando. */
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+/* `::ng-deep` é obrigatório: o conteúdo vem de `[innerHTML]` e não recebe o atributo
+   de encapsulamento do componente. */
+.retorno-block ::ng-deep {
+  .thl-json__chave { color: #89b4fa; }
+  .thl-json__texto { color: #a6e3a1; }
+  .thl-json__numero { color: #fab387; }
+  .thl-json__booleano { color: #f38ba8; }
+  .thl-json__nulo { color: #9399b2; font-style: italic; }
+}
+
+.empty-retorno {
+  padding: 24px 0;
+  text-align: center;
+}

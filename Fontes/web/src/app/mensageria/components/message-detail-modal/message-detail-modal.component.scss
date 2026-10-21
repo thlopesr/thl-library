@@ -1,0 +1,108 @@
+.field-label {
+  font-size: 12px;
+  color: var(--color-neutral-dark-40);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.field-mono {
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--color-neutral-light-05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-neutral-light-20);
+  display: inline-block;
+  color: var(--color-neutral-dark-70);
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.po-row {
+  margin-bottom: 12px;
+}
+
+// Retorno card
+.retorno-card {
+  border: 1px solid var(--color-neutral-light-20);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.retorno-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--color-neutral-light-20);
+
+  &.ok {
+    background: #e8f5e9;
+  }
+  &.err {
+    background: #fce4ec;
+  }
+}
+
+.retorno-http-badge {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+
+  &.ok {
+    background: #c8e6c9;
+    color: #2e7d32;
+    border: 1px solid #66bb6a;
+  }
+  &.err {
+    background: #ffcdd2;
+    color: #c62828;
+    border: 1px solid #ef5350;
+  }
+}
+
+.retorno-http-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-dark-70);
+}
+
+.retorno-card-body {
+  padding: 16px;
+}
+
+// JSON block com syntax highlight
+.json-block {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 4px;
+  padding: 16px;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: pre;
+  max-height: 380px;
+  margin: 0;
+
+  ::ng-deep {
+    .jk { color: #89dceb; }
+    .js { color: #a6e3a1; }
+    .jn { color: #fab387; }
+    .jb { color: #cba6f7; }
+  }
+}
+
+.empty-content {
+  padding: 24px 0;
+  text-align: center;
+}

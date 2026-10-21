@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # PAGE-TEMPLATES.md
 
 ## 5.1 Templates estáticos

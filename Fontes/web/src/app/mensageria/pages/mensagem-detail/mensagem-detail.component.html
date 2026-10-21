@@ -1,0 +1,83 @@
+<po-tabs>
+  <po-tab p-label="Informações" [p-active]="activeTab === 0">
+    <po-divider p-label="DADOS MENSAGEM"></po-divider>
+    <div class="po-row">
+      <po-info class="po-lg-12" p-label="Cód. Mensagem" [p-value]="mensagem.codMsg"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-4" p-label="Objeto" [p-value]="mensagem.objeto"></po-info>
+      <po-info class="po-lg-4" p-label="Operação" [p-value]="mensagem.operacao"></po-info>
+      <po-info class="po-lg-4" p-label="Aplicação" [p-value]="mensagem.aplicacao"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-3" p-label="Modelo" [p-value]="mensagem.modelo"></po-info>
+      <po-info class="po-lg-3" p-label="Método" [p-value]="mensagem.metodo"></po-info>
+      <po-info class="po-lg-3" p-label="Dispositivo" [p-value]="mensagem.dispositivo"></po-info>
+      <po-info class="po-lg-3" p-label="Destino" [p-value]="mensagem.destino"></po-info>
+    </div>
+
+    <po-divider p-label="DATAS"></po-divider>
+    <div class="po-row">
+      <po-info class="po-lg-6" p-label="Dt. Integração" [p-value]="mensagem.dtIntegracao"></po-info>
+      <po-info class="po-lg-6" p-label="Dt. Criação" [p-value]="mensagem.dtCriacao"></po-info>
+    </div>
+
+    <po-divider p-label="STATUS"></po-divider>
+    <div class="po-row">
+      <div class="po-lg-4">
+        <div class="status-item">
+          <span class="status-label">Status Requisição</span>
+          <po-tag [p-value]="mensagem.statusRequisicao"
+                  [p-color]="getStatusColor(mensagem.statusRequisicao)">
+          </po-tag>
+        </div>
+      </div>
+      <div class="po-lg-4">
+        <div class="status-item">
+          <span class="status-label">Status Retorno</span>
+          <po-tag [p-value]="mensagem.statusRetorno"
+                  [p-color]="getStatusColor(mensagem.statusRetorno)">
+          </po-tag>
+        </div>
+      </div>
+      <div class="po-lg-4">
+        <div class="status-item">
+          <span class="status-label">Status Processamento</span>
+          <po-tag [p-value]="mensagem.statusProcessamento"
+                  [p-color]="getStatusColor(mensagem.statusProcessamento)">
+          </po-tag>
+        </div>
+      </div>
+    </div>
+  </po-tab>
+
+  <po-tab p-label="Retorno" [p-active]="activeTab === 1">
+    <po-divider p-label="RETORNO"></po-divider>
+    <div class="po-row">
+      <po-info class="po-lg-4" p-label="Cód. Status Retorno" [p-value]="'' + mensagem.codStatusRetorno"></po-info>
+      <po-info class="po-lg-8" p-label="Descrição Retorno" [p-value]="mensagem.descrRetorno || '(vazio)'"></po-info>
+    </div>
+  </po-tab>
+
+  <po-tab p-label="Conteúdo Saída" [p-active]="activeTab === 2" (p-click)="onTabChange(2)">
+    @if (loadingSaida) {
+      <po-loading-overlay></po-loading-overlay>
+    }
+    @if (!mensagem.conteudo?.temRequisicao) {
+      <div class="content-box">(sem conteúdo de saída)</div>
+    } @else {
+      <div class="content-box">{{ formatJson(conteudoSaida) }}</div>
+    }
+  </po-tab>
+
+  <po-tab p-label="Conteúdo Entrada" [p-active]="activeTab === 3" (p-click)="onTabChange(3)">
+    @if (loadingEntrada) {
+      <po-loading-overlay></po-loading-overlay>
+    }
+    @if (!mensagem.conteudo?.temResposta) {
+      <div class="content-box">(sem conteúdo de entrada)</div>
+    } @else {
+      <div class="content-box">{{ formatJson(conteudoEntrada) }}</div>
+    }
+  </po-tab>
+</po-tabs>

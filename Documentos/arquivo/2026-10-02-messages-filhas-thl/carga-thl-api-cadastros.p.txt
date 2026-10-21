@@ -1,0 +1,265 @@
+/*------------------------------------------------------------------------
+    File        : carga-thl-api-cadastros.p
+    Purpose     : Carga dos cadastros que ligam a API REST dos cadastros THL
+                  (piloto thl0001/thl0002) ao resourcen.p: aplicacao THL,
+                  objetos, parametros por metodo e rotas inbound.
+    Created     : 2026-09-25
+    Notes       : - ADR Documentos/.claude/adr/api-rest-cadastros-thl.md.
+                  - Sem operacao na URL, o MessageConfigLoader acha o
+                    thl-objeto-parametro pelo metodo; como a chave primaria
+                    inclui a operacao, cada metodo usa o proprio nome como
+                    operacao (GET, POST, PATCH, DELETE).
+                  - Idempotente: registro ja cadastrado nao e alterado.
+                  - Roda em SIMULACAO por padrao (simulate = yes): so gera o
+                    log. Para gravar, altere simulate para no e rode de novo.
+                  - Log: <session:temp-directory>carga-thl-api-cadastros.log
+  ----------------------------------------------------------------------*/
+
+block-level on error undo, throw.
+
+define variable simulate    as logical   no-undo initial yes.
+define variable application as character no-undo initial "THL".
+define variable messagePkg  as character no-undo
+    initial "thl-extensions.integration.thl.messaging.inbound.message.".
+define variable logFile     as character no-undo.
+define variable created     as integer   no-undo.
+define variable existing    as integer   no-undo.
+define variable failed      as integer   no-undo.
+
+// objeto | classe | rota publica | metodos (MethodTypeEnum: 1=POST 3=PATCH 4=DELETE 5=GET) | descricao
+define temp-table tt-recurso no-undo
+    field objeto    as character
+    field classe    as character
+    field rota      as character
+    field metodos   as character
+    field descricao as character
+    index pk-recurso is primary unique objeto.
+
+define stream logStream.
+
+/* ***************************  Main Block  *************************** */
+
+run addResource( "AMBIENTE"          , "AmbienteMessage"         , "ambiente"          , "5,1,3,4", "Cadastro de ambientes (thl0001)" ).
+run addResource( "PARAMETRO"         , "ParametroAmbienteMessage", "parametro-ambiente", "5,1,3,4", "Cadastro de parametros de ambiente (thl0002)" ).
+run addResource( "PARAMETRO-VARIAVEL", "ParametroVariavelMessage", "parametro-variavel", "5,1,3,4", "Variaveis do parametro por ambiente (thl0002b)" ).
+run addResource( "PARAMETRO-PROGRAMA", "ParametroProgramaMessage", "parametro-programa", "5,1,4"  , "Programas do parametro (thl0002c)" ).
+run addResource( "APLICACAO"         , "AplicacaoMessage"        , "aplicacao"         , "5,1,3,4", "Cadastro de aplicacoes (thl0020)" ).
+
+run addResource( "AUDIT-TABELA"             , "AuditoriaTabelaMessage"           , "auditoria-tabela"            , "5,1,3,4", "Tabelas auditadas (thl0050)" ).
+run addResource( "AUDIT-TABELA-ACESSO"      , "AuditoriaTabelaAcessoMessage"     , "auditoria-tabela-acesso"     , "5,1,3,4", "Usuarios com acesso a auditoria da tabela (thl0051b)" ).
+run addResource( "AUDIT-TABELA-CAMPO"       , "AuditoriaTabelaCampoMessage"      , "auditoria-tabela-campo"      , "5,1,3,4", "Campos auditados da tabela (thl0051c)" ).
+run addResource( "AUDIT-TABELA-NOTIFICACAO" , "AuditoriaTabelaNotificacaoMessage", "auditoria-tabela-notificacao", "5,1,3,4", "Notificacoes por nivel de sensibilidade da tabela auditada (thl0051d)" ).
+run addResource( "AUDIT-TABELA-EXPURGO"     , "AuditoriaTabelaExpurgoMessage"    , "auditoria-tabela-expurgo"    , "5,1,3,4", "Retencao (expurgo) da auditoria por tabela (thl0051e)" ).
+run addResource( "CONEXAO-REST"             , "ConexaoRestMessage"               , "conexao-rest"                , "5,1,3,4", "Conexoes REST (URL base) (thl0030)" ).
+run addResource( "CONEXAO-REST-AUTENTICACAO", "ConexaoRestAutenticacaoMessage"   , "conexao-rest-autenticacao"   , "5,1,3,4", "Autenticacao da conexao REST (thl0032)" ).
+run addResource( "CONEXAO-REST-HEADER"      , "ConexaoRestHeaderMessage"         , "conexao-rest-header"         , "5,1,3,4", "Cabecalho (IHeaderProvider) da conexao REST (thl0033)" ).
+run addResource( "CONEXAO-REST-PATH"        , "ConexaoRestPathMessage"           , "conexao-rest-path"           , "5,1,3,4", "Paths (endpoints) REST (thl0031)" ).
+run addResource( "OBJETO"                   , "ObjetoMessage"                    , "objeto"                      , "5,1,3,4", "Objetos de integracao (thl0021)" ).
+run addResource( "OBJETO-PARAMETRO"         , "ObjetoParametroMessage"           , "objeto-parametro"            , "5,1,3,4", "Parametros do objeto de integracao por estabelecimento e operacao (thl0022a)" ).
+run addResource( "OBJETO-USUARIO"           , "ObjetoUsuarioMessage"             , "objeto-usuario"              , "5,1,4"  , "Usuarios liberados para o objeto de integracao (thl0022b)" ).
+run addResource( "INBOUND-ROTA"             , "InboundRotaMessage"               , "inbound-rota"                , "5,1,3,4", "Rotas inbound (caminho publico -> objeto) (thl0040)" ).
+run addResource( "EMAIL-PARAMETRO"          , "EmailParametroMessage"            , "email-parametro"             , "5,1,3,4", "Parametros de e-mail (thl0010)" ).
+run addResource( "GRUPO-EMAIL"             , "GrupoEmailMessage"                , "grupo-email"                 , "5,1,3,4", "Grupos de e-mail para notificacoes (thl0011)" ).
+run addResource( "GRUPO-EMAIL-USUARIO"     , "GrupoEmailUsuarioMessage"         , "grupo-email-usuario"         , "5,1,4"  , "Usuarios do grupo de e-mail (thl0011b)" ).
+
+logFile = session:temp-directory + "carga-thl-api-cadastros.log".
+
+output stream logStream to value( logFile ).
+put stream logStream unformatted
+    "Carga API cadastros THL em " string( now ) ( if simulate then " - SIMULACAO (nada gravado)" else "" ) skip
+    "tabela;chave;acao" skip.
+
+run loadApplication.
+
+for each tt-recurso:
+    run loadObject    ( buffer tt-recurso ).
+    run loadParameters( buffer tt-recurso ).
+    run loadRoute     ( buffer tt-recurso ).
+end.
+
+put stream logStream unformatted skip
+    ( if simulate then "Seriam criados: " else "Criados: " ) created skip
+    "Ja cadastrados: " existing skip
+    "Erros: " failed skip.
+output stream logStream close.
+
+message ( if simulate then "SIMULACAO - nada foi gravado." + chr(10) else "" )
+        ( if simulate then "Seriam criados: " else "Criados: " ) created chr(10)
+        "Ja cadastrados: " existing chr(10)
+        "Erros: " failed chr(10)
+        "Log: " logFile
+    view-as alert-box information.
+
+/* **********************  Internal Procedures  *********************** */
+
+procedure addResource private:
+    define input parameter objectName  as character no-undo.
+    define input parameter className   as character no-undo.
+    define input parameter routePath   as character no-undo.
+    define input parameter methodList  as character no-undo.
+    define input parameter descriptionText as character no-undo.
+
+    create tt-recurso.
+    assign tt-recurso.objeto    = objectName
+           tt-recurso.classe    = messagePkg + className
+           tt-recurso.rota      = routePath
+           tt-recurso.metodos   = methodList
+           tt-recurso.descricao = descriptionText.
+end procedure.
+
+procedure loadApplication private:
+    if can-find( thl-aplicacao where thl-aplicacao.aplicacao = application ) then do:
+        run countExisting( "thl-aplicacao", application ).
+        return.
+    end.
+
+    if not simulate then do transaction:
+        create thl-aplicacao.
+        assign thl-aplicacao.aplicacao = application
+               thl-aplicacao.descricao = "THL - cadastros do proprio framework".
+    end.
+    run countCreated( "thl-aplicacao", application ).
+
+    // erro num registro nao interrompe os demais; fica registrado no log
+    catch loadError as Progress.Lang.Error:
+        run countFailed( "thl-aplicacao", application, loadError:GetMessage( 1 ) ).
+    end catch.
+end procedure.
+
+procedure loadObject private:
+    define parameter buffer b-recurso for tt-recurso.
+
+    define variable objectKey as character no-undo.
+
+    objectKey = application + "/" + b-recurso.objeto.
+
+    if can-find( thl-objeto where thl-objeto.aplicacao = application
+                              and thl-objeto.objeto    = b-recurso.objeto ) then do:
+        run countExisting( "thl-objeto", objectKey ).
+        return.
+    end.
+
+    if not simulate then do transaction:
+        create thl-objeto.
+        assign thl-objeto.aplicacao          = application
+               thl-objeto.objeto             = b-recurso.objeto
+               thl-objeto.classe-objeto      = b-recurso.classe
+               thl-objeto.modelo-integracao  = 1      // REST
+               thl-objeto.sentido-fluxo      = no     // Entrada
+               thl-objeto.ind-inativo        = no
+               thl-objeto.ind-gera-historico = no.
+    end.
+    run countCreated( "thl-objeto", objectKey + " -> " + b-recurso.classe ).
+
+    catch loadError as Progress.Lang.Error:
+        run countFailed( "thl-objeto", objectKey, loadError:GetMessage( 1 ) ).
+    end catch.
+end procedure.
+
+procedure loadParameters private:
+    define parameter buffer b-recurso for tt-recurso.
+
+    define variable methodIndex as integer   no-undo.
+    define variable methodType  as integer   no-undo.
+    define variable operation   as character no-undo.
+    define variable paramKey    as character no-undo.
+
+    do methodIndex = 1 to num-entries( b-recurso.metodos ):
+
+        assign methodType = integer( entry( methodIndex, b-recurso.metodos ) )
+               operation  = entry( methodType, "POST,PUT,PATCH,DELETE,GET" )
+               paramKey   = substitute( "*/&1/&2/&3", application, b-recurso.objeto, operation ).
+
+        if can-find( thl-objeto-parametro where thl-objeto-parametro.cod-estabel = "*"
+                                            and thl-objeto-parametro.aplicacao   = application
+                                            and thl-objeto-parametro.objeto      = b-recurso.objeto
+                                            and thl-objeto-parametro.operacao    = operation ) then do:
+            run countExisting( "thl-objeto-parametro", paramKey ).
+            next.
+        end.
+
+        if not simulate then do transaction:
+            create thl-objeto-parametro.
+            assign thl-objeto-parametro.cod-estabel          = "*"
+                   thl-objeto-parametro.aplicacao            = application
+                   thl-objeto-parametro.objeto               = b-recurso.objeto
+                   thl-objeto-parametro.operacao             = operation
+                   thl-objeto-parametro.metodo               = methodType
+                   thl-objeto-parametro.forma-execucao       = 1     // Online
+                   thl-objeto-parametro.ind-inativo          = no
+                   thl-objeto-parametro.ind-mensagem-simples = no
+                   thl-objeto-parametro.ind-gera-historico   = no.
+        end.
+        run countCreated( "thl-objeto-parametro", paramKey ).
+
+        catch loadError as Progress.Lang.Error:
+            run countFailed( "thl-objeto-parametro", paramKey, loadError:GetMessage( 1 ) ).
+        end catch.
+    end.
+end procedure.
+
+procedure loadRoute private:
+    define parameter buffer b-recurso for tt-recurso.
+
+    define variable routeCode as character no-undo.
+
+    routeCode = "THL-" + b-recurso.objeto.
+
+    if can-find( thl-inbound-rota where thl-inbound-rota.rota-publica = b-recurso.rota ) then do:
+        run countExisting( "thl-inbound-rota", b-recurso.rota ).
+        return.
+    end.
+
+    if can-find( thl-inbound-rota where thl-inbound-rota.cod-rota = routeCode ) then do:
+        run countFailed( "thl-inbound-rota", b-recurso.rota, "cod-rota " + routeCode + " ja usado por outra rota" ).
+        return.
+    end.
+
+    if not simulate then do transaction:
+        create thl-inbound-rota.
+        assign thl-inbound-rota.cod-rota     = routeCode
+               thl-inbound-rota.rota-publica = b-recurso.rota
+               thl-inbound-rota.aplicacao    = application
+               thl-inbound-rota.objeto       = b-recurso.objeto
+               thl-inbound-rota.descricao    = b-recurso.descricao
+               thl-inbound-rota.ind-ativo    = yes.
+    end.
+    run countCreated( "thl-inbound-rota", b-recurso.rota + " -> " + application + "/" + b-recurso.objeto ).
+
+    catch loadError as Progress.Lang.Error:
+        run countFailed( "thl-inbound-rota", b-recurso.rota, loadError:GetMessage( 1 ) ).
+    end catch.
+end procedure.
+
+procedure countCreated private:
+    define input parameter tableName as character no-undo.
+    define input parameter keyValue  as character no-undo.
+
+    created = created + 1.
+    run writeLog( tableName, keyValue, if simulate then "seria criado" else "criado" ).
+end procedure.
+
+procedure countExisting private:
+    define input parameter tableName as character no-undo.
+    define input parameter keyValue  as character no-undo.
+
+    existing = existing + 1.
+    run writeLog( tableName, keyValue, "ja cadastrado" ).
+end procedure.
+
+procedure countFailed private:
+    define input parameter tableName as character no-undo.
+    define input parameter keyValue  as character no-undo.
+    define input parameter errorText as character no-undo.
+
+    failed = failed + 1.
+    run writeLog( tableName, keyValue, "erro: " + errorText ).
+end procedure.
+
+procedure writeLog private:
+    define input parameter tableName as character no-undo.
+    define input parameter keyValue  as character no-undo.
+    define input parameter action    as character no-undo.
+
+    put stream logStream unformatted tableName ";" keyValue ";" action skip.
+end procedure.

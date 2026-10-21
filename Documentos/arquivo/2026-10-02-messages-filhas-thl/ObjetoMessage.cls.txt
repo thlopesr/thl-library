@@ -1,0 +1,79 @@
+/*------------------------------------------------------------------------
+    File        : ObjetoMessage
+    Purpose     : Inbound message para CRUD de objetos de integracao
+                  (thl-objeto, tela thl0021). Rota: /resourcen/objeto
+                  (aplicacao THL, objeto OBJETO).
+    Author(s)   : Lopes
+    Created     : 2026-10-01
+    Notes       : Padrao AmbienteMessage (thl-extensions.integration.thl).
+                  POST/PATCH/DELETE pelos defaults de InboundMessage; GET com
+                  listagem paginada pela chave (aplicacaoIni/aplicacaoFin/objetoIni/objetoFin,
+                  page, pageSize).
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.ObjetoService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.ObjetoMessage inherits InboundMessage.
+
+    constructor public ObjetoMessage ( objectName           as character ,
+                                       applicationName      as character ,
+                                       integrationOperation as character ,
+                                       methodType           as integer   ,
+                                       connectorType        as integer   ,
+                                       integrationDirection as logical   ,
+                                       executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new ObjetoService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable objetoService as ObjetoService no-undo.
+
+        assign objetoService       = cast( this-object:createService(), ObjetoService )
+               this-object:payload = appendItems(
+                    objetoService:get(
+                        createPagination( 100 ),
+                        context:getQueryParam( 'aplicacaoIni', ''               ),
+                        context:getQueryParam( 'aplicacaoFin', fill( 'z', 100 ) ),
+                        context:getQueryParam( 'objetoIni'   , ''              ),
+                        context:getQueryParam( 'objetoFin'   , fill( 'z', 60 ) )
+                    )
+               ).
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    //cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'aplicacao,objeto'.
+    end method.
+
+end class.

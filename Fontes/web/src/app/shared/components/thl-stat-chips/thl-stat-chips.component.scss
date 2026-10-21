@@ -1,0 +1,71 @@
+.thl-stat-chips {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.thl-stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+
+  &--equal {
+    flex: 1;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--chip-color);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover {
+    border-color: #D1D5DB;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  &--active {
+    border-color: var(--chip-color);
+    background: #FAFBFF;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &__icon {
+    font-size: 16px;
+    color: var(--chip-color);
+    flex-shrink: 0;
+  }
+
+  &__value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A202C;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+}

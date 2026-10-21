@@ -12,7 +12,7 @@
 using Progress.Lang.*.
 
 using thl-lib.integration.messaging.core.*.
-using thl-lib.integration.messaging.Outbound.core.OutboundMessage.
+using thl-lib.integration.messaging.outbound.core.*.
 
 block-level on error undo, throw.
 
@@ -25,7 +25,7 @@ class thl-lib.integration.messaging.outbound.strategy.MessageStructureStrategy a
     end constructor.
 
     method public abstract void buildMessage ( ).  
-    method public abstract void addObject    ( register as recid ).
+    method public abstract void addObject    ( objectContext as OutboundObjectContext ).
     method public abstract void finishMessage( ).
      
 end class.

@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, auditoria, log]
+updated: 2026-10-13
+---
+
 # Módulo de auditoria — visão de ponta a ponta
 
 > **Análise de 2026-10-02**, por leitura do código (nada foi compilado nem medido). Detalhe de cada classe: [logging.md](logging.md) (gravação), [../erp/erp-services.md](../erp/erp-services.md) (consulta), [../extensions/thl.md](../extensions/thl.md) (API dos cadastros), [../thl/camada-datasul.md](../thl/camada-datasul.md) (telas e expurgo), [../data/schema.md](../data/schema.md) (tabelas e índices).
@@ -39,15 +47,15 @@ O chamador entrega um **buffer de banco** (`handle`). O `write-json` da linguage
 
 | # | Onde | Achado |
 |---|---|---|
-| D1 | `AuditLogService.cls:40-49` | **Inclusão gravada como alteração.** Com `ind-ativo-create = no`, `ind-ativo-update = yes` e `ind-audit-tabela = yes`, um registro novo cai no `else`, passa em `hasChangedMonitoredField` e é gravado como `Atualizacao`, com `campos` vazio e snapshot "Anterior" do buffer antigo. Falta sair quando `newRecord` é verdadeiro e a inclusão não está habilitada. |
+| D1 | `AuditLogService.cls:43-52` | **Inclusão gravada como alteração.** Com `ind-ativo-create = no`, `ind-ativo-update = yes` e `ind-audit-tabela = yes`, um registro novo cai no `else`, passa em `hasChangedMonitoredField` e é gravado como `Atualizacao`, com `campos` vazio e snapshot "Anterior" do buffer antigo. Falta sair quando `newRecord` é verdadeiro e a inclusão não está habilitada. |
 | D2 | `thl0250rp.p:130` | **Expurgo não encontra registros.** Compara `thl-audit-registro.banco` com o banco do cadastro sem o prefixo `sh` que o `AuditLogService` grava. O changelog de 2026-09-25 registra essa correção; o fonte atual não a tem. ⚠️ A confirmar com o responsável se foi revertido de propósito. |
 | D3 | `thl0250rp.p:149` | Grava `dt-ultima-execucao` em `thl-audit-tabela-purge` lido com `no-lock` — erro em tempo de execução ao gravar. |
 | D4 | `AuditLogService.cls` | Classe **sem** `block-level on error undo, throw`. |
-| D5 | `AuditLogService.cls:205`, `thl0150.w:708` | `matches '*campo*'` para testar campo alterado: `cod` casa com `cod-estab` (falso positivo). `AuditoriaService.filterSnapshot` já usa `lookup`, que é o correto. |
+| D5 | `AuditLogService.cls:209`, `thl0150.w:708` | `matches '*campo*'` para testar campo alterado: `cod` casa com `cod-estab` (falso positivo). `AuditoriaService.filterSnapshot` já usa `lookup`, que é o correto. |
 
 ### Riscos e inconsistências
 
-- **Prefixo `sh`.** O cadastro guarda o banco sem prefixo; o registro grava `'sh' + dbname`. Quatro pontos refazem a conta (`AuditLogService:167`, `AuditoriaService:67`, `thl0150.w:92/110/309`, e deveria estar no `thl0250rp.p`). O `thl0150.w:693` usa o valor com `sh` para abrir `_File` no schema holder — é a origem do prefixo, e pressupõe DataServer.
+- **Prefixo `sh`.** O cadastro guarda o banco sem prefixo; o registro grava `'sh' + dbname`. Quatro pontos refazem a conta (`AuditLogService:171`, `AuditoriaService:67`, `thl0150.w:92/110/309`, e deveria estar no `thl0250rp.p`). O `thl0150.w:693` usa o valor com `sh` para abrir `_File` no schema holder — é a origem do prefixo, e pressupõe DataServer.
 - **Identidade pela conexão.** A chave do cadastro é o nome lógico do banco na sessão (`buffer:dbname`). Alias diferente entre ambientes = auditoria deixa de gravar sem erro.
 - **`id` × `id-registro`.** `AuditLogService` e `AuditoriaService` usam `id` (abreviação do campo `id-registro`); `thl0150.w:706` usa `campo` para `campos`. Quebra com `-require-full-names`.
 - **Notificação não existe.** `thl-audit-tabela-notificacao` tem cadastro (tela, API, web), mas nenhum código lê `grupo-email` nem grava `thl-audit-registro-notificar`; só o expurgo apaga essa tabela.
@@ -111,3 +119,7 @@ Laço de alguns milhares de alterações com `etime` em três situações — se
 4. Identidade do banco: normalizar o prefixo `sh` em um único ponto, ou passar a identificação explícita pela trigger.
 5. Retenção padrão para tabela auditada sem registro de expurgo.
 6. Notificação por grupo de e-mail: implementar ou retirar o cadastro.
+
+## Snapshot ilegível na listagem (2026-10-13, não compilado)
+
+`AuditoriaService:parseSnapshot` lê o JSON de `thl-audit-registro-detalhe.valor` (CLOB `iso8859-1`, copiado para um `longchar` `UTF-8`). JSON inválido num registro (erro 16068 do analisador, "Erro do analisador Json no offset N") derrubava a **listagem inteira**. Agora o registro ruim é logado (`LogUtil`: id, tipo, tamanho e mensagem, no log do AVM quando ativo), o snapshot sai vazio e o item ganha `snapshotInvalido: true`; os demais itens seguem. A causa do JSON inválido nos dados continua em aberto: depende de inspecionar o registro logado.

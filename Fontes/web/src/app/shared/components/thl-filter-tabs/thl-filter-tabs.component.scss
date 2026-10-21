@@ -1,0 +1,113 @@
+:host {
+  display: inline-block;
+
+  --thl-filter-bg: #FFFFFF;
+  --thl-filter-border: #D1D5DB;
+  --thl-filter-text: #4B5563;
+  --thl-filter-active-bg: #1A2E4A;
+  --thl-filter-active-text: #FFFFFF;
+  --thl-filter-separator: #E5E7EB;
+  --thl-filter-radius: 6px;
+  --thl-filter-radius-inner: 4px;
+}
+
+.thl-filter-tabs {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--thl-filter-bg);
+  border: 1px solid var(--thl-filter-border);
+  border-radius: var(--thl-filter-radius);
+  overflow: hidden;
+}
+
+.thl-filter-tab {
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: var(--thl-filter-bg);
+  color: var(--thl-filter-text);
+  font-family: Inter, Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  height: 32px;
+  padding: 0 14px;
+  margin: 2px;
+  border-radius: var(--thl-filter-radius-inner);
+  transition: background-color 150ms ease, color 150ms ease;
+  white-space: nowrap;
+
+  &:hover:not(.thl-filter-tab--active) {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--thl-filter-active-bg);
+    z-index: 1;
+  }
+
+  &--active {
+    background: var(--thl-filter-active-bg);
+    color: var(--thl-filter-active-text);
+  }
+
+  /* Botão de ícone: largura menor que a do texto e conteúdo centrado.
+     Classe explícita em vez de `:has`, para não pegar o botão de atualizar. */
+  &--icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    min-width: 52px;
+    font-size: 24px;
+  }
+
+  &__glifo {
+    width: 1em;
+    height: 1em;
+  }
+
+
+  &--refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+
+    .po-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+/* Rótulo, não opção: sem cursor de clique e fora da ordem de tabulação. */
+.thl-filter-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-family: Inter, Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--thl-filter-text);
+  white-space: nowrap;
+
+  [class*='an-'] {
+    font-size: 16px;
+  }
+}
+
+.thl-filter-separator {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 0;
+  background: var(--thl-filter-separator);
+}
+
+/* O que separa o rótulo das opções é divisa de seção, não de botão: um tom acima
+   do separador interno, senão some no fundo branco. */
+.thl-filter-rotulo + .thl-filter-separator {
+  margin: 4px 0;
+  background: var(--thl-filter-border);
+}

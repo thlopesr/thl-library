@@ -14,14 +14,14 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i Q99XX999 9.99.99.999}
+{include/i-prgvrs.i thl0002-q01 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 /*                                                                                */
-/* OBS: Para os smartobjects o parametro m¢dulo dever  ser MUT                    */
+/* OBS: Para os smartobjects o parametro modulo devera ser MUT                    */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
     {include/i-license-manager.i <programa> MUT}
@@ -58,13 +58,13 @@ CREATE WIDGET-POOL.
 &Scoped-define QUERY-NAME Query-Main
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
-&Scoped-define INTERNAL-TABLES thl-ambiente
+&Scoped-define INTERNAL-TABLES thl-ambiente-param
 
 /* Definitions for QUERY Query-Main                                     */
-&Scoped-define QUERY-STRING-Query-Main FOR EACH thl-ambiente NO-LOCK INDEXED-REPOSITION
-&Scoped-define OPEN-QUERY-Query-Main OPEN QUERY Query-Main FOR EACH thl-ambiente NO-LOCK INDEXED-REPOSITION.
-&Scoped-define TABLES-IN-QUERY-Query-Main thl-ambiente
-&Scoped-define FIRST-TABLE-IN-QUERY-Query-Main thl-ambiente
+&Scoped-define QUERY-STRING-Query-Main FOR EACH thl-ambiente-param NO-LOCK INDEXED-REPOSITION
+&Scoped-define OPEN-QUERY-Query-Main OPEN QUERY Query-Main FOR EACH thl-ambiente-param NO-LOCK INDEXED-REPOSITION.
+&Scoped-define TABLES-IN-QUERY-Query-Main thl-ambiente-param
+&Scoped-define FIRST-TABLE-IN-QUERY-Query-Main thl-ambiente-param
 
 
 /* Custom List Definitions                                              */
@@ -81,8 +81,7 @@ CREATE WIDGET-POOL.
 &QUERY-NAME
 </KEY-OBJECT>
 <FOREIGN-KEYS>
-ip|||mgnitro.thl-ambiente.ip
-cod-ambiente|||mgnitro.thl-ambiente.cod-ambiente
+cod-param-ambiente|||mgnitro.thl-ambiente-param.cod-param-ambiente
 </FOREIGN-KEYS> 
 <EXECUTING-CODE>
 **************************
@@ -131,7 +130,7 @@ RUN set-attribute-list IN THIS-PROCEDURE ('
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
 DEFINE QUERY Query-Main FOR 
-      thl-ambiente
+      thl-ambiente-param
     FIELDS() SCROLLING.
 &ANALYZE-RESUME
 
@@ -203,7 +202,7 @@ Destroy on next read */
 
 &ANALYZE-SUSPEND _QUERY-BLOCK QUERY Query-Main
 /* Query rebuild information for QUERY Query-Main
-     _TblList          = "mgnitro.thl-ambiente"
+     _TblList          = "mgnitro.thl-ambiente-param"
      _Options          = "NO-LOCK INDEXED-REPOSITION"
      _TblOptList       = "USED"
      _Design-Parent    is WINDOW q-tables @ ( 1.17 , 9.86 )
@@ -316,7 +315,7 @@ PROCEDURE send-records :
   {src/adm/template/snd-head.i}
 
   /* For each requested table, put it's ROWID in the output list.      */
-  {src/adm/template/snd-list.i "thl-ambiente"}
+  {src/adm/template/snd-list.i "thl-ambiente-param"}
 
   /* Deal with any unexpected table requests before closing.           */
   {src/adm/template/snd-end.i}

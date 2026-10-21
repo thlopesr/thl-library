@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # SEÇÃO 10 — SERVIÇOS E UTILITÁRIOS (SERVICES.md)
 
 ## 10.1 Serviços nativos do PO-UI

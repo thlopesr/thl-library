@@ -1,0 +1,43 @@
+<ng-template #filhos let-row>
+  <thl-crud-children [def]="def" [row]="row"></thl-crud-children>
+</ng-template>
+
+<po-page-list p-title="">
+
+  <thl-page-header [title]="def.title" [subtitle]="subtitulo">
+    <div class="thl-barra">
+      <thl-search-bar
+        placeholder="Filtrar os registros carregados"
+        [value]="termo"
+        [showAdvanced]="false"
+        (search)="termo = $event">
+      </thl-search-bar>
+      <po-button p-label="Adicionar" p-icon="an an-plus" p-kind="primary" (p-click)="lista.abrirNovo()"></po-button>
+    </div>
+  </thl-page-header>
+
+  @if (disclaimers.disclaimers.length) {
+    <div class="thl-filtro-url">
+      <po-disclaimer-group class="thl-disclaimers"
+        [p-title]="disclaimers.title"
+        [p-disclaimers]="disclaimers.disclaimers">
+      </po-disclaimer-group>
+      <po-button p-label="Limpar filtro" p-icon="an an-x" p-kind="tertiary" p-size="small"
+        (p-click)="limparFiltro()"></po-button>
+    </div>
+  }
+
+  <thl-crud-list #lista
+    [def]="def"
+    modo="pagina"
+    [termo]="termo"
+    [filtroUrl]="filtroUrl"
+    [expandTemplate]="def.children?.length ? filhos : null"
+    (countChange)="total = $event">
+  </thl-crud-list>
+
+  @if (def.children?.length) {
+    <div class="thl-dica">{{ dica }}</div>
+  }
+
+</po-page-list>

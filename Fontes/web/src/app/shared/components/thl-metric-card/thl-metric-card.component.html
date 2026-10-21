@@ -1,0 +1,105 @@
+<div class="thl-metric" [class]="classeDaMoldura" [class.thl-metric--grande]="grande"
+  [style.--thl-metric-acento]="card.acento">
+
+  <div class="thl-metric__topo">
+    <span class="thl-metric__titulo">
+      @if (card.icone) {
+        <span [class]="'thl-metric__titulo-icone ' + card.icone" aria-hidden="true"></span>
+      }
+      {{ card.titulo }}
+    </span>
+    <span class="thl-metric__total">{{ card.total }}</span>
+  </div>
+
+  @if (card.etiquetas?.length) {
+    <div class="thl-metric__etiquetas">
+      @for (etiqueta of card.etiquetas; track etiqueta.texto) {
+        <!-- Com ícone, o texto sai e o significado vai para o tooltip e o `aria-label`:
+             a 30px o avião se lê sozinho. Etiqueta sem ícone (Interna, ambiente) segue texto. -->
+        <span class="thl-metric__etiqueta" [class]="classe(etiqueta.cor)"
+          [class.thl-metric__etiqueta--icone]="!!etiqueta.icone"
+          [attr.aria-label]="etiqueta.icone ? etiqueta.texto : null"
+          [p-tooltip]="etiqueta.icone ? etiqueta.texto : ''">
+          @if (etiqueta.icone) {
+            <po-icon [p-icon]="etiqueta.icone" aria-hidden="true"></po-icon>
+          } @else {
+            {{ etiqueta.texto }}
+          }
+        </span>
+      }
+    </div>
+  }
+
+  @if (card.fases?.length) {
+    <!-- Os ícones são os mesmos dos chips da tela, então dispensam legenda. -->
+    <div class="thl-metric__fases">
+      <div class="thl-metric__fase thl-metric__fase--cabecalho" aria-hidden="true">
+        <span class="thl-metric__fase-nome"></span>
+        @for (coluna of colunas; track coluna.chave) {
+          <span class="thl-metric__fase-valor" [class]="classe(coluna.cor)" [attr.title]="coluna.titulo">
+            <span [class]="coluna.icone"></span>
+          </span>
+        }
+      </div>
+
+      @for (fase of card.fases; track fase.label) {
+        <div class="thl-metric__fase" [attr.aria-label]="descricaoDaFase(fase)">
+          <span class="thl-metric__fase-nome">{{ fase.label }}</span>
+          @for (coluna of colunas; track coluna.chave) {
+            <span class="thl-metric__fase-valor"
+              [class]="valorDaFase(fase, coluna.chave) ? classe(coluna.cor) : 'thl-metric--zero'">
+              {{ valorDaFase(fase, coluna.chave) }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="thl-metric__linhas">
+      @for (linha of card.linhas; track linha.label) {
+        <div class="thl-metric__linha">
+          <span class="thl-metric__rotulo">
+            @if (linha.icone) {
+              <span [class]="'thl-metric__rotulo-icone ' + linha.icone + ' ' + classe(linha.cor)"
+                aria-hidden="true"></span>
+            }
+            {{ linha.label }}
+          </span>
+          <span class="thl-metric__valor" [class]="classe(linha.cor)">{{ linha.valor }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (card.barra) {
+    <div class="thl-metric__barra-area">
+      <div class="thl-metric__barra-topo">
+        <span>{{ card.barra.rotulo }}</span>
+        @if (percentual !== null) {
+          <span class="thl-metric__valor" [class]="classe($any(card.barra).cor)">{{ percentual }}%</span>
+        }
+      </div>
+      <div class="thl-metric__barra">
+        @if (percentual !== null) {
+          <div class="thl-metric__faixa" [class]="classe($any(card.barra).cor)" [style.width.%]="percentual"></div>
+        } @else {
+          @for (linha of proporcao; track linha.label) {
+            <div class="thl-metric__faixa" [class]="classe(linha.cor)" [style.width.%]="largura(linha)"
+              [attr.title]="linha.label + ': ' + linha.valor"></div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if (card.rodape || card.acao) {
+    <div class="thl-metric__rodape">
+      <span>{{ card.rodape }}</span>
+      @if (card.acao) {
+        <po-button [p-label]="card.acao" p-kind="tertiary" p-size="small" p-icon="an an-arrow-right"
+          (p-click)="acaoClick.emit(card)"></po-button>
+      }
+    </div>
+  }
+
+</div>

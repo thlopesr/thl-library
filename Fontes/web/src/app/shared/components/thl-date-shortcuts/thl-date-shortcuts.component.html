@@ -1,0 +1,17 @@
+<div class="thl-atalhos">
+  @for (opcao of opcoes; track opcao.value) {
+    <button type="button" class="thl-atalhos__link"
+      [class.thl-atalhos__link--ativo]="selecionado === opcao.value"
+      [attr.aria-pressed]="selecionado === opcao.value"
+      (click)="aoEscolher(opcao.value)">
+      {{ opcao.label }}
+    </button>
+  }
+</div>
+
+@if (aviso) {
+  <p class="thl-atalhos__aviso" role="status">
+    <span class="an an-warning-circle" aria-hidden="true"></span>
+    {{ aviso }}
+  </p>
+}

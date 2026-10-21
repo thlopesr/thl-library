@@ -1,6 +1,6 @@
  
  /*------------------------------------------------------------------------
-    File        : MessageRepository
+    File        : MultipleMessageStructure
     Purpose     : 
     Syntax      : 
     Description : 
@@ -11,7 +11,7 @@
 
 using Progress.Lang.*.
 using thl-lib.integration.messaging.outbound.strategy.*.
-using thl-lib.integration.messaging.outbound.core.OutboundMessage.
+using thl-lib.integration.messaging.outbound.core.*.
 
 block-level on error undo, throw.
 
@@ -25,11 +25,14 @@ class thl-lib.integration.messaging.outbound.strategy.MultipleMessageStructure i
         outboundMessage:createMessage().
     end method.
     
-    method public override void addObject( register as recid ).
+    method public override void addObject( objectContext as OutboundObjectContext ).
         
-        outboundMessage:loadData           ( register ).
-        outboundMessage:appendPayloadObject().
-        outboundMessage:appendItem         (). 
+        outboundMessage:loadData  ( objectContext ).
+        if objectContext:hasAdditionalData() then
+            outboundMessage:appendPayloadObject( objectContext ).
+        else
+            outboundMessage:appendPayloadObject().
+        outboundMessage:appendItem (). 
 
     end method. 
     

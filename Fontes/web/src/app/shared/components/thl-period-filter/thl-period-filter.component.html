@@ -1,0 +1,28 @@
+<div class="thl-periodo">
+  <thl-filter-tabs
+    rotulo="Período"
+    rotuloIcone="an an-calendar-dots"
+    [options]="opcoes"
+    [selected]="atalho"
+    [showRefresh]="true"
+    (selectedChange)="onAtalho($event)"
+    (refresh)="refresh.emit()">
+  </thl-filter-tabs>
+
+  @if (atalho === 'personalizado') {
+    <div class="thl-periodo__faixa">
+      <label class="thl-periodo__campo">
+        <span>Início</span>
+        <input type="datetime-local" [(ngModel)]="ini" />
+      </label>
+      <label class="thl-periodo__campo">
+        <span>Fim</span>
+        <input type="datetime-local" [(ngModel)]="fin" />
+      </label>
+      <po-button p-label="Aplicar" p-kind="secondary" p-size="small" (p-click)="aplicarFaixa()"></po-button>
+    </div>
+    @if (erro) {
+      <div class="thl-periodo__erro" role="alert">{{ erro }}</div>
+    }
+  }
+</div>

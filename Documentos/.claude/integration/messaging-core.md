@@ -1,4 +1,14 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, mensageria, core]
+updated: 2026-10-13
+---
+
 # Pacote: integration/messaging — Core
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** `MessageConfigLoader` virou classe-pai abstrata; a carga é feita por `InboundConfigLoader` e `OutboundConfigLoader`. Ver a seção final desta nota.
 
 > **Sincronizado em 2026-09-24:** incluídos 3 métodos protected de `Message` e 6 de `MessageRepository` que não estavam documentados. As descrições de `prepareResponseHistory` e `ensureMessageCode` foram conferidas no corpo; as demais foram inferidas da assinatura.
 
@@ -243,3 +253,73 @@
 | `method public void saveContentMessage( content as longchar )` | Salva `conteudo` no registro carregado. |
 
 **Observações:** Erros de criação de registros são logados via `LogUtil` antes de relançar — necessita que `log-manager:logfile-name` esteja configurado para produzir output.
+
+## Situação geral da mensagem — `sit-mensagem` (2026-10-03, não compilado)
+
+Decisão em [adr/metricas-conteudo-expurgo-mensagens.md](../adr/metricas-conteudo-expurgo-mensagens.md) §2.3. O campo vem do delta `Database\delta-thl-2026-10-03.df`; **estas classes só compilam com o delta carregado**.
+
+- `MessageRepository.createMessage` grava `sit-mensagem` = 1 (Pendente).
+- `MessageRepository.saveResultMessage` grava as três fases e, em seguida, a situação geral pelo método privado `resolveOverallStatus()`: alguma fase em erro → 2; senão, alguma pendente → 1; todas em sucesso ou não aplicável → 3. A assinatura não mudou.
+- Corrigido no mesmo método: a situação da requisição testava `successResponse = ?` para decidir "não aplicável"; agora testa `successRequest = ?`. Nenhum chamador passa esses valores como indefinidos, então o comportamento atual não muda.
+- `MessageRepository.markMessagePending()` e `Message.markPending()` (novos, públicos): voltam a situação geral para pendente. Usados pelo agendamento outbound aceito.
+- Códigos: os de `MessageStatusEnum` (1 Pendente, 2 Erro, 3 Sucesso); o 4 (Não aplicável) só existe nas fases.
+- Mensagens anteriores ao campo: `Utils\scripts\acerto-thl-sit-mensagem.p` (simulação por padrão; uma transação por mensagem; pula mensagem bloqueada).
+
+## Gravação de conteúdo por operação (2026-10-03, não compilado)
+
+Decisão em [adr/metricas-conteudo-expurgo-mensagens.md](../adr/metricas-conteudo-expurgo-mensagens.md) §2.4. Campo `thl-objeto-parametro.tipo-grava-conteudo` (delta `Database\delta-thl-2026-10-03.df`); **estas classes só compilam com o delta carregado**.
+
+| Classe | Mudança |
+|---|---|
+| `ContentStorageEnum` (novo, `thl-lib.integration.messaging.enum`) | `ALWAYS` = 1, `ERROR_ONLY` = 2, `NEVER` = 3; alinhado com `thl\include\i05thl011.i` |
+| `MessageConfig` | propriedade `contentStorage` e 13º parâmetro no construtor (único chamador: `MessageConfigLoader`) |
+| `MessageConfigLoader` | passa `tipo-grava-conteudo`; sem operação na URL, a escolha da linha ficou determinística (abaixo) |
+| `MessageFactory` | depois do `dynamic-new`, chama `message_:setContentStorage( configuration:contentStorage )` — o construtor de 7 parâmetros das Messages não muda |
+| `Message` | `setContentStorage`, `markFailed` (públicos), `shouldStoreContent` (protegido); `saveContentByType`, `saveResponse` e `saveResponseContent` passam a respeitar a opção |
+| `InboundMessage` | `saveInboundError` chama `markFailed()` antes de gravar |
+
+**Regra em `Message.shouldStoreContent`:**
+
+- Requisição do **outbound** e do **inbound fora do online** (agendado): gravada sempre — o reenvio e o RPW leem esse conteúdo.
+- `NEVER`: nada mais é gravado; fica só a `thl-mensagem` (o texto do erro continua em `descr-retorno`).
+- `ERROR_ONLY`: grava quando a mensagem falha. A requisição do inbound online fica **em memória** no objeto da mensagem (`saveContentByType` não grava na entrada) e só vai para o banco em `markFailed()`.
+- `ALWAYS` (padrão, e qualquer valor fora do domínio): comportamento anterior.
+
+**Quem marca a falha:** `InboundMessage.saveInboundError` (inbound) e `Message.saveResponse` quando `successRequest`, `successResponse` ou `successProcess` é falso (outbound).
+
+**Retorno do outbound sem gravar:** `saveResponseContent` limpa o conteúdo de retorno de uma tentativa anterior, para não ficar o erro antigo junto de um resultado novo.
+
+**Máscara de segredo:** as Messages que sobrescrevem `saveContentByType` chamam o `super` com o conteúdo já mascarado; o que fica em memória também é o mascarado.
+
+**Escolha da linha de `thl-objeto-parametro` sem operação na URL** (`MessageConfigLoader.load( aplicacao, objeto, metodo, operacao )`): antes era o primeiro registro do método; agora, nesta ordem: operação em branco → operação com o nome do método (`GET`, `POST`…, padrão das cargas) → primeiro registro do método (como antes). Evita que uma consulta sem operação pegue a configuração da linha `metricas` ou `conteudo`. Com operação na URL nada mudou.
+
+## Carregadores de configuração (2026-10-04, não compilado)
+
+| Classe | Pacote | Papel |
+|---|---|---|
+| `MessageConfigLoader` (abstrata) | `…messaging.repository` | Buffers protegidos `b-thl-objeto` e `b-thl-objeto-parametro`; `findObject( applicationName, objectName )`; `buildConfig()` |
+| `OutboundConfigLoader` | `…messaging.outbound.repository` | `load( establishmentCode, applicationName, objectName, integrationOperation )` → `MessageConfig`. Mesma busca e mesmas mensagens do carregador antigo |
+| `InboundConfigLoader` | `…messaging.inbound.repository` | `load( applicationName, objectName, methodType, operation )` → `InboundMessageConfig`. Valida as três classes do objeto |
+| `InboundMessageConfig` | `…messaging.inbound.core` | `MessageConfig` + `processorClass` e `serviceClass` |
+
+**Linha de `thl-objeto-parametro` na entrada** (`InboundConfigLoader:findParameter`), nesta ordem: (1) operação da URL + método; (2) método com operação em branco; (3) método com operação = nome do método (`GET`/`POST`/`PATCH`/`DELETE`); (4) primeira linha do método. A operação da URL, quando informada, é a que vai para a configuração e para a mensagem. Substitui a regra descrita em "Escolha da linha … sem operação na URL" acima.
+
+`thl-lib.integration` passa a ter 49 classes. Decisão em [adr/inbound-message-processor-service.md](../adr/inbound-message-processor-service.md).
+
+## Ação, classes por operação e extensão REST (2026-10-05, não compilado)
+
+`MessageConfigLoader` (base) ganhou o buffer `b-thl-objeto-parametro-rest` e os métodos protegidos:
+
+| Método | O que faz |
+|---|---|
+| `findRestExtension()` | Posiciona a extensão REST da operação já posicionada; pode não existir |
+| `actionOf( methodType )` | Verbo → ação neutra (`ActionEnum`); 0 = sem ação |
+| `resolveMethod()` | Verbo da extensão; sem ela (ou zero), o da operação |
+| `resolveMessageClass()` / `resolveProcessorClass()` / `resolveServiceClass()` | Classe da operação, se informada; senão a do objeto |
+| `buildConfig()` | Usa `findRestExtension`, `resolveMethod` e `resolveMessageClass` |
+
+`OutboundConfigLoader` não mudou: procura a operação por estabelecimento/aplicação/objeto/operação com `find first` (uma operação de saída tem uma ação) e herda o novo `buildConfig`.
+
+`InboundMessageConfig`: propriedades `requiredFields` e `externalReferenceFields` e `setContract( requiredFields, externalReferenceFields )`.
+
+Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md).

@@ -15,7 +15,9 @@ using Progress.Lang.*.
 using Progress.Json.ObjectModel.*.
 
 using thl-lib.util.json.JsonSetter.
-using thl-lib.integration.messaging.Inbound.service.InboundMessageService.
+using thl-lib.integration.messaging.inbound.core.InboundObjectContext.
+using thl-lib.integration.messaging.inbound.service.InboundMessageService.
+using thl-lib.integration.messaging.inbound.route.InboundRouteResolver.
 using thl-lib.integration.connectors.enum.MethodTypeEnum.
 
 {utp/ut-api.i}
@@ -23,7 +25,14 @@ using thl-lib.integration.connectors.enum.MethodTypeEnum.
 {utp/ut-api-action.i piPrincipal PATCH  /~*/~* }
 {utp/ut-api-action.i piPrincipal PUT    /~*/~* }
 {utp/ut-api-action.i piPrincipal GET    /~*/~* }
-{utp/ut-api-action.i piPrincipal DETELE /~*/~* }
+{utp/ut-api-action.i piPrincipal DELETE /~*/~* }
+
+{utp/ut-api-action.i piPrincipal POST   /~*/~*/~* }
+{utp/ut-api-action.i piPrincipal PATCH  /~*/~*/~* }
+{utp/ut-api-action.i piPrincipal PUT    /~*/~*/~* }
+{utp/ut-api-action.i piPrincipal GET    /~*/~*/~* }
+{utp/ut-api-action.i piPrincipal DELETE /~*/~*/~* }
+
 {utp/ut-api-notfound.i}
 
 {method/dbotterr.i}
@@ -39,15 +48,36 @@ procedure piPrincipal.
            
     define variable method      as integer   no-undo. 
     define variable object      as character no-undo.
+    define variable aplication  as character no-undo.
+    define variable operation   as character no-undo.
+    define variable routePath   as character no-undo.
     
-    assign queryParams    = new JsonAPIRequestParser(request):getQueryParams().
+    define variable context       as InboundObjectContext no-undo.
+    define variable routeResolver as InboundRouteResolver no-undo.
+    
+    assign context = new InboundObjectContext().
+    
+    context:SetPayload        ( request:GetJsonObject('payload')   ).
+    context:SetQueryParameters( new JsonAPIRequestParser(request):getQueryParams() ).           
+    context:SetPathParameters ( request:GetJsonArray('pathParams') ).
+    context:setPayloadText    ( ).
            
-    if request:GetJsonArray('pathParams'):Length = 0 then
+    if not context:hasPathParameters() then
         undo, throw new AppError( 'Parametro nao localizado', 17006 ).
         
-    assign method          = integer( MethodTypeEnum:GetEnum( request:GetCharacter('method')):GetValue() )
-           object          = request:GetJsonArray('pathParams'):GetCharacter(1)
-           responsePayload = new InboundMessageService( object, method ):receive( request:GetJsonObject('payload') ).
+    assign routeResolver   = new InboundRouteResolver( context:PathParameters )
+           method          = integer( MethodTypeEnum:GetEnum( request:GetCharacter('method')):GetValue() )
+           object          = routeResolver:GetObjectCode()
+           operation       = routeResolver:GetOperation()
+           routePath       = routeResolver:GetRoutePath()
+           aplication      = routeResolver:GetApplication()
+           .
+    
+    context:SetOperation(operation).
+    context:SetRoutePath(routePath).
+    
+    assign responsePayload = new InboundMessageService( aplication, object, method, operation ):receive( context )
+           .
         
     //Tramento de Erros
     catch erro-progress as Progress.Lang.Error.
@@ -62,7 +92,9 @@ procedure piPrincipal.
             create RowErrors.
             assign RowErrors.ErrorNumber      = erro-progress:GetMessageNum(count)
                    RowErrors.ErrorDescription = erro-progress:GetMessage(count)
-                   RowErrors.ErrorSubType     = 'ERROR'.  
+                   RowErrors.ErrorSubType     = 'ERROR'
+                   RowErrors.ErrorHelp        = context:payloadText
+                   .  
         end. 
            
         return 'NOK':u.
@@ -76,7 +108,7 @@ procedure piPrincipal.
         else do.
             if valid-object( responsePayload ) then 
                 assign response = if type-of( responsePayload, JsonArray ) then JsonAPIResponseBuilder:ok( cast( responsePayload, JsonArray  ), false )
-                                                                           else JsonAPIResponseBuilder:ok( cast( responsePayload, JsonObject ), 201 ).
+                                                                           else JsonAPIResponseBuilder:ok( cast( responsePayload, JsonObject ), 200 ).
                         
         end.
                                                                             

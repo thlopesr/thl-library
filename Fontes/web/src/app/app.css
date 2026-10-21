@@ -1,0 +1,35 @@
+/* Largura do po-menu (PO UI 21.30): 56px recolhido, 290px expandido.
+   O PO UI marca o host com .po-collapsed-menu quando o menu está recolhido. */
+.app-content {
+  margin-left: 56px;
+  transition: margin-left 0.2s ease;
+}
+
+/* Menu expandido empurra o conteúdo em vez de cobri-lo. */
+@media (min-width: 1200px) {
+  :host(:not(.po-collapsed-menu)) .app-content {
+    margin-left: 290px;
+  }
+}
+
+/* Abaixo de 1200px o PO UI tira o menu da tela e o abre sobreposto:
+   não há barra lateral ocupando espaço, então o conteúdo usa a largura toda. */
+@media (max-width: 1199px) {
+  .app-content {
+    margin-left: 0;
+  }
+}
+
+/* Separação dos grupos do menu: cada assunto reúne a listagem e a métrica dele.
+   O po-menu não tem divisor nativo, então a linha é um ::before no primeiro item
+   de cada grupo. Se a estrutura interna do po-menu mudar, some só a linha, não a
+   navegação. Mesmo recurso usado no app de cadastro (app-cadastro.css). */
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$="#/mensageria"])::before,
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$="#/email"])::before,
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$="#/auditoria"])::before {
+  content: "";
+  display: block;
+  height: 0;
+  margin: 8px 12px;
+  border-top: 1px solid var(--color-neutral-light-20, #e0e4e8);
+}

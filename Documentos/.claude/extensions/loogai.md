@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, loogai]
+updated: 2026-10-13
+---
+
 # Extensão: loogai
 
 > **Sincronizado em 2026-09-24** com o código: contrato `Service` (sem `IService`), verbos pelos defaults de `InboundMessage` (`executeService`), assinaturas dos hooks sem parâmetro `payload`, `buildResponse` próprio e seção nova de `StatusDocumento`.
@@ -248,3 +256,11 @@
 - Nome fora do padrão (`*Message`) e cabeçalho copiado (`File : centroCusto`, 2021). Declara `define private buffer b-docum-est`, mas não usa.
 - Sem referência estática no código — resolvida pelo banco (`thl-objeto.classe-objeto`). Uso a confirmar (diagnóstico, decisão D5).
 - Chamada típica: `addObject( new OutboundObjectContext( ?, '', '<chave>#<tipo>' ) )`.
+
+## 2026-10-04 — `LoogAiDocumentoService` sem `execute` (não compilado)
+
+`Service:execute` foi removido da base ([ADR](../adr/inbound-message-processor-service.md)). A sobrescrita de `execute` deste Service virou `method public override void create()`: `super:create()`, depois `loadActualFreight( inContext )` e `createActualFreight()`. O efeito pretendido é o mesmo (frete real só na criação), mas agora roda **antes** de `loadReferenceCode()`/`buildResponse()` — conferir no teste de POST do documento. A linha da tabela acima que descreve `execute` é histórico.
+
+## 2026-10-05 — Message de entrada retirada (não compilado)
+
+`LoogAiDocumentoMessage` e `LoogAiEmbarqueMessage` viraram `.cls.old` (e `DocumentoMessage`, de `thl-lib`, também): Message e Processor padrão com `LoogAiDocumentoService` e `LoogAiEmbarqueService`. Contrato na extensão REST: documento com os 12 campos obrigatórios; embarque com os campos por ação (criar: `codigoEstabelecimento`, `viagem`, `entregas`; alterar: `codigoEmbarque`; eliminar: `codigoEmbarque`, `viagem`) e chave externa `viagem`. As Messages de **saída** não mudaram. Sistema `loogai`: 5 classes. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md). As seções acima que descrevem a Message de entrada são histórico.

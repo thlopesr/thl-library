@@ -1,0 +1,15 @@
+/* Estilos globais — tema PO-UI configurado via angular.json */
+
+/* Tooltip é informação, não alvo de clique. Sem isto, um tooltip que fique preso sobre a
+   tabela (o `po-menu` recolhido deixa escapar — ver `poui-licoes.md`) consome o primeiro
+   clique no menu de ações da linha, e o usuário precisa clicar duas vezes.
+
+   O `:not(:has(...))` poupa os tooltips que tenham conteúdo interativo — é o caso do
+   `p-additional-help-tooltip` com header template, que hoje nenhuma tela usa, mas que
+   ficaria surdo a cliques por causa de um CSS global distante do campo.
+
+   Navegador sem `:has()` ignora a regra inteira e volta ao comportamento antigo: o
+   tooltip volta a capturar clique, que é a degradação aceitável aqui. */
+.po-tooltip:not(:has(a, button, input, select, textarea, [tabindex])) {
+  pointer-events: none;
+}

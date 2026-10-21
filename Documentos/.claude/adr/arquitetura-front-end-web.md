@@ -3,6 +3,8 @@ tipo: adr
 modulo: web
 status: aceita
 updated: 2026-10-02
+camada: ambos
+tags: [adr, web]
 ---
 
 # ADR — Arquitetura do front-end web (Angular + PO UI)

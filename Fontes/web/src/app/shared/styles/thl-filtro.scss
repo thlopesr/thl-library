@@ -1,0 +1,30 @@
+/* Filtro avançado em abas (monitor de mensageria).
+   Os títulos separam grupos que se comportam de forma diferente — buscar na base
+   × refinar o que já está na tela —, e o aviso fica junto do grupo a que se aplica. */
+
+.thl-filtro-secao {
+  margin: 16px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral-dark-70, #4a5c6b);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.thl-filtro-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-left: 3px solid #d4a017;
+  background: #fdf8ec;
+  color: #6b4e00;
+  font-size: 13px;
+  line-height: 1.4;
+
+  po-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+}

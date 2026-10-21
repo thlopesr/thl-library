@@ -1,9 +1,17 @@
+---
+tipo: tabela
+camada: ambos
+status: vigente
+tags: [banco, schema, tabelas]
+updated: 2026-10-13
+---
+
 # Schema de dados THL (`thl-*`)
 
 > Nota criada em 2026-09-24 e **reescrita no mesmo dia** a partir do `.df` refeito.
-> **Fonte:** `Database\thl.df` (versionado; 84.274 bytes; rótulos e descrições revisados em 2026-09-24 e 2026-09-25; ISO-8859-1, trailer `cpstream=ISO8859-1`, CRLF) — **30 tabelas, 188 campos, 59 índices (30 `pk-`, 13 `fk-`, 16 `idx-`), 1 sequência** (`thl-seq-id-email` voltou ao `.df` gerado em 2026-09-25; não é usada no código). `thl-aplicacao` incluída em 2026-09-25. A cópia antiga em `.sharedavm\thl.df` (2026-06-04, 21 tabelas) está obsoleta.
+> **Fonte:** `Database\Definition\thl.df` (versionado; 91.942 bytes em 08/10/2026, já com os deltas até 10-09 incorporados; rótulos e descrições revisados em 2026-09-24 e 2026-09-25; ISO-8859-1, trailer `cpstream=ISO8859-1`, CRLF) — **31 tabelas, 204 campos, 59 índices (31 `pk-`, 12 `fk-`, 16 `idx-`), 1 sequência** (contagem de 08/10/2026) (`thl-seq-id-email` voltou ao `.df` gerado em 2026-09-25; não é usada no código). `thl-aplicacao` incluída em 2026-09-25. A cópia antiga em `.sharedavm\thl.df` (2026-06-04, 21 tabelas) está obsoleta.
 > Convenção de nomes de índice: `pk-` chave primária, `fk-` chave estrangeira, `idx-` busca ([convencoes.md §6](../convencoes.md); plano de renomeação no §6 abaixo).
-> Ao alterar o banco: atualizar `Database\thl.df`, esta nota e o changelog do [INDEX.md](../INDEX.md). Para bancos em uso, gerar o **.df incremental** no Data Dictionary e ativar índices novos (`proutil <db> -C idxactivate` ou `idxbuild`).
+> Ao alterar o banco: atualizar `Database\Definition\thl.df`, esta nota e o changelog do [INDEX.md](../INDEX.md). Para bancos em uso, gerar o **.df incremental** no Data Dictionary e ativar índices novos (`proutil <db> -C idxactivate` ou `idxbuild`).
 
 ## 1. Tabelas por domínio
 
@@ -19,7 +27,7 @@
 | | `thl-objeto` | thl010 | `aplicacao`, `objeto`, `classe-objeto` (nome completo da classe — `dynamic-new`), `sentido-fluxo`, `modelo-integracao`, `ind-gera-historico`, `ind-inativo`, `programa-consulta` | thl0021 |
 | | `thl-objeto-parametro` | thl011 | `cod-estabel`, `aplicacao`, `objeto`, `operacao`, `metodo` (`MethodTypeEnum`), `forma-execucao` (`ExecutionMode`), `ind-mensagem-simples`, `cod-param-ambiente`, `cod-param-ambiente-destino` (**códigos de variável** cujo valor é o `cod-conexao`/`cod-path` — ver [er-diagrama.md](er-diagrama.md)), `frequencia-execucao`, `cod-servid-exec`, `ind-persistente`, `qtd-tentativas-persist`, `qtd-dias-persist`, `tipo-log-requisicao`, `tipo-log-retorno` | thl0022 |
 | | `thl-objeto-usuario` | thl012 | `aplicacao`, `objeto`, `cod-usuario` (visibilidade no monitor) | thl0022 |
-| | `thl-inbound-rota` | thl021 | `cod-rota`, `rota-publica`, `aplicacao`, `objeto`, `ind-ativo`, `descricao` | thl0040 |
+| | `thl-objeto-rota` | thl021 | `aplicacao`, `objeto`, `rota-publica`, `ind-ativo`, `inicio-operacao` (substitui `thl-inbound-rota`; `.df` ainda não está no repositório, ver seção abaixo) | thl0040 |
 | Conexão REST | `thl-conexao-rest` | thl018 | `cod-conexao`, `des-conexao`, `url-base`, `ind-requisita-autenticacao`, `ind-requisita-header` | thl0030 |
 | | `thl-conexao-rest-path` | thl019 | `cod-path`, `des-path`, `path`, `content-type`, `accept`, `timeout`, `parameters`, `headers` | thl0031 |
 | | `thl-conexao-rest-autenticacao` | thl020 | `cod-conexao`, `tipo-autenticacao`, `url-token`, `content-type-token`, `accept-token`, `headers-token`, `parameters-token`, `usuario`, `senha`, `token`, `raw-token-data`, `dt-expiracao-token`, `ind-requisita-token`, `classe-parser-token` (classe `ITokenProvider`) | thl0032 |
@@ -69,7 +77,7 @@ Legenda: **P** = primário, **U** = único. "Usado por" lista as consultas conhe
 | | `fk-objeto` | aplicacao, objeto | Relação com `thl-objeto` |
 | `thl-objeto-usuario` | `pk-objeto-usuario` P U | aplicacao, objeto, cod-usuario | `can-find` do `thl0120.w` (3 igualdades) |
 | | `idx-usuario` | cod-usuario, aplicacao, objeto | **Monitor** (`MensageriaService.get`) — criado em 2026-09-24 |
-| `thl-inbound-rota` | `pk-rota` P U | cod-rota | |
+| `thl-objeto-rota` | `pk-objeto-rota` P U | aplicacao, objeto, rota-publica | (antes `thl-inbound-rota.pk-rota` por `cod-rota`; a chave passou de aplicacao + objeto para a tripla em 2026-10-13, delta `delta-thl-2026-10-13.df`) |
 | | `idx-rota-publica` U | rota-publica | Resolução da rota inbound |
 | | `idx-ativo` | ind-ativo | |
 | | `fk-objeto` | aplicacao, objeto | Relação com `thl-objeto` |
@@ -198,3 +206,84 @@ Convenção decidida em 2026-09-24 ([convencoes.md §6](../convencoes.md)). Apli
 Datasul padrão (`emitente`, `estabelec`, `item`, `nota-fiscal`, `ped-venda`, `embarque`, `requisicao`, `it-requisicao`, `ordem-compra`, `docum-est`, `ems.ccusto`, `usuar_mestre`…) e **tabelas de cliente** `nit-*` (`nit-lpco`, `nit-frete-prev`, `nit-frete-real`, `nit-loc-entr`, `nit-tipo-oper`, `nit-tipo-oper-natur`, `nit-loog-natur-oper`) + `es_nota_terceiros` — estas só devem aparecer em `thl-extensions`.
 
 Relacionados: [arquitetura.md](../arquitetura.md) · [integration/messaging-core.md](../integration/messaging-core.md) · [logging/logging.md](../logging/logging.md) · [integration/connectors.md](../integration/connectors.md)
+
+## Delta 2026-10-03 — gerado, ainda não carregado
+
+Arquivo `Database\delta-thl-2026-10-03.df` (ISO-8859-1, CRLF, com trailer). Decisões em [adr/metricas-conteudo-expurgo-mensagens.md](../adr/metricas-conteudo-expurgo-mensagens.md). Depois de carregado pelo responsável, os itens abaixo entram no inventário das seções anteriores.
+
+| Tabela | Campo / índice | Tipo | Inicial | Para quê |
+|---|---|---|---|---|
+| `thl-aplicacao` | `ind-interna` | lógico | Não | Aplicação do próprio THL (separa o tráfego interno) |
+| `thl-objeto` | `retencao-dias-sucesso` | inteiro | 21 | Expurgo das mensagens com sucesso (0 = não expurga) |
+| `thl-objeto` | `retencao-dias-erro` | inteiro | 42 | Expurgo das mensagens com erro ou pendentes (0 = não expurga) |
+| `thl-objeto-parametro` | `tipo-grava-conteudo` | inteiro | 1 | 1 Sempre, 2 Somente em erro, 3 Nunca (`thl\include\i05thl011.i`) |
+| `thl-mensagem` | `sit-mensagem` | inteiro | 1 | Situação geral: 1 Pendente, 2 Erro, 3 Sucesso |
+| `thl-mensagem` | `idx-objeto-situacao` | índice | — | `aplicacao`, `objeto`, `sit-mensagem`, `dt-criacao` (expurgo e métricas) |
+
+Mensagens existentes ficam com `sit-mensagem` = 1 até rodar o script de acerto (fase 4 do ADR). Diagnóstico das situações atuais: `Utils\scripts\diagnostico-thl-situacao-mensagem.p` (só leitura, gera CSV).
+
+## Delta 2026-10-04 — classes do objeto (gerado, ainda não carregado)
+
+Arquivo `Database\delta-thl-2026-10-04.df` (ISO-8859-1, CRLF, com trailer). Carregar **depois** do `delta-thl-2026-10-03.df` (as posições 16 e 17 contam com os campos de retenção, 14 e 15).
+
+| Tabela | Campo | Tipo | Inicial | Para quê |
+|---|---|---|---|---|
+| `thl-objeto` | `classe-objeto` (alterado) | character | `thl-lib.integration.messaging.inbound.core.InboundMessage` | Classe de message; só o valor inicial, a descrição e a ajuda mudaram — o rótulo "Classe" foi mantido para não deslocar o campo nas telas |
+| `thl-objeto` | `classe-processor` (novo) | character x(150) | `thl-lib.integration.messaging.inbound.core.Processor` | Classe de orquestração; a padrão chama um Service (1 para 1) |
+| `thl-objeto` | `classe-service` (novo) | character x(150) | em branco | Classe do Service; obrigatória em objeto de entrada |
+
+Lidos em execução pelo `InboundConfigLoader` (entrada), que recusa objeto com qualquer das três classes em branco. Decisão em [adr/inbound-message-processor-service.md](../adr/inbound-message-processor-service.md).
+
+⚠️ Objetos já cadastrados recebem o processor padrão e ficam com o Service em branco: os de **entrada deixam de responder** até o Service ser informado. Rodar `Utils\scripts\acerto-thl-objeto-classes.p` logo depois de carregar o delta.
+
+## Delta 2026-10-05 — ação na chave da operação, classes por operação e extensão REST (gerado, não carregado)
+
+Arquivo `Database\delta-thl-2026-10-05.df` (ISO-8859-1, CRLF, com trailer). Carregar **depois** dos deltas de 10-03 e 10-04. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md).
+
+**`thl-objeto-parametro`**
+
+| Campo | Tipo | Inicial | Para quê |
+|---|---|---|---|
+| `acao` | integer | 0 | Ação neutra: 1 criar, 2 alterar, 3 eliminar, 4 consultar (`ActionEnum`; domínio `thl\include\i06thl011.i`). Zero = linha anterior ao campo, sem acerto |
+| `classe-objeto` | character x(150) | em branco | Message só desta operação; em branco vale a do objeto |
+| `classe-processor` | character x(150) | em branco | Processor só desta operação |
+| `classe-service` | character x(150) | em branco | Service só desta operação |
+
+Índice `pk-objeto-parametro` passa a ser (`cod-estabel`, `aplicacao`, `objeto`, `operacao`, **`acao`**). O delta cria `pk-operacao`, torna-o primário, elimina o antigo e renomeia para `pk-objeto-parametro`. ⚠️ `find` pela chave de quatro campos deixa de ser único.
+
+**`thl-objeto-parametro-rest`** (nova, dump `thl032`) — extensão REST da operação, 1 para 1:
+
+| Campo | Tipo | Para quê |
+|---|---|---|
+| `cod-estabel`, `aplicacao`, `objeto`, `operacao`, `acao` | chave | A mesma da operação (`pk-objeto-parametro-rest`) |
+| `metodo` | integer | Verbo HTTP (`MethodTypeEnum`); fonte no lugar de `thl-objeto-parametro.metodo`, que fica como cópia |
+| `campos-obrigatorios` | character x(500) | Array JSON de texto com os campos obrigatórios do payload |
+| `chave-externa` | character x(200) | Array JSON de texto com os campos da referência externa; `[]` desliga; em branco = padrão `externalID` |
+
+Não há `fk-*` na extensão: o vínculo com a operação é a própria chave primária. Com este delta carregado, as tabelas THL passam de 30 para 31.
+
+## Delta 2026-10-06 — início da operação na rota (gerado, não carregado)
+
+`Database\delta-thl-2026-10-06.df`: `thl-inbound-rota.inicio-operacao` (integer, inicial 0) — segmento da URL em que começa a operação, para rota com mais de um nível de operação; zero = só o último segmento. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md) §8.
+
+## Delta de 2026-10-05 em dois arquivos (2026-10-06)
+
+Pela regra de implantação de índice ([convencoes.md §6](../convencoes.md)), a troca da chave primária de `thl-objeto-parametro` ficou em arquivo próprio:
+
+1. `delta-thl-2026-10-05.df` — campos novos, índice `pk-operacao` (único, com a ação) e a tabela `thl-objeto-parametro-rest`.
+2. Ativar o índice se a carga foi online com dados (`proutil <db> -C idxactivate` ou `idxbuild`).
+3. `delta-thl-2026-10-05-chave.df` — torna `pk-operacao` primário, elimina o `pk-objeto-parametro` antigo e renomeia o novo para `pk-objeto-parametro`.
+
+Ordem completa: 10-03 → 10-04 → 10-05 → (ativação) → 10-05-chave → 10-06. Até o segundo arquivo, o código funciona com o índice sob o nome `pk-operacao`: nenhum fonte cita o nome do índice.
+
+## Delta 2026-10-07 — valor inicial de `thl-objeto.classe-processor` (gerado, não carregado)
+
+`Database\delta-thl-2026-10-07.df`: `UPDATE FIELD` trocando o valor inicial para `thl-lib.integration.messaging.inbound.core.Processor` (a classe-base mudou de pacote depois de o delta de 10-04 já ter sido carregado). O arquivo de 10-04 não foi alterado. Objetos já gravados com o nome antigo são corrigidos pelo passo 0 do `acerto-thl-objeto-classes.p`.
+
+## `thl-objeto-rota` — substitui `thl-inbound-rota` (2026-10-06; no `Definition\thl.df` desde 08/10/2026)
+
+Tabela no `Database\Definition\thl.df` (dump-name `thl021`): `aplicacao`, `objeto`, `rota-publica`, `ind-ativo`, `inicio-operacao`. Índices: `pk-objeto-rota` (aplicação + objeto + rota pública, único e primário; **chave tripla desde 2026-10-13**, ver `Database\Definition\delta-thl-2026-10-13.df`, gerado, não carregado) e `idx-rota-publica` (único no banco todo). Sem `fk-objeto`, porque aplicação + objeto são prefixo da `pk-`; sem `idx-ativo`, que nenhuma consulta usava sozinho. `thl-inbound-rota` já não existe no `.df`. Migrar os dados de um banco que ainda tem a tabela antiga é passo do responsável. Onde esta nota cita `thl-inbound-rota`, `cod-rota` ou `descricao` da rota, vale a tabela nova. Decisão em [adr\operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md) §9.
+
+## Método na chave da operação (2026-10-08; já no `Definition\thl.df`)
+
+`Database\delta-thl-2026-10-08.df` (arquivo removido do repositório; o resultado está no `Definition\thl.df`): em `thl-objeto-parametro` e `thl-objeto-parametro-rest` sai a coluna `metodo` antiga e o campo `acao` da chave é renomeado para `metodo`. Chaves: `pk-objeto-parametro` e `pk-objeto-parametro-rest` = estabelecimento, aplicação, objeto, operação, método. Onde esta nota cita `acao` nessas tabelas, vale `metodo`. Rodar `Utils\scripts\pre-delta-metodo-chave.p` antes. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md) §11.

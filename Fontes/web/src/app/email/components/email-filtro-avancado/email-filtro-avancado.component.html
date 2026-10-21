@@ -1,0 +1,36 @@
+<po-modal #modal p-title="Filtro Avançado" p-size="lg"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction">
+  <form>
+    <div class="po-row">
+      <po-datetimepicker class="po-md-6" name="dtEnvioIni" [(ngModel)]="dtEnvioIni"
+        (ngModelChange)="aoDigitarData()"
+        p-label="Dt. Envio (Inicial)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+      </po-datetimepicker>
+      <po-datetimepicker class="po-md-6" name="dtEnvioFin" [(ngModel)]="dtEnvioFin"
+        (ngModelChange)="aoDigitarData()"
+        p-label="Dt. Envio (Final)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+      </po-datetimepicker>
+    </div>
+
+    <thl-date-shortcuts [selecionado]="atalho" [ini]="dtEnvioIni"
+      (selecionadoChange)="atalho = $event" (faixaChange)="aplicarAtalho($event)">
+    </thl-date-shortcuts>
+    <div class="po-row">
+      <po-input class="po-md-6" name="idIni" [(ngModel)]="filtro.idIni"
+        p-label="Cód. E-mail (Inicial)" p-placeholder="UUID inicial">
+      </po-input>
+      <po-input class="po-md-6" name="idFin" [(ngModel)]="filtro.idFin"
+        p-label="Cód. E-mail (Final)" p-placeholder="UUID final">
+      </po-input>
+    </div>
+    <div class="po-row">
+      <po-input class="po-md-6" name="codProgDtsulIni" [(ngModel)]="filtro.codProgDtsulIni"
+        p-label="Programa (Inicial)" p-placeholder="Ex: esacr115b">
+      </po-input>
+      <po-input class="po-md-6" name="codProgDtsulFin" [(ngModel)]="filtro.codProgDtsulFin"
+        p-label="Programa (Final)" p-placeholder="Ex: tkn4001e">
+      </po-input>
+    </div>
+  </form>
+</po-modal>

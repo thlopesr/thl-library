@@ -1,0 +1,38 @@
+/* Telas `<feature>/metricas`: período, contadores e grade de cartões. */
+.thl-metricas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.thl-metricas__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.thl-metricas__nota { font-size: 12px; color: #718096; }
+
+.thl-metricas__aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid #d4a017;
+  background: #fdf8ec;
+  color: #6b4e00;
+  font-size: 13px;
+}
+
+.thl-metricas__alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--color-feedback-negative-base, #c91f1f);
+  background: #fdecec;
+  color: #7a1212;
+  font-size: 13px;
+
+  po-button { margin-left: auto; }
+}

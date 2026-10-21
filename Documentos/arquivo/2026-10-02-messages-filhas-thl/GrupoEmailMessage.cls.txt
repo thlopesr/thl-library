@@ -1,0 +1,77 @@
+/*------------------------------------------------------------------------
+    File        : GrupoEmailMessage
+    Purpose     : Inbound message para CRUD de grupos de e-mail
+                  (thl-ambiente-param-grupo, tela thl0011). Rota: /resourcen/grupo-email
+                  (aplicacao THL, objeto GRUPO-EMAIL).
+    Author(s)   : Lopes
+    Created     : 2026-10-01
+    Notes       : Padrao AmbienteMessage (thl-extensions.integration.thl).
+                  POST/PATCH/DELETE pelos defaults de InboundMessage; GET com
+                  listagem paginada pela chave (grupoEmailIni/grupoEmailFin,
+                  page, pageSize).
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.GrupoEmailService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.GrupoEmailMessage inherits InboundMessage.
+
+    constructor public GrupoEmailMessage ( objectName           as character ,
+                                           applicationName      as character ,
+                                           integrationOperation as character ,
+                                           methodType           as integer   ,
+                                           connectorType        as integer   ,
+                                           integrationDirection as logical   ,
+                                           executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new GrupoEmailService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable grupoEmailService as GrupoEmailService no-undo.
+
+        assign grupoEmailService  = cast( this-object:createService(), GrupoEmailService )
+               this-object:payload = appendItems(
+                    grupoEmailService:get(
+                        createPagination( 100 ),
+                        context:getQueryParam( 'grupoEmailIni', ''              ),
+                        context:getQueryParam( 'grupoEmailFin', fill( 'z', 20 ) )
+                    )
+               ).
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    // cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'grupoEmail'.
+    end method.
+
+end class.

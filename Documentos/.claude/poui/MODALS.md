@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # SEÇÃO 8 — MODAIS E DIÁLOGOS (MODALS.md)
 
 ## 8.1 po-modal

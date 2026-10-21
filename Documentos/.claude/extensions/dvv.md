@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, dvv]
+updated: 2026-10-13
+---
+
 # Extensão: dvv
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |
@@ -88,3 +96,15 @@
 **Valores:** `ATIVO = 1`, `CANCELADO = 2` — espelham `nit-frete-prev.idi-situacao`.
 
 **Usado por:** `FretePrevistoService` (`SituacaoFreteEnum:ATIVO:GetValue()`, `SituacaoFreteEnum:GetEnum('Ativo')`, `SituacaoFreteEnum:CANCELADO:GetValue()`).
+
+## 2026-10-04 — `FreteProcessor` (não compilado)
+
+A escolha da modalidade saiu da `FreteMessage` (`createService()` removido) e foi para `thl-extensions.integration.dvv.messaging.inbound.process.FreteProcessor:resolveService( operation )`: `previsto` → `FretePrevistoService`; `realizado` → erro "ainda nao implementada"; sem modalidade ou outra → erro "nao reconhecida". A `FreteMessage` ficou só com `getRequiredFields()`. O objeto do frete precisa de `classe-processor` = `thl-extensions.integration.dvv.messaging.inbound.process.FreteProcessor` (o `acerto-thl-objeto-classes.p` preenche). A descrição de `createService()` acima é histórico. Sistema `dvv`: 4 classes.
+
+## 2026-10-05 — Message de entrada retirada (não compilado)
+
+`FreteMessage` virou `.cls.old`: Message padrão + `FreteProcessor` + `FretePrevistoService`. Campos obrigatórios na extensão REST (criar e alterar: `Estabelecimento`, `Serie`, `NrNota`, `TipoFrete`, `ValorFrete`; eliminar: sem `ValorFrete`). Sistema `dvv`: 3 classes. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md). As seções acima que descrevem a Message de entrada são histórico.
+
+## 2026-10-08 — `FreteProcessor` retirado (não compilado)
+
+`FreteProcessor` virou `.cls.old`: o objeto Frete usa o Processor padrão e o Service do cadastro (`FretePrevistoService`), sem classe fixa no código. Como a linha genérica do método atende qualquer operação da URL, o `FretePrevistoService:initialize()` passou a recusar modalidade diferente de `previsto` ("Modalidade de frete nao suportada") — é o que impede `frete/realizado`, ou `frete` sem modalidade, de gravar frete previsto. Na escrita o comportamento continua o do Processor antigo, com outra mensagem. Para `frete/realizado`: criar o Service e cadastrar a linha da operação `realizado` com ele em `thl-objeto-parametro.classe-service`. Cadastro existente: `Utils\scripts\acerto-thl-operacao-service.p` troca o Processor pelo padrão. O arquivo do Service está em UTF-8 com LF (fora do padrão; preservado).

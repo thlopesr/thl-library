@@ -11,14 +11,14 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i V99XX999 9.99.99.999}
+{include/i-prgvrs.i thl0002-g01 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 /*                                                                                */
-/* OBS: Para os smartobjects o parametro m¢dulo dever  ser MUT                    */
+/* OBS: Para os smartobjects o parametro modulo devera ser MUT                    */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
     {include/i-license-manager.i <programa> MUT}
@@ -54,9 +54,9 @@ define output parameter     p-row-tabela    as rowid    no-undo.
 &Scoped-define FRAME-NAME d-vapara
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS rt-button RECT-1 c_cod-ambiente bt-ok ~
+&Scoped-Define ENABLED-OBJECTS rt-button RECT-2 c_cod-param-ambiente bt-ok ~
 bt-cancela bt-ajuda 
-&Scoped-Define DISPLAYED-OBJECTS c_cod-ambiente 
+&Scoped-Define DISPLAYED-OBJECTS c_cod-param-ambiente 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -91,34 +91,34 @@ DEFINE BUTTON bt-ok AUTO-GO
      SIZE 10 BY 1
      BGCOLOR 8 .
 
-DEFINE VARIABLE c_cod-ambiente AS CHARACTER FORMAT "x(3)":U 
-     LABEL "Ambiente" 
+DEFINE VARIABLE c_cod-param-ambiente AS CHARACTER FORMAT "x(15)":U 
+     LABEL "Parametro" 
      VIEW-AS FILL-IN 
-     SIZE 4.57 BY .88 NO-UNDO.
+     SIZE 15 BY .88 NO-UNDO.
 
-DEFINE RECTANGLE RECT-1
+DEFINE RECTANGLE RECT-2
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 67.71 BY 1.25.
+     SIZE 68 BY 1.25.
 
 DEFINE RECTANGLE rt-button
      EDGE-PIXELS 2 GRAPHIC-EDGE    
-     SIZE 67.71 BY 1.42
+     SIZE 68 BY 1.42
      BGCOLOR 7 .
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME d-vapara
-     c_cod-ambiente AT ROW 1.17 COL 30 COLON-ALIGNED WIDGET-ID 2
+     c_cod-param-ambiente AT ROW 1.17 COL 30 COLON-ALIGNED WIDGET-ID 2
      bt-ok AT ROW 2.75 COL 2.14
      bt-cancela AT ROW 2.75 COL 13
      bt-ajuda AT ROW 2.75 COL 58
-     rt-button AT ROW 2.5 COL 1.43
-     RECT-1 AT ROW 1 COL 1.43 WIDGET-ID 4
-     SPACE(0.00) SKIP(1.95)
+     rt-button AT ROW 2.5 COL 1
+     RECT-2 AT ROW 1 COL 1 WIDGET-ID 4
+     SPACE(0.13) SKIP(1.66)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
-         TITLE "V  Para <insira complemento>"
+         TITLE "Va Para Parametro de Ambiente"
          DEFAULT-BUTTON bt-ok CANCEL-BUTTON bt-cancela WIDGET-ID 100.
 
 
@@ -185,19 +185,19 @@ ASSIGN
 
 &Scoped-define SELF-NAME d-vapara
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL d-vapara d-vapara 
-ON GO OF FRAME d-vapara /* V  Para <insira complemento> */
+ON GO OF FRAME d-vapara /* Va Para Parametro de Ambiente */
 DO:
-FIND thl-ambiente NO-LOCK
-    WHERE thl-ambiente.cod-ambiente EQ INPUT FRAME {&FRAME-NAME} c_cod-ambiente NO-ERROR.
+FIND thl-ambiente-param NO-LOCK
+    WHERE thl-ambiente-param.cod-param-ambiente EQ INPUT FRAME {&FRAME-NAME} c_cod-param-ambiente NO-ERROR.
 
-IF NOT AVAILABLE thl-ambiente THEN DO:
-    {utp/ut-table.i mgnitro thl-ambiente 1}
+IF NOT AVAILABLE thl-ambiente-param THEN DO:
+    {utp/ut-table.i mgnitro thl-ambiente-param 1}
     RUN utp/ut-msgs.p(INPUT "show",
                       INPUT 2,
                       INPUT RETURN-VALUE).
     RETURN NO-APPLY.
 END.
-ASSIGN p-row-tabela = ROWID(thl-ambiente).
+ASSIGN p-row-tabela = ROWID(thl-ambiente-param).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -206,7 +206,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL d-vapara d-vapara
-ON WINDOW-CLOSE OF FRAME d-vapara /* V  Para <insira complemento> */
+ON WINDOW-CLOSE OF FRAME d-vapara /* Va Para Parametro de Ambiente */
 DO:  
   /* Add Trigger to equate WINDOW-CLOSE to END-ERROR. */
   APPLY "END-ERROR":U TO SELF.
@@ -319,9 +319,9 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY c_cod-ambiente 
+  DISPLAY c_cod-param-ambiente 
       WITH FRAME d-vapara.
-  ENABLE rt-button RECT-1 c_cod-ambiente bt-ok bt-cancela bt-ajuda 
+  ENABLE rt-button RECT-2 c_cod-param-ambiente bt-ok bt-cancela bt-ajuda 
       WITH FRAME d-vapara.
   VIEW FRAME d-vapara.
   {&OPEN-BROWSERS-IN-QUERY-d-vapara}
@@ -359,7 +359,7 @@ PROCEDURE local-initialize :
 
   /* Code placed here will execute PRIOR to standard behavior. */
 
-  {utp/ut9000.i "G99XX999" "9.99.99.999"}
+  {utp/ut9000.i "thl0002-g01" "12.00.00.000"}
 
   /* Dispatch standard ADM method.                             */
   RUN dispatch IN THIS-PROCEDURE ( INPUT 'initialize':U ) .

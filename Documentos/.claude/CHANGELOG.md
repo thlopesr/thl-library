@@ -1,6 +1,342 @@
+---
+tipo: guia
+camada: ambos
+status: historico
+tags: [changelog, historico]
+updated: 2026-10-13
+---
+
 # Histórico documental da THL-Library
 
 [Índice atual](INDEX.md). Registros abaixo descrevem sessões e estados anteriores; não são instruções vigentes nem comprovação de implantação.
+
+## 13/10/2026 — Obsidian (Fase 3)
+
+- Frontmatter `tipo`/`camada`/`status`/`tags` em todas as notas (80); ADRs só ganharam `camada` e `tags`. Novos MOCs em `moc/` (geral, ambiente, e-mail, mensageria, REST/conectores, auditoria, jobs RPW). Sem wikilinks; `.obsidian/` intocado.
+
+## 13/10/2026 — Revisão documental (Fase 2) e registro de dívida
+
+- Notas: `thl0120c` em `thl/camada-datasul.md`; linhas do `AuditLogService` em `logging/auditoria.md`; pacote de `MetricsProcessor` e `IMetricsService` em `integration/messaging-inbound.md` e no ADR `inbound-message-processor-service.md` (o código está em `thl-extensions`); contagem de UTF-8 em `convencoes.md`.
+- ⚠️ Cadastros (`thl010.d`, `thl011.d`) e `Utils/scripts/acerto-thl-*.p` ainda gravam o pacote antigo `thl-lib…MetricsProcessor`: não alterados; ver TD-001.
+- Novos: `tech-debt/REGISTRO.md`; ADRs `separacao-core-extensoes`, `codificacao-iso-8859-1-crlf` (aceitas, retroativas) e `niveis-sensibilidade-auditoria` (proposta).
+- `INDEX.md`: 145 classes (94 + 51); a tabela por pacote somava 153.
+- Por leitura estática; nada compilado nem executado.
+
+## 13/10/2026 — `DateTimeUtil` (`thl-lib.util.date`)
+
+- Classe nova com `currentDateTime`, `addHours`, `addDays`, `addMonths` e `addYears`, devolvendo `datetime`: a conversão do `datetime-tz` de `now` fica num lugar só. Usada no padrão das faixas de data (últimas 24 horas) de `MensageriaService:consult()` e dos `consultMetrics` de `MensageriaService`, `EmailService` e `AuditoriaService`, que deixaram as variáveis `initial_`/`final_`. Nota em [util/util.md](util/util.md). Não compilada.
+
+## 21/10/2026 — thl0220/0221/0222: método em combo-box
+
+- O filtro "Ação" virou "Método": `cb-metodo-ini/fin` (combo inteiro, itens `N - Descrição`, 0 a 8) e `tt-param.metodo-ini/fin` nas telas, nos `rp` e no `thl0220z.p`. Não compilado.
+
+## 21/10/2026 — thl0220/0221/0222: chave aplicação, objeto, operação e ação
+
+- Telas, `rp` e `thl0220z.p` com faixas De/Até de aplicação, objeto (fill-in no lugar do combo-box), operação e ação (= `metodo`); `thl0220z.p` valida a mensagem e grava a chave exata. Ver `thl/camada-datasul.md`. Não compilado; restrição por `thl-objeto-usuario` do combo deixou de existir.
+
+## 16/10/2026 — Padrão do estabelecimento e `enumToCode` sem `lc`
+
+- `StringUtil:enumToCode` sem `lc` (a busca não diferencia maiúsculas). `FieldDefaultEnum:OPERACAO_ESTABELECIMENTO` (`operacao.estabelecimento`) aplicado ao `cod-estabel` na `thl0022a-v01`, com `pi-nome-estab`; a API segue exigindo `estabelecimento`. Variável ainda não está no `.d`. Não compilado.
+
+## 16/10/2026 — `StringUtil:enumToCode`
+
+- A conversão do membro do enum em código de variável (`lc( replace( ..., '_', '.' ) )`) saiu do `EnvironmentResource` para `StringUtil:enumToCode( enum )`; `EnvironmentResource:getEnvironmentVariable( enum )` passou a chamá-lo. Não compilado.
+
+## 16/10/2026 — Padrões do thl0002 no `local-add-record`
+
+- `thl0021-v01` e `thl0022a-v01` a `v06`: `pi-padroes-*` (e `pi-classes-do-objeto` na v06) saíram do `local-enable-fields` e foram para um novo `local-add-record`, que despacha o `add-record` padrão, aplica os padrões e reexecuta o `pi-habilita-*` da aba. O `local-enable-fields` ficou só com a habilitação. Não compilado; `local-add-record` sem precedente nas outras telas do projeto.
+
+## 16/10/2026 — Padrões do thl0002 que faltavam (telas e API)
+
+- `FieldDefaultEnum` ganhou `OBJETO_PROGRAMA_CONSULTA`, `OPERACAO_PARAM_AMBIENTE`, `OPERACAO_PARAM_AMB_DESTINO` e `OPERACAO_SERVIDOR_EXECUCAO` (25 membros). Telas: `thl0021-v01` (programa de consulta), `thl0022a-v02` (parâmetros de ambiente, agora com `using`, `pi-padroes-campos` e `i01thl002.i`) e `thl0022a-v04` (servidor). API: `fillDefaultFields` dos dois Services. `EnvironmentResource`: leitura com padrão de texto. `thl0021-v01.w`: em objeto de saída o processor e o service passam a ser limpos (além de desabilitados). Não compilado; `.d` não regerado (variáveis novas e programas `thl0022a-v02`/`v04` a cadastrar no thl0002).
+
+## 15/10/2026 — thl0022a-v04 (aba Servidor): servidor só fora de Online
+
+- `thl0022a-v04.w`: `pi-habilita-servidor` deixa `cod-servid-exec` desabilitado quando a forma de execução é Online (1) e habilitado em Batch/Agendar; não apaga o valor. A forma vem da tela da `thl0022a-v01.w` (novo `pi-devolve-forma`, valor ainda não gravado), com a operação corrente como alternativa; a v01 avisa a aba ao mudar a forma (`pi-notifica-forma`, `VALUE-CHANGED`). Não compilado; `get-link-handle` `GROUP-ASSIGN-TARGET` nunca testado. A API (`ObjetoParametroService:validateRecord`) recusa `servidorExecucao` preenchido com `formaExecucao` 1 (Online), erro 17006; a tela também recusa no `Pi-validate` (mensagem 17006) e desabilita o campo; a forma vem de `pi-acha-forma`.
+
+## 15/10/2026 — Carga do parâmetro `thl.classe` (thl0002)
+
+- `Database\Data\OpenEdge\carga-thl-classe\thl002.d` (1 parâmetro) e `thl005.d` (4 variáveis, ambiente `*`): padrões de classe do thl0021, thl0022 e API. Mensagem de entrada e Processor vêm preenchidos; mensagem de saída e Service de entrada ficam em branco para o usuário preencher no thl0002. Não carregado. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md).
+
+## 15/10/2026 — thl0022a-v05 (aba REST): contrato só na entrada
+
+- Em operação de saída, `campos obrigatórios` e `chave externa` ficam desabilitados (só a entrada lê o contrato do payload). Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado. A API (`ObjetoParametroService`) aplica a mesma regra: em objeto de saída recusa `camposObrigatorios` e `chaveExterna` preenchidos (17006) e ignora os vazios.
+
+## 15/10/2026 — Padrões de campos no thl0002 também na API
+
+- `ObjetoService` e `ObjetoParametroService` aplicam, no `create()`, os padrões do thl0002 (`FieldDefaultEnum`) antes do corpo; o JSON prevalece e valor inválido lança 17006. `EnvironmentResource` ganhou `getEnvironmentVariable( enum, defaultValue as logical|integer )`. Detalhe em [extensions/thl.md](extensions/thl.md). Não compilado.
+
+## 15/10/2026 — Padrões de campos no thl0002 e correção do thl0220z
+
+- Os campos com valor inicial de `thl0021-v01.w` e `thl0022a-v01/v03/v05.w` ganham padrão parametrizável no thl0002 (`FieldDefaultEnum`, include `thl/include/i01thl002.i`, 18 variáveis no parâmetro `thl.classe`); a carga `carga-thl-classe` passou a ter 22 variáveis e 7 programas. `thl0220z.p` agora busca a operação também pelo método (e cai na linha do objeto do mesmo método) e separa a mensagem de servidor em branco. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado.
+
+## 15/10/2026 — thl0022a-v03 (aba Persistência): persistência só na saída
+
+- Em operação de entrada, `persistente`, `frequência`, `dias` e `tentativas` ficam desabilitados; log e Grava Conteúdo valem nos dois sentidos. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado. A API (`ObjetoParametroService`) aplica a mesma regra: em objeto de entrada recusa persistência diferente de falso ou zero (17006).
+
+## 15/10/2026 — `ClassVariableEnum` no lugar da `ObjetoClassDefault`
+
+- Saiu a classe `ObjetoClassDefault` (só repassava para o `EnvironmentResource`). Entrou o enum `thl-extensions.erp.thl.enum.ClassVariableEnum` e o `EnvironmentResource` ganhou `getEnvironmentVariable( variable as Progress.Lang.Enum )` (instância): código da variável = nome do membro em minúsculas com `_` virando `.`; o parâmetro `thl.classe` é achado pelo programa vinculado no thl0002 (sem o literal nas chamadas); ambiente atual e, se não achar, `*`. Os Services e as telas thl0021 e thl0022a chamam `new EnvironmentResource():getEnvironmentVariable( ... ) no-error`. A carga `carga-thl-classe` ganhou o `thl003.d` com os cinco programas. Não compilado.
+
+## 15/10/2026 — `ObjetoClassDefault`: padrões de classe numa classe só (substituída pelo `ClassVariableEnum`, ver acima)
+
+- Classe nova `thl-extensions.erp.thl.service.ObjetoClassDefault` (`getMessageClass`, `getProcessorClass`, `getServiceClass`) com a leitura do parâmetro `thl.classe` do thl0002; saiu o `getClassDefault` duplicado de `ObjetoService` e `ObjetoParametroService`. Nota em [extensions/thl.md](extensions/thl.md). Não compilada. As viewers `thl0022a-v01.w` e `thl0022a-v06.w` (thl0022) também a chamam: classe que o objeto não tem recebe o padrão do thl0002, na inclusão (aba Classe) e ao gravar. A tela `thl0021-v01.w` também passou a chamá-la (`using` no topo, como na `thl0050-v01.w`) e perdeu o `pi-le-padrao`.
+
+## 15/10/2026 — Classes por sentido do fluxo (thl0021 e thl0022)
+
+- Saída: só a classe da mensagem (habilitada e obrigatória); entrada: mensagem, processor e service obrigatórias. `thl0021-v01.w`, `thl0022a-v06.w`, `thl0022a-v01.w`, `ObjetoService` e `ObjetoParametroService`. Na inclusão, o thl0021 mostra os padrões do thl0002 (parâmetro `thl.classe`) e a aba Classe do thl0022 mostra as classes do objeto. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado. A criação do objeto pela API (`ObjetoService`) e a da operação (`ObjetoParametroService`, depois de copiar do objeto) também aplicam os padrões do thl0002 às classes em branco.
+
+## 14/10/2026 — thl0110, thl0120 e thl0150: o padrão do filtro vai até amanhã
+
+- Correção da mudança de 13/10: o fim do padrão era `now` (fixo no momento em que a tela abre) e escondia mensagens criadas depois ou gravadas pelo PASOE com horário à frente; voltou a `today + 1`. O início continua 24 horas atrás. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado.
+
+## 14/10/2026 — `JsonSetter`: número entre aspas vale em campo numérico
+
+- `SetValue` de `integer` e de `decimal` aceita a propriedade como texto numérico (`"valorFrete":"100"`, caso do `embarque/loogai`, que falhava com o erro 16060 em `GetDecimal`). O ponto do texto vira o separador decimal da sessão; texto em branco mantém o valor atual (como campo ausente); texto não numérico continua dando erro. Número JSON, ausente e nulo seguem como antes. Não compilado.
+
+## 13/10/2026 — Auditoria: snapshot com JSON inválido não derruba a listagem
+
+- `AuditoriaService:parseSnapshot` captura o erro do analisador (16068), registra no log e devolve snapshot vazio; o item sai com `snapshotInvalido: true`. Nota em [logging/auditoria.md](logging/auditoria.md). Não compilado; a causa nos dados não foi apurada.
+
+## 13/10/2026 — thl0110, thl0120 e thl0150: filtro de data e hora
+
+- Diálogos de filtro (`thl0110a`, `thl0120a`, `thl0150b`) com `DATETIME` (`99/99/9999 HH:MM:SS`) no lugar de `DATE`; padrão das três consultas: agora − 24 horas até agora. Detalhe em [thl/camada-datasul.md](thl/camada-datasul.md). Não compilado.
+
+## 13/10/2026 — Listagens de mensageria, e-mail e auditoria: filtros de data e hora
+
+- `MensageriaService`, `EmailService` e `AuditoriaService` (`consult()`) leem as datas com `getDateTime` (`yyyy-MM-ddTHH:mm`); padrão agora − 24 horas até agora (e-mail e auditoria viam 30 dias). `StringUtil` não mudou. ⚠️ A data simples deixa de valer e o monitor web precisa enviar data e hora. Detalhe em [extensions/thl.md](extensions/thl.md). Não compilado.
+## 13/10/2026 — Rota: chave aplicação + objeto + rota pública
+
+- `thl-objeto-rota` com chave tripla; `idx-rota-publica` segue único. `ObjetoRotaService`, `thl0040-v01.w`, `thl0040-g01.w`, `carga-thl-api-cadastros.p`, `cadastrar-thl-api-rotas.ps1` e o app web acompanham; delta `Database/Definition/delta-thl-2026-10-13.df` gerado, não carregado. Decisão em [adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §16. Não compilado.
+- Correção nesta revisão: link markdown de `data/schema.md` que tinha barras invertidas.
+
+## 13/10/2026 — `NotaFiscalProcessor`: etapa é a última parte; Service vem da linha
+
+- A etapa é sempre a última parte da operação (`geracao`, `embarque/geracao`, `ninahub/geracao`); o Service vem da linha do thl0022. Saiu o `new NotaFiscalPorEmbarqueService()` do Processor. Decisão em [adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §15. Não compilado. ⚠️ Operação composta sem linha ainda cai na linha em branco do objeto.
+
+## 08/10/2026 — Novo layout de `Database` e `Definition\thl.df`
+
+- O responsável reorganizou `Database\`: definição em `Definition\thl.df` (31 tabelas, 204 campos; já com `thl-objeto-rota`, `metodo` na chave e as descrições dos deltas) e pasta `Data\entrada\` para cargas. Os deltas `delta-thl-2026-10-08/09.df`, o `thl-.df` e as cargas `.d` de `Database\carga\entrada\` (`thl004`, `thl010`, `thl011`, `thl032`, `thl021`) **não estão mais no repositório**; `Data\entrada\` está vazia. Os `.d` não eram versionados; foram **regerados** em `Database\Data\entrada\` (`thl004` 4 aplicações, `thl010` 26 objetos, `thl011` 118 operações, `thl032` 118 extensões REST, `thl021` 26 rotas), no layout atual (método na chave, classes copiadas do objeto para a linha da operação, `objeto/rota`, nota fiscal em um objeto só).
+- `data\schema.md` (fonte, contagens, seção da rota), `adr\operacao-acao-extensao-rest.md`, `thl\camada-datasul.md`, `AGENTS.md` e `README.md` apontam para o novo caminho. `Utils\scripts\gerar-er-diagrama.py` lê o novo `.df` e conhece `thl-objeto-rota` e `thl-objeto-parametro-rest`; `data\er-diagrama.md` foi regenerado.
+
+## 08/10/2026 — Revisão de Postman e `.md` (rota do objeto e cascata)
+
+- Postman (collection Nitro, pasta `THL`): descrição do DELETE de `Ambiente`, `Auditoria Tabela`, `Conexao REST`, `Objeto` e `Grupo Email` alinhada à cascata. `Parametro` já estava certo.
+- `.md`: referências a `thl-inbound-rota` / `InboundRotaService` / `InboundRotaMessage` trocadas por `thl-objeto-rota` / `ObjetoRotaService` em `thl/camada-datasul.md`, `extensions/thl.md`, `data/schema.md`, `data/er-diagrama.md`; ADR de cadastros ganhou aviso de "superado em parte". ⚠️ Não há `.df` com `thl-objeto-rota` em `Database\` (o `thl.df` ainda define `thl-inbound-rota`): a definição precisa ser gerada pelo Data Dictionary.
+
+## 08/10/2026 — Exclusão em cascata nos demais cadastros pai
+
+- `local-delete-record` com cascata, no padrão do thl0002, em `thl0001` (variáveis), `thl0011` (usuários do grupo), `thl0021` (procedimento novo: operações, extensão REST, usuários e rota), `thl0030` (autenticação e cabeçalhos) e `thl0050` (campo, acesso, notificação e expurgo). `thl0020` segue bloqueado, e o grupo de e-mail em uso por `thl-email-param` ou `thl-audit-tabela-notificacao` também. As cinco APIs (`AmbienteService`, `GrupoEmailService`, `ObjetoService`, `ConexaoRestService`, `AuditoriaTabelaService`) espelham a regra. Não compilado. Detalhes em [thl/camada-datasul.md](thl/camada-datasul.md).
+
+## 08/10/2026 — THL0002: exclusão em cascata e aba Programa no zoom
+
+- Eliminar o parâmetro de ambiente elimina variáveis e programas dele (`thl0002-v01.w` e `ParametroAmbienteService`); antes era bloqueado. Zoom `thl0002-z01.w` com a aba **Programa** (novo `thl0002-b04.w`), que busca o pai pelo programa vinculado. Detalhes em [thl/camada-datasul.md](thl/camada-datasul.md).
+
+## 08/10/2026 — `FreteProcessor` retirado
+
+- A pedido do responsável, o frete também deixa de ter classe fixa: `FreteProcessor` virou `.cls.old`; objeto Frete com Processor padrão + `FretePrevistoService` do cadastro; `FretePrevistoService:initialize()` recusa modalidade diferente de `previsto`. Acertos e `.d` ajustados. Classes: 144 (96 + 48). Ver [extensions/dvv.md](extensions/dvv.md).
+
+## 08/10/2026 — Service do filho no cadastro; nove Processors de agregado retirados
+
+- Decisão do responsável: escolher Service não justifica Processor. Nove Processors viraram `.cls.old` (3 em `thl-lib`, 6 em `thl`); o Service de cada filho fica em `thl-objeto-parametro.classe-service`, em linha própria da operação. Novo `Utils\scripts\acerto-thl-operacao-service.p` para a base existente; acerto, carga, PowerShell, `.d` (118 operações), `convencoes.md` §8 e skill `thl-coding` ajustados. Risco: operação sem linha cai no Service do pai, sem erro. Detalhes em [adr/inbound-message-processor-service.md](adr/inbound-message-processor-service.md). Classes: 145 (96 + 49).
+
+## 08/10/2026 — Services de nota fiscal em ISO-8859-1
+
+- `NotaFiscalBaseService`, `NotaFiscalService`, `NotaFiscalPorEmbarqueService` e `NinahubNotaFiscalService` convertidos de UTF-8/LF para ISO-8859-1/CRLF, a pedido do responsável; travessão dos comentários trocado por hífen. Sem mudança de código.
+
+## 08/10/2026 — Métricas: `MetricsProcessor` e `IMetricsService`
+
+- Mesmo critério na consulta: `Processor:invokeQuery` (novo), `thl-lib.erp.interfaces.IMetricsService` e `MetricsProcessor` (novos); `MensageriaService`, `AuditoriaService` e `EmailService` com `consultMetrics()`, sem ler a operação no `consult()`; `MensageriaProcessor` herda de `MetricsProcessor`. Objetos Auditoria e Email passam a usar o `MetricsProcessor` (acerto e `.d`). Classes: +2 em `thl-lib`.
+
+## 08/10/2026 — Processor chama o método da operação (nota fiscal)
+
+- Decisão do responsável: o Processor orquestra e chama o método do Service. `Processor:invokeWrite` (novo, protegido); `NotaFiscalProcessor` chama a etapa e encadeia o `processamento`; etapas públicas em `NotaFiscalBaseService`/`NotaFiscalService`/`NotaFiscalPorEmbarqueService`, sem `case` no `create()`. Ninahub `NotaFiscal` passa a usar o `NotaFiscalProcessor` (acerto e `.d`). Regra em [convencoes.md](convencoes.md) §8; detalhes em [adr/inbound-message-processor-service.md](adr/inbound-message-processor-service.md).
+
+## 08/10/2026 — Nota fiscal em um objeto só; rota pelo prefixo da URL
+
+- Decisão do responsável ([adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §12): só o objeto `NotaFiscal`. `InboundRouteResolver` ganhou `findRouteByPrefix` (sem rota exata, vale a rota cadastrada que inicia a URL; o resto é a operação); `NotaFiscalProcessor` volta a ser usado; acerto e `.d` ajustados (27 objetos de entrada).
+
+## 08/10/2026 — `thl-objeto-rota`: dump-name `thl021`; cargas `.d` de entrada
+
+- O responsável trocou o dump-name de `thl-objeto-rota` de `thl999` (provisório) para `thl021`, que era o de `thl-inbound-rota`.
+- `Database\carga\entrada\`: `.d` de todos os objetos de entrada (`thl004`, `thl010`, `thl011`, `thl032`, `thl021`), no layout do delta de 2026-10-08. Os `.d` antigos de `Database\carga\` foram apagados a pedido.
+
+## 08/10/2026 — `Fontes	hl` sem acentuação
+
+- Decisão do responsável: telas e programas Datasul sem acento. 134 fontes (`.w` e `.p`) convertidos: vogais acentuadas e `ç` viram a letra base (877 ocorrências), `´` dos comentários do template virou apóstrofo e três rótulos já corrompidos (`Descri»cao Para³metro`, `Par³metros`) perderam os caracteres soltos. ISO-8859-1 e fim de linha preservados; os 3 `.r` compilados não foram tocados (recompilar). Regra em [convencoes.md](convencoes.md) §1.
+
+## 08/10/2026 — Classes só na linha da operação; cadastro obrigatório só do pai
+
+- Decisão do responsável ([adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §14): a execução lê as classes só de `thl-objeto-parametro`; as de `thl-objeto` são o padrão copiado na criação da linha, com propagação ao alterar. O `InboundConfigLoader` procura só a operação da URL e a linha do pai (operação em branco, obrigatória); saem a busca pelo nome do verbo e pela primeira linha.
+- Ajustados: `MessageConfigLoader`, `InboundConfigLoader`, `OutboundConfigLoader`, `ObjetoParametroService`, `ObjetoService`, `thl0021-v01`, `thl0022a-v01`, `thl0022a-v06`, cargas `.p`, PowerShell, acerto de classes e `.d`. Novos: `Utils\scripts\acerto-thl-operacao-classes.p` (migração, rodar antes de publicar) e `Database\delta-thl-2026-10-09.df` (só descrições).
+
+## 08/10/2026 — Rota: `objeto/rota`
+
+- Decisão do responsável: a rota é filha de objeto. `InboundRotaService` → `ObjetoRotaService`; API `/resourcen/objeto/rota` (antes `inbound-rota`); sai o objeto `InboundRota` do cadastro e entra a operação `rota` no objeto `Objeto`. Acerto de operações, acerto de classes, carga, PowerShell e `.d` (26 objetos, 118 operações) ajustados; Postman: pasta `Objeto > Rota`. App web ainda aponta para `inbound-rota`. Ver [adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §13.
+
+## 08/10/2026 — Delta do método: `VIEW-AS` e `ActionEnum`
+
+- `delta-thl-2026-10-08.df`: `VIEW-AS` do campo `metodo` = radio-set com `thl\include\i02thl011.i` (pedido do responsável); `i06thl011.i` fica sem uso depois do delta. `ActionEnum` mantido no código (decisão do responsável).
+- A extensão REST **continua dentro do `thl0022a`** (aba REST, `thl0022a-v05.w`): a mudança para o `thl0022` com um `thl0022c` foi feita e desfeita no mesmo dia, a pedido do responsável.
+
+## 08/10/2026 — Sai o campo `acao`: o método é o campo da chave
+
+- Decisão do responsável ([adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §11): `thl-objeto-parametro` e `thl-objeto-parametro-rest` ficam só com `metodo`, na chave. `Database\delta-thl-2026-10-08.df` (drop da cópia + rename) e `Utils\scripts\pre-delta-metodo-chave.p` (rodar antes).
+- Ajustados: `InboundConfigLoader`, `MessageConfigLoader`, `ObjetoParametroService` (saiu `acao` do JSON), `thl0022a-v01/-v05.w`, `i06thl011.i`, acerto, cargas `.p`, `.d` e PowerShell. `ActionEnum` segue no código.
+
+## 07/10/2026 — Um campo só para o método da operação
+
+- Decisão do responsável ([adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §10): `thl-objeto-parametro.acao` guarda o método (REST: POST, PUT, PATCH, DELETE, GET), exibido como "Método" com a lista pelo tipo do objeto; a aba REST perdeu o Método e a extensão segue filha da operação, com a chave do pai.
+- Ajustados: `thl0022a-v01/-v02/-v05.w`, `i06thl011.i`, `MessageConfigLoader` (sem `actionOf`), `InboundConfigLoader`, `ObjetoParametroService`, acerto, cargas e `.d`.
+
+## 07/10/2026 — Rota do objeto: `thl-objeto-rota` no lugar de `thl-inbound-rota`
+
+- Decisão do responsável: uma rota por objeto, chave aplicação + objeto, nome em português; sem código da rota e sem descrição. `Database\thl-objeto-rota.df` (dump-name `thl021`).
+- Ajustados: tela `thl0040` (viewer, browse, vá-para, query), `InboundRotaService`, `InboundRouteResolver`, cargas, PowerShell, acerto e `.d`. `NotaFiscalProcessor` ficou sem uso (nota fiscal direta e por embarque são objetos diferentes).
+- Também nesta data: `MessageFactory` deixou de testar `error-status:error` depois do `dynamic-new` (ficava ligado por um `find … no-error` do carregador e acusava falha falsa ao instanciar a Message); `actionOf` recebe `MethodTypeEnum`; `resolveOverallStatus` devolve `MessageStatusEnum`; objetos da aplicação `THL` em NomeNomeNome; cargas `.d` em `Database\carga\`.
+- ADR: [adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §9.
+
+## 07/10/2026 — Classes `.cls.old` retiradas do projeto
+
+- A pedido do responsável, os 25 arquivos `.cls.old` (Messages de entrada retiradas de `thl-lib` e das extensões) saíram de `Fontes` e foram para `Documentos/arquivo/2026-10-05-classes-old.zip`, com o caminho original de cada um. O `.zip` não é versionado (`.gitignore`). As pastas `inbound/message` que ficaram vazias foram removidas; restam as duas Messages de máscara em `thl-extensions/integration/thl/messaging/inbound/message`.
+- Onde as notas dizem "virou `.cls.old` na própria pasta", o arquivo está nesse zip.
+
+## 07/10/2026 — Processor base em `core`; primeiros acertos de compilação
+
+- `Processor` (classe-base) movido para `thl-lib.integration.messaging.inbound.core`; específicos seguem em `…inbound.process`. `delta-thl-2026-10-07.df` com o valor inicial novo; acerto com o passo 0 (nomes de pacote antigos nos cadastros).
+- Compilação (responsável): `dynamic-new` não pode vir dentro de `assign` — corrigido em `Processor:createService` e `InboundMessage:createProcessor`, que passaram a atribuir direto à variável tipada (`Service`/`Processor`), como as factories.
+- `Processor:execute`: as quatro ações no mesmo `case`; preparo da escrita em `prepareWrite`.
+
+## 06/10/2026 — Regra de uso da entrada no `convencoes.md`; delta de 10-05 dividido
+
+- [convencoes.md](convencoes.md) §8: papel de Message, Processor e Service; o que criar em cada situação (entidade simples, agregado, entidades diferentes, exceção por operação); operação e ação; contrato no cadastro; URL de três níveis; classe retirada vira `.cls.old`. §2 e §3 ajustadas.
+- `delta-thl-2026-10-05.df` dividido: a troca do índice primário de `thl-objeto-parametro` foi para `delta-thl-2026-10-05-chave.df`, a carregar depois da ativação do índice (convencoes §6).
+
+## 06/10/2026 — Processors no pacote da mensageria de entrada
+
+- A pedido do responsável, os 12 Processors saíram de `erp.process` e foram para o pacote da entrada: `thl-lib.integration.messaging.inbound.process` (base, item, emitente, requisição, nota fiscal) e `thl-extensions.integration.<sistema>.messaging.inbound.process` (`dvv`: frete; `thl`: os seis de agregado). As entradas mais antigas deste histórico citam o pacote anterior.
+- Nomes trocados em `InboundMessage`, `Service` (comentário), `ObjetoService`, `thl0021-v01.w`, no delta `delta-thl-2026-10-04.df` (valor inicial de `classe-processor`; trailer recalculado), nas cargas, no acerto, no PowerShell, nas notas e nas skills. Como nenhum delta foi carregado, nenhum cadastro guarda o nome antigo.
+- Contagem por pacote: `thl-lib.erp` 22, `thl-lib.integration` 45; total inalterado (152).
+
+## 06/10/2026 — Início da operação na rota; nota fiscal em um objeto
+
+- Revisão da decisão de dois objetos para a nota fiscal ([adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) §8): `thl-inbound-rota.inicio-operacao` (`Database\delta-thl-2026-10-06.df`), `InboundRouteResolver:composeOperation`, novo `NotaFiscalProcessor` (pacote dos Processors na entrada acima).
+- `InboundRotaService` e `thl0040-v01.w` com o campo e a validação; acerto sem a divisão em dois objetos (grava o Processor e o início 2 na rota do embarque).
+- Contagem: 152 classes = 97 `thl-lib` + 55 `thl-extensions`. Sem compilação.
+
+## 05/10/2026 — Operação com ação na chave, classes por operação e extensão REST
+
+- Nova [adr/operacao-acao-extensao-rest.md](adr/operacao-acao-extensao-rest.md) (aceita). Aplicada sem compilação.
+- Banco: `Database\delta-thl-2026-10-05.df` — `thl-objeto-parametro.acao` na chave, três classes por operação, tabela `thl-objeto-parametro-rest` (verbo, campos obrigatórios, chave externa).
+- `thl-lib`: `MessageConfigLoader` (ação, classes, extensão), `InboundConfigLoader` (linha pela ação), `InboundMessageConfig` e `InboundMessage` (contrato pelo cadastro), `JsonUtil:nameListToCsv`.
+- Sistema `thl`: `ObjetoParametroService` (ação, classes e extensão no mesmo JSON); tela `thl0022a` com a ação na chave, classes na aba Servidor e aba REST nova (`thl0022a-v05.w`); include `i06thl011.i`.
+- Messages específicas revistas: `LpcoMessage` (entrada), `FreteMessage`, `LoogAiDocumentoMessage`, `LoogAiEmbarqueMessage`, `NinahubNotaFiscalMessage`, `DocumentoMessage`, `EmbarqueMessage`, `RequisicaoMessage`, `UsuarioMessage` → `.cls.old`. `LpcoService:consult()`. (ver a linha da nota fiscal abaixo).
+- Scripts: `acerto-thl-objeto-classes.p` reescrito (ação, extensão, classes e contrato); cargas gravam a ação; `carga-thl-transporte.p` sem a `TransporteMessage`.
+- Nota fiscal (revisto em 06/10, entrada acima): direta e por embarque passam a ser dois objetos; `NotaFiscalMessage` → `.cls.old`; o acerto resolve o Service pela rota e divide o objeto quando as duas rotas apontam para o mesmo. Restam 2 Messages de entrada.
+- Contagem: 151 classes = 96 `thl-lib` + 55 `thl-extensions`.
+
+## 04/10/2026 — Segunda rodada: consultas de `thl-lib` e escolha por operação no Processor
+
+- `consult()` em seis Services de consulta de `thl-lib` (item, saldo, centro de custo, emitente, local de entrega, transporte), chamando o `get(...)` existente.
+- Processors novos: `ItemProcessor`, `EmitenteProcessor`, `RequisicaoProcessor` (`thl-lib.erp.process`) e `FreteProcessor` (`thl-extensions.erp.dvv.process`).
+- `CentroCustoMessage`, `EmitenteMessage`, `ItemMessage` e `TransporteMessage` → `.cls.old`; `RequisicaoMessage` e `FreteMessage` sem `createService()`.
+- Não migradas: `LpcoMessage` (contrato do GET) e `NotaFiscalMessage` (escolha por rota). `acerto-thl-objeto-classes.p` com as regras novas.
+- Contagem: 161 classes = 101 `thl-lib` + 60 `thl-extensions`. Sem compilação. Detalhe em [adr/inbound-message-processor-service.md](adr/inbound-message-processor-service.md) §7.
+
+## 04/10/2026 — Entrada em três camadas: Message → Processor → Service
+
+- Nova [adr/inbound-message-processor-service.md](adr/inbound-message-processor-service.md) (aceita). Aplicada sem compilação.
+- `thl-lib`: `Service` sem `execute` e com verbos públicos (211 declarações em 43 Services ajustadas); novo `thl-lib.erp.process.Processor`; `InboundMessage` concreta; `MessageConfigLoader` abstrata + `InboundConfigLoader`, `OutboundConfigLoader` e `InboundMessageConfig`; `InboundMessageService` e `OutboundMessageService` usam os carregadores novos. `LoogAiDocumentoService`: `execute` → `create()`.
+- Sistema `thl`: 6 Processors (`thl-extensions.erp.thl.process`); 11 Messages 1 para 1 renomeadas para `.cls.old`; `ParametroAmbienteMessage` e `ConexaoRestMessage` só com a máscara; `MensageriaConteudoService:consult()`. Filhos viraram operação da URL (`objeto/usuario`).
+- Scripts: `carga-thl-api-cadastros.p` e `cadastrar-thl-api-rotas.ps1`/`.cmd` reescritos para o modelo novo; novo `acerto-thl-objeto-classes.p`.
+- Contagem: 161 classes = 102 `thl-lib` + 59 `thl-extensions` (`.cls.old` não conta).
+- Pendências: compilar; carregar os dois deltas; rodar o acerto; app web com as URLs novas dos filhos; conferir inbound agendado por operação.
+
+## 04/10/2026 — Classes do objeto: delta e validação no cadastro
+
+- Decisão do responsável (desenho em aplicação por partes): message padrão (`InboundMessage` concreta) → classe de orquestração (`Processor`, concreta; filhas para 1 para N) → Service. Classes informadas no cadastro do objeto.
+- Aplicado nesta data, sem compilação: `Database\delta-thl-2026-10-04.df` (`classe-processor` com inicial `thl-lib.erp.process.Processor`, `classe-service` em branco, inicial de `classe-objeto` = `InboundMessage`); `thl0021-v01.w` e `thl0021.w` (dois campos novos, validação no `Pi-validate`, duas linhas a mais na tela); `ObjetoService` (`classeProcessor`, `classeService` e a mesma validação).
+- O restante do desenho (`Processor`, `InboundMessage` concreta, carregadores, Service sem `execute`, Messages `.old`) foi aplicado no mesmo dia — entrada acima.
+- Notas: [data/schema.md](data/schema.md), [thl/camada-datasul.md](thl/camada-datasul.md), [extensions/thl.md](extensions/thl.md).
+
+## 03/10/2026 — GET agrupado no `execute` do Service
+
+- Nova [adr/get-no-execute-do-service.md](adr/get-no-execute-do-service.md) (aceita). Base: `ActionEnum:Consultado`, `Service:consult()`/`queryParameters`/`buildQueryResponse`, novo `thl-lib.erp.core.QueryParameters`, padrão em `InboundMessage:methodGet`. Sem mudança de assinatura.
+- Sistema `thl`: 24 Services com `consult()`; 13 Messages sem `methodGet`/`appendItems` (793 linhas no total, eram 1.370). Consultas de `thl-lib` e das outras extensões ficam para a segunda rodada.
+- Contagem: 162 classes = 98 `thl-lib` + 64 `thl-extensions`.
+- Sem compilação. A confirmar no primeiro teste: lista devolvida como objeto pelo `resourcen.p`.
+
+## 03/10/2026 — Chave validada só no Service; referência externa também no erro
+
+- A pedido do responsável: as 10 Messages de cadastro do THL não sobrescrevem mais `getRequiredFields()`; os 21 Services conferem a presença da chave em `initialize()` com o novo `JsonUtil:requireProperties` (17006).
+- `InboundMessage`: `executeService` lê a referência externa antes do Service e `saveInboundError` grava o item da mensagem com ela quando o Service falha (mensagem com erro ficava sem item). Sem mudança de assinatura.
+- Sem compilação. Notas: [extensions/thl.md](extensions/thl.md), [integration/messaging-inbound.md](integration/messaging-inbound.md), [util/util.md](util/util.md), ADR da API de cadastros, skills `thl-coding` e `thl-qa`.
+
+## 03/10/2026 — Faixa das métricas pelo contexto (`getQueryParamDateTime`)
+
+- A pedido do responsável, a leitura da faixa de data e hora saiu das três Messages (métodos privados `getMetricsStart`/`getMetricsEnd`, removidos) e foi para `InboundObjectContext:getQueryParamDateTime( paramName, defaultValue )`; cada Message passa o padrão (`add-interval( now, -24, 'hours' )` no início, `now` no fim). Sem compilação. [integration/messaging-inbound.md](integration/messaging-inbound.md).
+
+## 03/10/2026 — `email/metricas`: atributo `destino`
+
+- A pedido do responsável, cada e-mail das métricas leva `destino` (lista de endereços como gravada). Sem compilação. [extensions/thl.md](extensions/thl.md).
+
+## 03/10/2026 — `email/metricas` e `auditoria/metricas` no desenho da mensageria
+
+- Decisão do responsável: nenhuma rota de métricas valida acesso de usuário. `EmailService:getMetrics` agrupa por programa + parâmetro de ambiente (`emails[]`, `situacao` em texto); `AuditoriaService:getMetrics` percorre `thl-audit-tabela` sem `thl-audit-tabela-acesso` e agrupa por banco + tabela com `nivelSensibilidade` (`registros[]`, `tipo` em texto). Datas direto no JSON. Sem compilação. [extensions/thl.md](extensions/thl.md), ADR §2.1.
+
+## 03/10/2026 — `mensageria/metricas`: ajuste do responsável
+
+- Alteração feita pelo responsável em `MensageriaService:getMetrics`: sai `sitMensagem`; as três situações vão como texto (`getStatusLabel`); `dtCriacao` vai como `datetime` direto no JSON. O agente só atualizou o comentário do método e as notas ([extensions/thl.md](extensions/thl.md), ADR §2.1).
+
+## 03/10/2026 — `mensageria/metricas`: `interna` como atributo do objeto
+
+- A pedido do responsável, as aplicações internas voltam a entrar e cada objeto traz `interna` (`thl-aplicacao.ind-interna`). Formato: array → objeto (`aplicacao`, `objeto`, `interna`) → `mensagens[]`. Sem compilação.
+
+## 03/10/2026 — `mensageria/metricas`: formato final (objeto com `mensagens[]`, sem aplicações internas)
+
+- Definição do responsável: array → objeto (`aplicacao`, `objeto`) → `mensagens[]` → atributos; aplicação com `ind-interna` não entra e o atributo `interna` saiu da resposta; sem validação de usuário. Substitui os dois registros abaixo. Sem compilação. [extensions/thl.md](extensions/thl.md), ADR §2.1.
+
+## 03/10/2026 — `mensageria/metricas` sem validação de usuário, uma linha por mensagem
+
+- A pedido do responsável, `MensageriaService:getMetrics` deixou de consultar `thl-objeto-usuario`: percorre `thl-aplicacao` → `thl-objeto` → `thl-mensagem` e devolve uma linha por mensagem (desfeito o agrupamento do registro abaixo). `interna` vem de `thl-aplicacao.ind-interna`. Sem compilação. [extensions/thl.md](extensions/thl.md), ADR §2.1.
+
+## 03/10/2026 — `mensageria/metricas` agrupada por aplicação + objeto
+
+- A pedido do responsável, `MensageriaService:getMetrics` devolve um item por aplicação + objeto (`aplicacao`, `objeto`, `interna`) com as mensagens do período em `mensagens[]`; objeto sem mensagem não entra. Sem compilação. Contrato em [extensions/thl.md](extensions/thl.md).
+
+## 03/10/2026 — `parseDateTime` restrito a `yyyy-MM-ddTHH:mm`
+
+- A pedido do responsável, `StringUtil:parseDateTime` aceita somente `yyyy-MM-ddTHH:mm`; outro formato lança `ThlError`. Sem compilação. Notas: [util/util.md](util/util.md), [extensions/thl.md](extensions/thl.md), ADR §2.2.
+
+## 03/10/2026 — Aplicação interna, expurgo com dois prazos e telas (fases 6 a 8)
+
+- Escrito, sem compilação (depende do delta carregado). Fase 6: `AplicacaoService` com `indInterna`; `interna` nas linhas de `mensageria/metricas`; `carga-thl-api-cadastros.p` marca `THL` como interna.
+- Fase 7: `ObjetoService` com `retencaoDiasSucesso`/`retencaoDiasErro`; `thl0222rp.p` reescrito (por objeto e situação geral, corte por data de criação, índice `idx-objeto-situacao`, relatório com resumo por objeto); `thl0222.w` esconde o campo "Manter Dias".
+- Fase 8: `thl0020-v01.w` (Interna), `thl0021-v01.w` (Ret. Sucesso/Ret. Erro + validação), `thl0022a-v03.w` (Grava Conteúdo). Layout definido por leitura — conferir no AppBuilder.
+- Notas: [thl/camada-datasul.md](thl/camada-datasul.md), [extensions/thl.md](extensions/thl.md), ADR (as oito fases do backend escritas), skill `thl-coding`.
+
+## 03/10/2026 — Gravação de conteúdo por operação (fase 5)
+
+- Escrito, sem compilação (só compila com o delta carregado): novo `ContentStorageEnum`; `MessageConfig`, `MessageConfigLoader` e `MessageFactory` levam `tipo-grava-conteudo` até a `Message`; `Message` decide em `saveContentByType`/`saveResponseContent` (requisição do outbound e do inbound agendado sempre gravada; "somente em erro" guarda a requisição em memória até `markFailed`); `InboundMessage.saveInboundError` marca a falha; `ObjetoParametroService` expõe `tipoGravaConteudo`; a carga das métricas cria a operação com "somente em erro".
+- `MessageConfigLoader`: sem operação na URL, a escolha da linha de parâmetro ficou determinística (operação em branco, depois o nome do método, depois o primeiro registro).
+- Contagem: 161 classes = 97 `thl-lib` + 64 `thl-extensions` (entrou o enum).
+- Notas: [integration/messaging-core.md](integration/messaging-core.md), [extensions/thl.md](extensions/thl.md), ADR (quadro de fases), `INDEX.md` e skills `thl-architect`/`thl-qa` (contagem).
+
+## 03/10/2026 — Situação geral da mensagem (fase 4)
+
+- Escrito, sem compilação (só compila com o delta carregado): `MessageRepository` grava `sit-mensagem` na criação e no resultado (`resolveOverallStatus`), com a correção do teste da requisição; `markMessagePending`/`Message.markPending`; `SchedulingService` deixa o agendado aceito como pendente; `OutboundMessage.saveResponse` grava processamento como não aplicável quando o envio falha; `MensageriaService` devolve `sitMensagem` (métricas) e `statusMensagem` (listagem).
+- Novo `Utils\scripts\acerto-thl-sit-mensagem.p` (simulação por padrão).
+- Notas: [integration/messaging-core.md](integration/messaging-core.md), [integration/messaging-outbound.md](integration/messaging-outbound.md), [extensions/thl.md](extensions/thl.md), ADR (quadro de fases).
+- `SchedulingService.cls` está em LF no disco; o fim de linha foi preservado.
+
+## 03/10/2026 — Métricas, conteúdo, aplicação interna e expurgo (fases 1 a 3)
+
+- Nova [adr/metricas-conteudo-expurgo-mensagens.md](adr/metricas-conteudo-expurgo-mensagens.md) (aceita): rotas de métricas abertas e sem paginação, hora só nas métricas, situação geral da mensagem (`sit-mensagem`), gravação de conteúdo por operação, aplicação interna e expurgo com dois prazos (21/42 dias). Só o backend nesta frente.
+- Gerados `Database\delta-thl-2026-10-03.df` (5 campos + índice `idx-objeto-situacao`; **não carregado**), `thl\include\i05thl011.i` e `Utils\scripts\diagnostico-thl-situacao-mensagem.p` (só leitura). [data/schema.md](data/schema.md).
+- Escritos, sem compilação: `StringUtil:parseDateTime`; `getMetrics` em `MensageriaService`, `EmailService` e `AuditoriaService`; operação `metricas` nas três Messages; `Utils\scripts\carga-thl-api-metricas.p`. Contrato das rotas para o front em [extensions/thl.md](extensions/thl.md); [util/util.md](util/util.md).
+- As seis classes tocadas do sistema `thl` saíram de UTF-8/LF para ISO-8859-1/CRLF.
+- Achados: `MessageRepository.saveResultMessage` testa o retorno para decidir "não aplicável" na requisição (correção prevista na fase 4); `thl-mensagem.num-ped-exec` existe e nunca é gravado; sem operação na URL, o `MessageConfigLoader` pega o primeiro parâmetro do método — precisa ficar determinístico antes da fase 5.
+- Fases 4 a 8 aguardam a carga do delta. Validação por leitura; nada compilado nem executado.
 
 ## 02/10/2026 — Lote 3: sincronização documental
 

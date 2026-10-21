@@ -1,0 +1,61 @@
+<div class="thl-filter-tabs" role="group" [attr.aria-label]="rotulo || 'Filtros'">
+
+  <span *ngIf="rotulo" class="thl-filter-rotulo">
+    <span *ngIf="rotuloIcone" [class]="rotuloIcone" aria-hidden="true"></span>
+    {{ rotulo }}
+  </span>
+  <span *ngIf="rotulo" class="thl-filter-separator"></span>
+
+  <button
+    *ngFor="let tab of options; let first = first; let last = last"
+    type="button"
+    class="thl-filter-tab"
+    [class.thl-filter-tab--active]="tab.value === selected"
+    [class.thl-filter-tab--first]="first"
+    [class.thl-filter-tab--last]="last && !showRefresh"
+    [class.thl-filter-tab--icone]="!!tab.glifo || !!tab.icone"
+    [attr.aria-pressed]="tab.value === selected"
+    [attr.aria-label]="tab.glifo || tab.icone ? (tab.tooltip || tab.label) : null"
+    [p-tooltip]="tab.glifo || tab.icone ? (tab.tooltip || tab.label) : ''"
+    (click)="onSelect(tab.value)">
+
+    @if (tab.glifo; as glifo) {
+      <!-- Desenhado aqui porque a fonte não permite: o `an-calendar` tem "12" no glifo.
+           `currentColor` faz o ícone acompanhar o branco do botão selecionado. -->
+      <svg class="thl-filter-tab__glifo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        @if (glifo.forma === 'timer') {
+          <circle cx="12" cy="13.5" r="8"></circle>
+          <path d="M9 2.5h6M12 5.5v-3M18.5 7.5l1.5-1.5"></path>
+          <text x="12" y="17" text-anchor="middle" font-size="8.5" font-weight="700"
+            fill="currentColor" stroke="none">{{ glifo.valor }}</text>
+        } @else {
+          <!-- Corpo útil de y=9,5 a y=21,5, centro em 15,5. As linhas de base saíram de
+               medição do `getBBox` do próprio texto, não de estimativa: com 19,1 o dígito
+               sozinho ficava com o centro em 14,74, alto em 0,76. -->
+          <rect x="3" y="4.5" width="18" height="17" rx="2.5"></rect>
+          <path d="M3 9.5h18M8 2v4.5M16 2v4.5"></path>
+          <text x="12" y="19" text-anchor="middle"
+            [attr.font-size]="glifo.valor.length > 1 ? 8.5 : 10" [attr.letter-spacing]="glifo.valor.length > 1 ? -0.4 : 0"
+            font-weight="700" fill="currentColor" stroke="none">{{ glifo.valor }}</text>
+        }
+      </svg>
+    } @else if (tab.icone) {
+      <span [class]="tab.icone" aria-hidden="true"></span>
+    } @else {
+      {{ tab.label }}
+    }
+  </button>
+
+  <span *ngIf="showRefresh" class="thl-filter-separator"></span>
+
+  <button
+    *ngIf="showRefresh"
+    type="button"
+    class="thl-filter-tab thl-filter-tab--refresh thl-filter-tab--last"
+    aria-label="Atualizar dados"
+    p-tooltip="Atualizar"
+    (click)="onRefresh()">
+    <span class="an an-arrows-clockwise"></span>
+  </button>
+</div>

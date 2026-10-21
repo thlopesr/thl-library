@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, core, error]
+updated: 2026-10-13
+---
+
 # Pacote: core/error
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

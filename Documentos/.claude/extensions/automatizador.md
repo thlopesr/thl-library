@@ -1,9 +1,18 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, automatizador]
+updated: 2026-10-13
+---
+
 # Extensão: automatizador
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |
 |---|---|---|---|---|
 | LpcoMessage (outbound) | Mensagem outbound que serializa um LPCO (`nit-lpco`) para envio ao Automatizador | Template Method | OutboundMessage | OutboundMessageService (via config) |
 | LpcoMessage (inbound) | Mensagem inbound de CRUD de LPCO: POST/PATCH/DELETE pelos defaults de `InboundMessage`; GET com listagem paginada | Template Method + Factory Method | InboundMessage, LpcoService, MethodTypeEnum | InboundMessageService (via `thl-objeto.classe-objeto`) |
+| ProcessoExportacaoMessage (outbound) | Lote de processos de exportacao (`processo-exp`) para o RPA, modo Multiple, corpo `{ "processos": [...] }` | Template Method | OutboundMessage | OutboundMessageService (via config) |
 | LpcoService | Serviço de domínio do LPCO: criação (com numeração sequencial por emitente), atualização, exclusão física e listagem paginada | Service (Template Method via `Service`) | Service, JsonSetter, PaginationHelper, ThlError | LpcoMessage (inbound) |
 
 > **Movidas em 2026-09-24:** `LpcoMessage` (inbound) e `LpcoService` saíram de `thl-lib` (`…messaging.inbound.message` e `erp.service`) porque dependem do schema do cliente (`nit-lpco`). ⚠️ O registro de `thl-objeto.classe-objeto` da mensagem inbound precisa apontar para o novo nome completo.
@@ -103,3 +112,13 @@
 - ⚠️ **Numeração sequencial sem bloqueio:** `find last … no-lock` + `create` — duas criações simultâneas para o mesmo emitente podem gerar o mesmo `num-interno-lpco` (depende de índice único em `nit-lpco`, NÃO CONFIRMADO).
 - A listagem do `get()` filtra só por faixa de número interno — **não filtra por emitente**.
 - Diferente de `FretePrevistoService` (DVV), aqui o `delete` é físico.
+
+## 2026-10-05 — Message de entrada retirada (não compilado)
+
+`LpcoMessage` de entrada virou `.cls.old`: o objeto usa a Message e o Processor padrão com `LpcoService`. O contrato foi para a extensão REST das operações (criar: `codigoEmitente`; alterar e eliminar: `codigoEmitente`, `numeroInternoLpco`; chave externa `numeroLpco`). `LpcoService` ganhou `consult()` (filtros `NumeroInternoIni`/`NumeroInternoFin`, paginação por `page`/`pageSize`); a lista chega ao `resourcen.p` como `{ items, hasNext: false }` — conferir que a resposta é a mesma de antes. A `LpcoMessage` de **saída** não mudou. Sistema `automatizador`: 2 classes. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md). As seções acima que descrevem a Message de entrada são histórico.
+
+## 2026-10-13 — ProcessoExportacaoMessage (outbound, não compilado)
+
+**Caminho:** `thl-extensions\integrationutomatizador\messaging\outbound\message\ProcessoExportacaoMessage.cls`
+
+Substitui o envio direto de `esex1986rp.p` (legado mantido até a validação em HML). Objeto `Automatizacao / ProcessoExportacao / Envio`, `ind-mensagem-simples` = Multiple. `onLoadData(recid)` valida `processo-exp`, `proces-exp-adic` e `es_processo_exp` e devolve `cod-estabel#nr-proc-exp`; `appendPayloadObject()` cria a raiz `{ "processos": [] }` na primeira chamada e acrescenta um objeto por processo (`codigoEstabelecimento`, `numeroProcessoExportacao`, `codigoSituacao`, `terminalEmbarque`, `idVeiculo`, `numeroViagem`). `dataEmbarque` estava comentado no legado e não foi migrado. O RPW `esex1987rp.p` (fora deste repositório, em `Nitro\Melhorias±0-048050`) faz a seleção e chama `OutboundMessageService`. Smoke test: `Utils/test/testProcessoExportacao.p`. ⚠️ O reenvio repete o lote inteiro; idempotência do RPA não confirmada.

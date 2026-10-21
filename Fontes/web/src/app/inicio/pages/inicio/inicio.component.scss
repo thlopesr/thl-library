@@ -1,0 +1,38 @@
+/* Página inicial do cadastro: navegação por grupos, sem número nenhum. */
+
+/* Cards do grupo com a mesma altura na linha: o fundo irregular faz o card mais
+   curto parecer inacabado. O `::ng-deep` chega na caixa interna do po-widget. */
+.thl-inicio__grupos {
+  align-items: stretch;
+
+  > div {
+    display: flex;
+  }
+
+  po-widget {
+    width: 100%;
+  }
+
+  ::ng-deep .po-widget {
+    height: 100%;
+  }
+}
+
+.thl-inicio__descricao {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-neutral-dark-70, #4a5c6b);
+}
+
+.thl-inicio__nota {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-neutral-light-10, #f0f2f5);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-neutral-dark-70, #4a5c6b);
+}
+

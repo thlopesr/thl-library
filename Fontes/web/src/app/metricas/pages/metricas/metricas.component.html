@@ -1,0 +1,60 @@
+<po-page-list p-title="">
+
+  <thl-page-header title="Métricas gerais"
+    [lastUpdate]="atualizadoEm"
+    [subtitle]="'Visão geral · ' + rotuloPeriodo">
+    <thl-icon-toggle [ativo]="mostrarInternas"
+      rotuloLigar="Mostrar tráfego interno"
+      rotuloDesligar="Ocultar tráfego interno"
+      (ativoChange)="alternarInternas()">
+    </thl-icon-toggle>
+    <thl-period-filter [atalho]="atalho" (faixaChange)="aoMudarPeriodo($event)" (refresh)="carregar()">
+    </thl-period-filter>
+  </thl-page-header>
+
+  <div class="thl-metricas">
+
+    @if (avisoRetencao) {
+      <div class="thl-metricas__aviso">
+        <po-icon p-icon="an an-warning-circle"></po-icon>
+        <span>{{ avisoRetencao }}</span>
+      </div>
+    }
+
+    @if (carregando) {
+      <po-loading-overlay [p-screen-lock]="false" p-text="Carregando..."></po-loading-overlay>
+    }
+
+    @if (erro) {
+      <thl-error-state [detalhe]="erro" (retry)="carregar()"></thl-error-state>
+    } @else {
+
+      @if (dados && dados.errosNoPeriodo > 0) {
+        <div class="thl-metricas__alerta">
+          <po-icon p-icon="an an-x-circle"></po-icon>
+          <span><b>{{ dados.errosNoPeriodo }}</b> mensagens com erro em alguma fase no período.</span>
+          <po-button p-label="Ver mensagens com erro" p-kind="tertiary" p-size="small"
+            p-icon="an an-arrow-right" (p-click)="verErros()"></po-button>
+        </div>
+      }
+
+      @if (!carregando && totalGeral === 0) {
+        <thl-empty-state titulo="Nenhum movimento no período"
+          descricao="Não houve mensagem, e-mail ou registro de auditoria na faixa escolhida."></thl-empty-state>
+      } @else {
+        <div class="thl-metricas__grade">
+          @for (card of cards; track card.id) {
+            <thl-metric-card [card]="card" [grande]="true" (acaoClick)="abrirMetricas($event)"></thl-metric-card>
+          }
+        </div>
+        <div class="thl-metricas__nota">
+          Os três blocos vêm das mesmas rotas das telas de métricas de cada assunto. A mensageria não conta o
+          tráfego interno do THL, a menos que o botão ao lado do período esteja ligado. O detalhe por objeto,
+          programa ou tabela está em <b>Ver métricas</b>.
+        </div>
+      }
+    }
+
+  </div>
+
+</po-page-list>

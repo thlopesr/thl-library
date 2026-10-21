@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, email, comunicacao]
+updated: 2026-10-13
+---
+
 # Pacote: communication/email
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

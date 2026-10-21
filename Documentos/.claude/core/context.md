@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, core, context]
+updated: 2026-10-13
+---
+
 # Pacote: core/context
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

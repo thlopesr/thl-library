@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, core, environment]
+updated: 2026-10-13
+---
+
 # Pacote: core/environment
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |
@@ -128,7 +136,7 @@
 
 | Assinatura | Descrição |
 |---|---|
-| `method public static final character findEnvironmentCodeByPropath( input propathValue as character )` | Busca ambiente pelo campo `ip` no propath. Se não encontrar por IP, retorna o primeiro disponível. Lança `ThlError` se nenhum ambiente cadastrado. |
+| `method public static final character findEnvironmentCodeByPropath( input propathValue as character )` | Busca ambiente pelo campo `ip` no propath (`for each` com `index( propathValue, ip ) > 0`; o primeiro que casar vence). Se nenhum casar, lança `ThlError` "Ambiente nao identificado." — o `if available` após o laço não devolve fallback (⚠️ leitura estática; confirmar em execução). |
 | `method public static final character findParameterCodeByProgram( input programName as character )` | Busca o código de parâmetro de ambiente associado ao programa. Retorna `''` se não encontrado (não lança erro). |
 | `method public static final character findVariableValue( input environmentCode as character, input parameterCode as character, input variableCode as character )` | Busca o valor da variável para ambiente/parâmetro/variável específicos. Aplica fallback para `cod-ambiente = '*'`. Retorna `''` se não encontrado. |
 

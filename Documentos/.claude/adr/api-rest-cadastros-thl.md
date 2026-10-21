@@ -3,9 +3,13 @@ tipo: adr
 modulo: cadastros
 status: aceita
 updated: 2026-10-02
+camada: ambos
+tags: [adr, cadastros]
 ---
 
 # ADR — API REST dos cadastros THL (piloto: thl0001 Ambiente e thl0002 Parâmetro)
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** A §6 (uma Message por agregado, filho com rota própria) foi substituída por [inbound-message-processor-service.md](inbound-message-processor-service.md): um objeto por agregado, filho como operação da URL (`pai/filho`), Message padrão e Processor por agregado. Contrato JSON, filtros e regras dos Services não mudaram.
 
 > **Aceita e aplicada (piloto) em 2026-09-25** — fontes em [extensions/thl.md](../extensions/thl.md), ainda não compilados; o thl0001-v01 ganhou o bloqueio de eliminação (DECIDIR 3). Atualizada em 2026-09-25 com as decisões do responsável: THL como sistema em `thl-extensions`, códigos de erro 2/17006, mensagens sempre armazenadas, chave do `MessageConfigLoader`, **sem alterar o `InboundRouteResolver`** (rotas por cadastro), **padrão `LpcoMessage`/`LpcoService`** (sem classe-base) e **sem autorização por usuário**. Levantamento por leitura de `Fontes\thl\integration\api\v1\resourcen.p`, `thl-lib.integration.messaging.inbound.*`, `thl-lib.erp.core.Service`, `Database\thl.df`, das telas thl0001/thl0002 e dos exemplos do Automatizador.
 >
@@ -41,6 +45,8 @@ Depois do piloto: thl0020/thl0021 (Aplicação e Objeto), depois o resto.
 
 ### 2.3 Rotas — só por cadastro (`thl-inbound-rota`), sem mudar o roteador
 
+> **Superado em parte (2026-10-06 a 08):** a tabela é hoje `thl-objeto-rota` (uma rota por objeto, chave aplicação + objeto), os filhos são operações da URL do pai e a própria rota virou a operação `rota` do objeto `Objeto`. O desenho abaixo é o histórico; o vigente está em [operacao-acao-extensao-rest.md](operacao-acao-extensao-rest.md) §§9 e 13.
+
 **Decidido (2026-09-25):** o `InboundRouteResolver` **não** é alterado; cada recurso ganha um registro em `thl-inbound-rota` apontando para a aplicação `THL`.
 
 Como o roteador atual lê o caminho (`thl-lib.integration.messaging.inbound.route.InboundRouteResolver`):
@@ -73,7 +79,7 @@ Base: `${window.location.origin}/api/thl/integration/v1/resourcen/<rota>` — me
 - `initialize()` → `positionRecord()`: `find first b-<tabela> exclusive-lock` pela chave do `inContext`, `no-error`;
 - `create()`: erro se o registro já existe; validações; `do transaction` + `create` + chave + `mapFields( jsonSetter )`;
 - `update()`: erro se não existe; `mapFields( jsonSetter )` — **nunca grava a chave** (paridade com "chave só na inclusão");
-- `delete()`: erro se não existe; bloqueios de vínculo; `delete`;
+- `delete()`: erro se não existe; bloqueios por referência (outra tabela que usa o registro); filhos subordinados eliminados em cascata, na mesma `do transaction` do pai (desde 2026-10-08); `delete`;
 - `get( pager, filtros… )` público: `for each … no-lock` com `pager:incrementPageCount()` / `shouldSkipEntry()` / `shouldStopPaging()`, monta `JsonArray` com `referenceCode`;
 - `mapFields( jsonSetter )` privado: `jsonSetter:SetValue( input-output b-x.campo, input 'campoJson' )` só dos campos não-chave;
 - `loadReferenceCode()`: lê do **buffer posicionado** (serve à escrita e ao GET); `getEntityName()`: nome do recurso.
@@ -205,3 +211,5 @@ Todos em ISO-8859-1 com CRLF. Compilação no PDSOE (PROPATH do Shared AVM) ou `
 **Condições de qualidade:** rota desconhecida lança erro (nunca cai no Service do pai); a máscara de segredo não depende da rota, porque o conteúdo de entrada é gravado antes de o contexto existir; teste por rota × verbo antes de publicar.
 
 **Implantação:** compilar e publicar as cinco Messages → apontar as rotas dos filhos para o objeto do pai (`carga-thl-api-cadastros.p` ou `cadastrar-thl-api-rotas.ps1`) → eliminar os objetos próprios dos filhos e os `.r` das 11 classes retiradas.
+
+**Complemento de 2026-10-03 — chave validada só no Service:** as Messages de cadastro deixaram de sobrescrever `getRequiredFields()`; cada Service confere a presença dos campos da chave em `initialize()` (`JsonUtil:requireProperties`). Com isso, nas Messages de agregado restam dois `case` por rota (`createService` e `methodGet`). Substitui o item de §2.4 "`getRequiredFields()` por método: campos da chave".

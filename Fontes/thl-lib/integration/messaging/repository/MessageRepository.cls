@@ -10,6 +10,10 @@
   ----------------------------------------------------------------------*/
 
 using Progress.Lang.*.
+using thl-lib.util.string.StringUtil.
+using thl-lib.core.error.ThlError.
+using thl-lib.logging.LogUtil.
+using thl-lib.integration.messaging.enum.MessageStatusEnum.
 
 block-level on error undo, throw.
 
@@ -20,10 +24,11 @@ class thl-lib.integration.messaging.repository.MessageRepository.
     define protected buffer b-thl-mensagem-item      for thl-mensagem-item.
     define protected buffer b-thl-mensagem-conteudo  for thl-mensagem-conteudo.
     
-    define public property messageCode   as character no-undo get. set.
-    define public property referenceCode as character no-undo get. set.
-    define public property objectName    as character no-undo get. set.
-
+    define public property messageCode           as character no-undo get. set.
+    define public property referenceCode         as character no-undo get. set.
+    define public property objectName            as character no-undo get. set.
+    define public property applicationName       as character no-undo get. set.
+    define public property externalReferenceCode as character no-undo get. set.
     /*------------------------------------------------------------------------------
      Purpose:
      Notes:
@@ -35,37 +40,47 @@ class thl-lib.integration.messaging.repository.MessageRepository.
 
     //Metodos relacionado a tabela thl-mensagem    
     method public void createMessage( objectName           as character ,
+                                      applicationName      as character ,
                                       integrationOperation as character ,
                                       methodType           as integer   ,
-                                      connectorType        as integer   , 
-                                      integrationDirection as logical   , 
+                                      connectorType        as integer   ,
+                                      integrationDirection as logical   ,
                                       executionMode        as integer   ).
-        
+
         this-object:ensureMessageCode().
-        
+
         create b-thl-mensagem.
         assign b-thl-mensagem.codigo-mensagem   = this-object:messageCode
                b-thl-mensagem.dt-criacao        = now
                b-thl-mensagem.objeto            = objectName
+               b-thl-mensagem.aplicacao         = applicationName
                b-thl-mensagem.operacao          = integrationOperation
                b-thl-mensagem.metodo            = methodType
-               b-thl-mensagem.forma-execucao    = connectorType
-               b-thl-mensagem.modelo-integracao = executionMode
+               b-thl-mensagem.forma-execucao    = executionMode
+               b-thl-mensagem.modelo-integracao = connectorType
                b-thl-mensagem.qtd-tentativas    = 0
                b-thl-mensagem.sentido-fluxo     = integrationDirection
-               b-thl-mensagem.sit-processamento = 1
-               b-thl-mensagem.sit-requisicao    = 1
-               b-thl-mensagem.sit-retorno       = 1
+               b-thl-mensagem.sit-processamento = MessageStatusEnum:PENDING:getValue()
+               b-thl-mensagem.sit-requisicao    = MessageStatusEnum:PENDING:getValue()
+               b-thl-mensagem.sit-retorno       = MessageStatusEnum:PENDING:getValue()
+               b-thl-mensagem.sit-mensagem      = MessageStatusEnum:PENDING:getValue()
                .
-               
-        assign this-object:objectName = objectName.
-        
+
+        assign this-object:objectName      = objectName
+               this-object:applicationName = applicationName.
+
     end method.
     
     method public void loadMessage().
         this-object:ensureMessageCode().
+
         find first b-thl-mensagem exclusive-lock
-            where b-thl-mensagem.codigo-mensagem = this-object:messageCode no-error.
+            where b-thl-mensagem.codigo-mensagem = this-object:messageCode
+            no-wait no-error.
+
+        if not available b-thl-mensagem then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'loadMessage',
+                substitute( 'Mensagem &1 nao encontrada ou esta bloqueada por outra sessao.', this-object:messageCode ) ).
     end method.
     
     method public void saveResultMessage( destination     as character,
@@ -74,24 +89,53 @@ class thl-lib.integration.messaging.repository.MessageRepository.
                                           successProcess  as logical  ,
                                           statusCode      as integer  ,
                                           statusMessage   as character).
-                                          
-        assign b-thl-mensagem.destino            = destination
+        
+        assign b-thl-mensagem.destino            = if length( destination ) > 200 then substring(destination, 1 , 200) else destination
                b-thl-mensagem.dt-integracao      = now
                b-thl-mensagem.qtd-tentativas     = b-thl-mensagem.qtd-tentativas + 1
-               b-thl-mensagem.sit-processamento  = if successProcess  = ? then 4 else if successProcess  then 3 else 2
-               b-thl-mensagem.sit-requisicao     = if successResponse = ? then 4 else if successRequest  then 3 else 2
-               b-thl-mensagem.sit-retorno        = if successResponse = ? then 4 else if successResponse then 3 else 2
+               b-thl-mensagem.sit-processamento  = if successProcess  = ? then MessageStatusEnum:NOT_APPLICABLE:getValue() else if successProcess  then MessageStatusEnum:SUCCESS:getValue() else MessageStatusEnum:ERROR:getValue()
+               b-thl-mensagem.sit-requisicao     = if successRequest  = ? then MessageStatusEnum:NOT_APPLICABLE:getValue() else if successRequest  then MessageStatusEnum:SUCCESS:getValue() else MessageStatusEnum:ERROR:getValue()
+               b-thl-mensagem.sit-retorno        = if successResponse = ? then MessageStatusEnum:NOT_APPLICABLE:getValue() else if successResponse then MessageStatusEnum:SUCCESS:getValue() else MessageStatusEnum:ERROR:getValue()
                b-thl-mensagem.cod-status-retorno = statusCode
-               b-thl-mensagem.descr-retorno      = statusMessage
+               b-thl-mensagem.descr-retorno      = if length (statusMessage) > 200 then substring( statusMessage, 1, 200)
+                                                                                   else statusMessage
                .
-                  
+
+        //depois das tres fases gravadas: a situacao geral e derivada delas
+        assign b-thl-mensagem.sit-mensagem = this-object:resolveOverallStatus():getValue().
+
+    end method.
+
+    //Agendamento aceito: as fases ficam como aceitas, mas a mensagem so
+    //conclui quando o RPW executar e gravar o resultado de verdade.
+    method public void markMessagePending().
+        assign b-thl-mensagem.sit-mensagem = MessageStatusEnum:PENDING:getValue().
+    end method.
+
+    //Situacao geral (thl-mensagem.sit-mensagem) a partir das tres fases:
+    //alguma em erro -> Erro; senao, alguma pendente -> Pendente; todas em
+    //sucesso ou nao aplicavel -> Sucesso.
+    method private MessageStatusEnum resolveOverallStatus().
+
+        if b-thl-mensagem.sit-requisicao    = MessageStatusEnum:ERROR:getValue() or
+           b-thl-mensagem.sit-processamento = MessageStatusEnum:ERROR:getValue() or
+           b-thl-mensagem.sit-retorno       = MessageStatusEnum:ERROR:getValue() then
+            return MessageStatusEnum:ERROR.
+
+        if b-thl-mensagem.sit-requisicao    = MessageStatusEnum:PENDING:getValue() or
+           b-thl-mensagem.sit-processamento = MessageStatusEnum:PENDING:getValue() or
+           b-thl-mensagem.sit-retorno       = MessageStatusEnum:PENDING:getValue() then
+            return MessageStatusEnum:PENDING.
+
+        return MessageStatusEnum:SUCCESS.
+
     end method.
     
     //Metodos relacionado a tabela thl-mensagem-historico
     method public void createHistoryMessage().
         
         this-object:ensureMessageCode().
-            
+
         create b-thl-mensagem-historico.
         buffer-copy b-thl-mensagem to b-thl-mensagem-historico
             assign b-thl-mensagem-historico.tentativa = b-thl-mensagem.qtd-tentativas.
@@ -103,25 +147,29 @@ class thl-lib.integration.messaging.repository.MessageRepository.
         
         this-object:ensureMessageCode().
         this-object:ensureReferenceCode().
-        
+
         create b-thl-mensagem-item.
-        assign b-thl-mensagem-item.codigo-mensagem = this-object:messageCode
-               b-thl-mensagem-item.chave-registro  = this-object:referenceCode. 
+        assign b-thl-mensagem-item.codigo-mensagem     = this-object:messageCode
+               b-thl-mensagem-item.chave-registro      = this-object:referenceCode
+               b-thl-mensagem-item.chave-registro-ext  = this-object:ExternalReferenceCode.
+
     end method.
     
     method public logical hasExistingMessageItemForReference().
         return available b-thl-mensagem-item.
     end method.    
 
-    method public void loadMessageItemByReference( objectName as character ).
-        
+    method public void loadMessageItemByReference( objectName      as character ,
+                                                   applicationName as character ).
+
         this-object:ensureReferenceCode().
-        
+
         find first b-thl-mensagem-item exclusive-lock
-            where b-thl-mensagem-item.chave-registro = this-object:referenceCode 
-              and can-find( first thl-mensagem of b-thl-mensagem-item 
-                                where thl-mensagem.objeto = objectName )no-error.
-            
+            where b-thl-mensagem-item.chave-registro = this-object:referenceCode
+              and can-find( first thl-mensagem of b-thl-mensagem-item
+                                where thl-mensagem.objeto    = objectName
+                                  and thl-mensagem.aplicacao = applicationName ) no-error.
+
     end method.
     
     method public void loadMessageCodeFromItem().
@@ -132,10 +180,11 @@ class thl-lib.integration.messaging.repository.MessageRepository.
     method public void createMessageContent( typeContent as int64 ).
         
         this-object:ensureMessageCode().
-        
+
         create b-thl-mensagem-conteudo.
         assign b-thl-mensagem-conteudo.codigo-mensagem = this-object:messageCode
-               b-thl-mensagem-conteudo.tipo-conteudo   = typeContent. 
+               b-thl-mensagem-conteudo.tipo-conteudo   = typeContent.
+
     end method.
 
     method public logical hasExistingMessageContentForObject().
@@ -161,16 +210,17 @@ class thl-lib.integration.messaging.repository.MessageRepository.
     method public void saveContentMessage( content as longchar ).
         assign b-thl-mensagem-conteudo.conteudo =  content.   
     end method.
-    
-    //Metodo de validacao 
+
+    //Metodo de validacao
     method protected void ensureMessageCode().
-        if this-object:messageCode = '' then
-            undo, throw new AppError( 'Message code was not informed.', 17006 ).
+        if not StringUtil:hasValue( this-object:messageCode ) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'ensureMessageCode', 'Codigo de mensagem nao informado.' ).
     end method.
     
     method protected void ensureReferenceCode().
-        if this-object:referenceCode = '' then
-            undo, throw new AppError( 'Reference code was not informed.', 17006 ).
+        if not StringUtil:hasValue( this-object:referenceCode         ) and
+           not StringUtil:hasValue( this-object:externalReferenceCode ) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'ensureReferenceCode', 'Codigo de referencia nao informado.' ).
     end method.
     
 end class.

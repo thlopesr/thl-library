@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # DYNAMIC-COMPONENTS.md
 
 ## 6.1 po-dynamic-form

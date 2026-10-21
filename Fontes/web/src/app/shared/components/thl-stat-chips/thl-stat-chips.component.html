@@ -1,0 +1,11 @@
+<div class="thl-stat-chips">
+  @for (chip of chips; track chip.key) {
+    <button class="thl-stat-chip" [class.thl-stat-chip--active]="chip.active"
+      [class.thl-stat-chip--equal]="equalWidth" [attr.aria-pressed]="chip.active"
+      [style.--chip-color]="chip.color" (click)="onChipClick(chip)">
+      <span class="thl-stat-chip__icon" [ngClass]="chip.icon"></span>
+      <span class="thl-stat-chip__value">{{ chip.value }}</span>
+      <span class="thl-stat-chip__label">{{ chip.label }}</span>
+    </button>
+  }
+</div>

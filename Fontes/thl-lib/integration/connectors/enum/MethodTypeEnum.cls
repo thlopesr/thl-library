@@ -1,6 +1,6 @@
 
 /*------------------------------------------------------------------------
-    File        : MethodType
+    File        : MethodTypeEnum
     Purpose     : 
     Syntax      : 
     Description : 

@@ -1,4 +1,14 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, erp, service]
+updated: 2026-10-13
+---
+
 # Pacote: erp (core · enum · service)
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** O `execute` saiu do `Service` e foi para `thl-lib.integration.messaging.inbound.core.Processor`; os verbos do Service ficaram públicos. Assinaturas vigentes na seção final desta nota; decisão em [adr/inbound-message-processor-service.md](../adr/inbound-message-processor-service.md).
 
 > **Reescrito em 2026-09-24 a partir do código** (`Fontes\thl-lib\erp\**`, 27 classes). Substitui a versão de 2026-08-24, que descrevia uma interface `IService` inexistente, `ServiceResponse:failure()`, `EmitenteService:buscarEmitente/buscarLocalEntrega` e classes de nomes antigos (`FreteService`, `BusinessObjectService`, `ApplicationProgramInterfaceService`, `NinaNotaFiscal*`).
 > `LpcoService` e `FretePrevistoService`/`SituacaoFreteEnum` saíram deste pacote em 2026-09-24 → ver `extensions/automatizador.md` e `extensions/dvv.md`.
@@ -148,3 +158,63 @@ Herdam `Service` direto, não usam `execute()` para leitura: a Message chama o `
 - ⚠️ `AuditoriaService` declara o buffer `b-tabela` (`thl-audit-tabela`) mas não o usa: a API **não aplica** o filtro de sensibilidade por tabela (`thl-audit-tabela.nivel-sensibilidade <= nivel-acesso`) que a tela `thl0150.w` aplica — só oculta campos restritos. NÃO CONFIRMADO se é intencional.
 - Cabeçalhos copiados: `CentroCustoService` ("consulta de item"), `LocalEntregaService` (texto de `EmitenteService`), `MensageriaConteudoService` (texto de `MensageriaService`); `ActionEnum` e `Service` ainda citam "IService"/"ThlAppError" nos comentários.
 - Os serviços de consulta não usam o dispatcher: `create/update/delete` continuam com o default "Acao nao suportada".
+
+## Consulta pelo `execute` — ação Consultado (2026-10-03, não compilado)
+
+Decisão em [adr/get-no-execute-do-service.md](../adr/get-no-execute-do-service.md).
+
+| Peça | O que é |
+|---|---|
+| `ActionEnum:Consultado` (4) | Ação do GET |
+| `Service:execute` | Com `Consultado`: `context` = parâmetros da query; não chama `initialize()`; devolve `buildQueryResponse( consult() )`; `referenceCode` sai vazio |
+| `method protected JsonConstruct consult()` | Gancho da consulta; padrão "Acao nao suportada". O desvio por operação (`this-object:operation`) fica dentro dele |
+| `define protected property queryParameters as QueryParameters` | Leitura tipada dos filtros durante o `consult()` |
+| `method protected JsonObject buildQueryResponse( result as JsonConstruct )` | `JsonArray` → `{ items, hasNext: false }`; `JsonObject` segue como veio |
+| `thl-lib.erp.core.QueryParameters` (novo) | `has`, `getText`, `getInteger`, `getDate`, `getDateTime`, `getPager`; aceita o formato do `resourcen.p` (array de valores) e valor simples |
+
+Os Services de consulta de `thl-lib` listados nesta nota **ainda não** têm `consult()`: seguem atendidos pelo `methodGet` da própria Message.
+
+## Processor e Service sem `execute` (2026-10-04, não compilado)
+
+Novo pacote `thl-lib.integration.messaging.inbound.process` (1 classe). `thl-lib.erp` passa a ter 23 classes.
+
+### Processor (concreta)
+
+**Caminho:** `thl-lib\integration\messaging\inbound\core\Processor.cls` · **Namespace:** `thl-lib.integration.messaging.inbound.core.Processor`
+
+| Assinatura | Descrição |
+|---|---|
+| `constructor public Processor()` | Sem parâmetros — instanciado por `dynamic-new` a partir de `thl-objeto.classe-processor`. |
+| `method public void setServiceClass( input serviceClass as character )` | Nome completo do Service do cadastro (`thl-objeto.classe-service`). |
+| `method public void setService( input domainService as Service )` | Instância pronta (Message antiga com `createService()`, `.p`, teste). Tem prioridade sobre o nome. |
+| `method public JsonObject execute( input action as ActionEnum, input operation as character, input context as JsonObject, output referenceCode as character )` | `resolveService( operation )`; `Consultado` → `prepareQuery` + `buildQueryResponse( consult() )`; demais → `prepare` → `initialize` → verbo → `loadReferenceCode` → `buildResponse`. Ação desconhecida ou Service não resolvido → `ThlError`. |
+| `method protected Service resolveService( input operation as character )` | Padrão: a instância entregue ou o Service do cadastro. **Ponto de extensão** do agregado. |
+| `method protected Service createService( input className as character )` | `dynamic-new` + conferência de tipo; nome em branco → `ThlError`. |
+
+Filhas em `thl-extensions.integration.thl.messaging.inbound.process`: `ParametroProcessor`, `ObjetoProcessor`, `ConexaoRestProcessor`, `AuditoriaTabelaProcessor`, `GrupoEmailProcessor`, `MensageriaProcessor` — ver [extensions/thl.md](../extensions/thl.md).
+
+### Service — assinaturas vigentes
+
+`execute` foi removido. Públicos: `prepare( operation, context )`, `prepareQuery( operation, context )`, `initialize()`, `create()`, `update()`, `delete()`, `consult()`, `buildQueryResponse( result )`, `buildResponse( action, referenceCode )`, `loadReferenceCode()` (abstrato), `getEntityName()` (abstrato). Detalhe em [arquitetura/Service.md](../arquitetura/Service.md).
+
+- 211 declarações `method protected override` → `method public override` em 43 Services de `thl-lib.erp` e `thl-extensions.erp` (só a visibilidade).
+- `LoogAiDocumentoService`: a sobrescrita de `execute` virou `create()` (`super:create()` + frete real).
+- Uso fora da mensageria (`.p`, RPW): `new Processor()` → `setServiceClass( '<classe>' )` ou `setService( new XService() )` → `execute( … )`.
+
+## Segunda rodada do GET (2026-10-04, não compilado)
+
+- `consult()` em `ItemService`, `SaldoService`, `CentroCustoService`, `EmitenteService`, `LocalEntregaService` e `TransporteService`: lê os filtros de `queryParameters` e chama o `get(...)` público, que continua existindo. A frase "não usam `execute()` para leitura: a Message chama o `get(...)`" acima deixou de valer para esses seis.
+- Processors novos em `thl-lib.integration.messaging.inbound.process`: `ItemProcessor` (`Saldo`), `EmitenteProcessor` (`localentrega`), `RequisicaoProcessor` (`item`). Em `thl-extensions.integration.dvv.messaging.inbound.process`: `FreteProcessor` (`previsto`/`realizado`).
+- `thl-lib.erp` passa a ter 26 classes. Detalhe em [adr/inbound-message-processor-service.md](../adr/inbound-message-processor-service.md) §7.
+
+## `NotaFiscalProcessor` (2026-10-06, não compilado)
+
+`thl-lib.integration.messaging.inbound.process.NotaFiscalProcessor`: um objeto de nota fiscal, vários Services. Recebe a operação (`geracao`, `embarque/geracao`, `ninahub/geracao`…) e repassa só a **última parte** como etapa; o Service vem da **linha da operação no thl0022** (`classe-service`), e não há mais `new NotaFiscalPorEmbarqueService()` no Processor (desde 2026-10-13). É o único Processor que sobrescreve `execute` (os demais só `resolveService`). `processamento` é recusado quando o Service da linha é o `NotaFiscalPorEmbarqueService`. `thl-lib.erp` tem 27 classes.
+
+## Pacote dos Processors (2026-10-06)
+
+Os Processors são orquestração da **entrada** e ficam junto dela: `thl-lib.integration.messaging.inbound.process` (`Fontes	hl-lib\integration\messaging\inbound\process\`) e, nas extensões, `thl-extensions.integration.<sistema>.messaging.inbound.process`. Os Services continuam em `erp.service`. As contagens de `thl-lib.erp` citadas acima (26, 27) passam a ser 22: os cinco Processors de `thl-lib` contam agora em `thl-lib.integration` (45).
+
+## Nota fiscal: etapas públicas, sem despacho no `create()` (2026-10-08, não compilado)
+
+`NotaFiscalBaseService` declara `generateInvoice`, `generateNfeXml`, `authorizeSefaz`, `printInvoice`, `notifyInvoice` (abstratos) e `waitSefazProcessing`. `NotaFiscalService` e `NotaFiscalPorEmbarqueService` não escolhem mais a etapa pela operação: `create()` é a geração e quem chama cada etapa é o `NotaFiscalProcessor`. `processSteps` saiu do `NotaFiscalService`. Ver [adr/inbound-message-processor-service.md](../adr/inbound-message-processor-service.md).

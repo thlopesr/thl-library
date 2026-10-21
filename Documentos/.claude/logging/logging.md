@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, log, auditoria]
+updated: 2026-10-13
+---
+
 # Pacote: logging
 
 > **Visão do módulo de auditoria** (gravação, consulta, cadastro, expurgo, achados e plano de desempenho): [auditoria.md](auditoria.md).

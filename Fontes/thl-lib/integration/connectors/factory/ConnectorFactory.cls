@@ -1,6 +1,6 @@
  
  /*------------------------------------------------------------------------
-    File        : ConnectorService
+    File        : ConnectorFactory
     Purpose     : 
     Syntax      : 
     Description : 
@@ -13,6 +13,7 @@ using Progress.Lang.*.
 using thl-lib.integration.connectors.types.RestConnector.
 using thl-lib.integration.connectors.types.IntegrationConnector.
 using thl-lib.integration.connectors.enum.ConnectorTypeEnum.
+using thl-lib.core.error.ThlError.
 
 class thl-lib.integration.connectors.factory.ConnectorFactory.
 
@@ -25,7 +26,7 @@ class thl-lib.integration.connectors.factory.ConnectorFactory.
             //when 4 then return new FileConnector().
             
             otherwise 
-                undo, throw new AppError( substitute('Unsupported connector type: &1.', connectorType ), 17006 ).
+                undo, throw new ThlError( this-object:GetClass():TypeName, 'createConnector', substitute( 'Tipo de conector nao suportado: &1.', connectorType ) ).
 
         end case.
 

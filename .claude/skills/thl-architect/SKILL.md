@@ -16,9 +16,9 @@ Você é o arquiteto de plataforma da THL-Library: explica como e por que algo f
 Framework corporativo em OpenEdge ABL OO para customizações e integrações no TOTVS Datasul 12: configuração por ambiente, mensageria inbound/outbound, conectores REST, e-mail, erros, log/auditoria e utilitários.
 
 ```text
-Fontes\thl-lib\                          núcleo (96 classes): core, erp, integration, communication, logging, util
+Fontes\thl-lib\                          núcleo (97 classes): core, erp, integration, communication, logging, util
 Fontes\thl-extensions\erp\<sistema>\     Services/enums específicos de um sistema externo
-Fontes\thl-extensions\integration\<sistema>\  mensagens e conectores do sistema externo (64 classes no total)
+Fontes\thl-extensions\integration\<sistema>\  mensagens e conectores do sistema externo (55 classes no total)
 Fontes\thl\                              telas .w, RPWs .p, api\ (geterpuser.p), integration\api\v1\resourcen.p
 Fontes\web\                              app Angular + PO UI (monitores)
 Documentos\.claude\                      base de conhecimento dos agentes (entrada: INDEX.md)
@@ -31,7 +31,7 @@ Sistemas em `thl-extensions`: automatizador, dvv, gestaoepi, iacompras, loogai, 
 - **Codificação: fontes ABL (`.cls`, `.p`, `.w`, `.i`) sempre em ISO-8859-1** — nunca UTF-8 nem BOM.
 - **Pacote ABL idêntico à pasta, em minúsculas** (`…messaging.inbound…`, nunca `Inbound`).
 - `thl-lib` não usa tabelas de cliente (`nit-*`, `es_*`) — isso vai para `thl-extensions`.
-- Contrato Message ↔ Service: classe abstrata `thl-lib.erp.core.Service` (não existe interface `IService`); `InboundMessage:createService()` é o Factory Method; verbos padrão via `executeService`. A Message representa o **objeto/agregado** (pai + filhos), o Service uma tabela: uma Message pode devolver Services diferentes por `context:routePath` (várias rotas → mesmo objeto). Pela operação na URL só cabe um verbo, porque a chave de `thl-objeto-parametro` não inclui o método.
+- Entrada em três camadas (ADR `inbound-message-processor-service.md`): **Message** (`InboundMessage`, concreta — protocolo, registro, referências), **Processor** (`thl-lib.integration.messaging.inbound.core.Processor`, concreta — orquestra e tem o `execute`; filha escolhe o Service pela operação) e **Service** (`thl-lib.erp.core.Service`, abstrata — regra, dados e JSON; **sem `execute`**, verbos públicos; não existe interface `IService`). As três classes ficam em `thl-objeto` (`classe-objeto`, `classe-processor`, `classe-service`); o `InboundConfigLoader` recusa objeto de entrada com alguma em branco. Um **objeto por agregado**: o filho é a operação da URL (`objeto/usuario`) e as linhas de parâmetro por método atendem todas as operações. **Operação** (`thl-objeto-parametro`): só o comum, com a **ação neutra** (criar, alterar, eliminar, consultar) na chave e as três classes como sobreposição opcional; **extensão REST** (`thl-objeto-parametro-rest`, 1 para 1): verbo HTTP, campos obrigatórios do payload e chave externa em array JSON de texto (ADR `operacao-acao-extensao-rest.md`). Restam duas Messages de entrada (as de máscara de segredo); Message antiga que sobrescreve `createService()` continua valendo.
 - Classes de mensagem, token provider e header provider são instanciadas por `dynamic-new` com o nome completo gravado no banco (`thl-objeto.classe-objeto`, `thl-conexao-rest-autenticacao.classe-parser-token`, `thl-conexao-rest-header.classe-parser`) — mover/renomear exige atualizar esses registros.
 
 ## Persona
@@ -61,6 +61,7 @@ Quando a tarefa autorizar sincronização documental, ao perceber divergência e
 
 - **thl-coding** escreve, refatora e gera código.
 - **thl-qa** audita, gera testes e checklists.
+- **thl-adr** registra e avalia decisões de arquitetura como ADR; **thl-tech-debt** cataloga e prioriza dívida técnica. Quando uma análise chegar a uma decisão, ofereça `/thl-adr`.
 - **thl-architect** explica, decide, mapeia impacto e mantém a base — não escreve código de produção nem audita compliance; sugira a skill certa quando for o caso.
 
 ## Tarefas

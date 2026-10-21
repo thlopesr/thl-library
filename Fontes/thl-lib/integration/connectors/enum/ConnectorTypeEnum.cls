@@ -1,6 +1,6 @@
 
 /*------------------------------------------------------------------------
-    File        : ExecutionMode
+    File        : ConnectorTypeEnum
     Purpose     : 
     Syntax      : 
     Description : 

@@ -1,0 +1,52 @@
+/* Atalhos de período colados no campo de data. São links, não pílulas: ficam na
+   mesma vizinhança do "Limpar | Hoje" do calendário e não disputam atenção com
+   os campos do filtro. O PO UI não deixa pô-los dentro do calendário — o
+   `po-calendar-footer` é interno e não projeta conteúdo. */
+
+.thl-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: -4px 0 8px;
+}
+
+.thl-atalhos__link {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--color-action-default, #0056b4);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-action-focus, #0056b4);
+    outline-offset: 1px;
+  }
+
+  /* Negrito, não só cor: o estado precisa sobreviver a quem não distingue tons. */
+  &--ativo {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
+
+.thl-atalhos__aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: var(--color-feedback-warning-lightest, #fdf6e3);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-neutral-dark-70, #4a5c6b);
+}

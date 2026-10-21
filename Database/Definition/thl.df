@@ -1,0 +1,2879 @@
+ADD SEQUENCE "thl-seq-id-email"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MAX-VAL 4
+
+ADD TABLE "thl-ambiente"
+  AREA "Schema Area"
+  LABEL "Ambiente de Execução"
+  DESCRIPTION "Ambientes de execução da THL (produção, homologação, desenvolvimento). O ambiente corrente é resolvido pelo IP presente no PROPATH e seleciona as variáveis de configuração de cada parâmetro."
+  DUMP-NAME "thl001"
+
+ADD FIELD "ip" OF "thl-ambiente" AS character 
+  DESCRIPTION "IP (ou trecho) que identifica o ambiente: o ambiente corrente é aquele cujo IP aparece no PROPATH da sessão. Único por ambiente."
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "IP Ambiente"
+  POSITION 2
+  MAX-WIDTH 30
+  COLUMN-LABEL "IP!Ambiente"
+  HELP "Informe o IP que identifica o ambiente no PROPATH."
+  ORDER 20
+
+ADD FIELD "nome-ambiente" OF "thl-ambiente" AS character 
+  DESCRIPTION "Nome descritivo do ambiente de execução."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Nome Ambiente"
+  POSITION 3
+  MAX-WIDTH 30
+  COLUMN-LABEL "Nome!Ambiente"
+  HELP "Informe o nome do ambiente."
+  ORDER 30
+
+ADD FIELD "cod-ambiente" OF "thl-ambiente" AS character 
+  DESCRIPTION "Código do ambiente de execução, ex.: PRD, HML, DEV."
+  FORMAT "x(3)"
+  INITIAL ""
+  LABEL "Ambiente"
+  POSITION 4
+  MAX-WIDTH 6
+  COLUMN-LABEL "Ambiente"
+  HELP "Informe o código do ambiente."
+  ORDER 10
+
+ADD INDEX "pk-ambiente" ON "thl-ambiente" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código do ambiente."
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+
+ADD INDEX "idx-ip" ON "thl-ambiente" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave alternativa única: IP do ambiente."
+  INDEX-FIELD "ip" ASCENDING 
+
+ADD TABLE "thl-ambiente-param"
+  AREA "Schema Area"
+  LABEL "Parâmetro de Ambiente"
+  DESCRIPTION "Parâmetros de configuração técnica (ex.: conexão de uma integração). Os valores por ambiente ficam em thl-ambiente-param-variavel."
+  DUMP-NAME "thl002"
+
+ADD FIELD "descr-param-ambiente" OF "thl-ambiente-param" AS character 
+  DESCRIPTION "Descrição da finalidade do parâmetro de ambiente."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descrição"
+  POSITION 6
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descrição"
+  HELP "Informe a descrição do parâmetro."
+  ORDER 30
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param" AS character 
+  DESCRIPTION "Código do parâmetro de ambiente, referenciado pelos objetos de integração, e-mails e conexões."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Ambiente"
+  POSITION 7
+  MAX-WIDTH 6
+  COLUMN-LABEL "Parâmetro!Ambiente"
+  HELP "Informe o código do parâmetro de ambiente."
+  ORDER 20
+
+ADD INDEX "pk-param" ON "thl-ambiente-param" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código do parâmetro de ambiente."
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-grupo"
+  AREA "Schema Area"
+  LABEL "Grupo de E-mail"
+  DESCRIPTION "Grupos de destinatários de e-mail usados em notificações e envios da THL (cadastro thl0004)."
+  DUMP-NAME "thl017"
+
+ADD FIELD "cod-grp-usuar" OF "thl-ambiente-param-grupo" AS character 
+  DESCRIPTION "Código do grupo de e-mail."
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Grupo E-mail"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Grupo!E-mail"
+  HELP "Informe o código do grupo de e-mail."
+  ORDER 10
+
+ADD FIELD "descricao" OF "thl-ambiente-param-grupo" AS character 
+  DESCRIPTION "Descrição do grupo de e-mail."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descrição"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descrição"
+  HELP "Informe a descrição do grupo."
+  ORDER 20
+
+ADD INDEX "pk-cod-grp-usuar" ON "thl-ambiente-param-grupo" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código do grupo de e-mail."
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-grupo-usuar"
+  AREA "Schema Area"
+  LABEL "Usuário do Grupo de E-mail"
+  DESCRIPTION "Usuários que compõem um grupo de e-mail, com e-mail alternativo opcional (cadastro thl0004)."
+  DUMP-NAME "thl014"
+
+ADD FIELD "cod-grp-usuar" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "Código do grupo de e-mail (thl-ambiente-param-grupo, cadastrado no thl0004)."
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Grupo E-mail"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Grupo!E-mail"
+  HELP "Informe o código do grupo de e-mail."
+  ORDER 10
+
+ADD FIELD "cod-usuario" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "Código do usuário Datasul que recebe os e-mails do grupo."
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Usuário"
+  POSITION 3
+  MAX-WIDTH 24
+  COLUMN-LABEL "Usuário"
+  HELP "Informe o código do usuário."
+  ORDER 20
+
+ADD FIELD "email-alternativo" OF "thl-ambiente-param-grupo-usuar" AS character 
+  DESCRIPTION "E-mail usado no lugar do e-mail do cadastro do usuário, quando informado."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "E-mail Alternativo"
+  POSITION 4
+  MAX-WIDTH 400
+  COLUMN-LABEL "E-mail!Alternativo"
+  HELP "Informe o e-mail alternativo (opcional)."
+  ORDER 30
+
+ADD INDEX "fk-grupo" ON "thl-ambiente-param-grupo-usuar" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Chave estrangeira: thl-ambiente-param-grupo."
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+
+ADD INDEX "pk-grupo-usuar" ON "thl-ambiente-param-grupo-usuar" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: grupo, usuário e e-mail alternativo."
+  INDEX-FIELD "cod-grp-usuar" ASCENDING 
+  INDEX-FIELD "cod-usuario" ASCENDING 
+  INDEX-FIELD "email-alternativo" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-prog"
+  AREA "Schema Area"
+  LABEL "Programa do Parâmetro"
+  DESCRIPTION "Programas Datasul vinculados a um parâmetro de ambiente. Permite resolver o parâmetro pela pilha de chamadas (call stack) do programa em execução."
+  DUMP-NAME "thl003"
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param-prog" AS character 
+  DESCRIPTION "Código do parâmetro de ambiente (thl-ambiente-param)."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Ambiente"
+  POSITION 3
+  MAX-WIDTH 6
+  COLUMN-LABEL "Parâmetro!Ambiente"
+  HELP "Informe o código do parâmetro de ambiente."
+  ORDER 20
+
+ADD FIELD "cod-prog-dtsul" OF "thl-ambiente-param-prog" AS character 
+  DESCRIPTION "Programa Datasul vinculado ao parâmetro; quando aparece na pilha de chamadas, o parâmetro é aplicado."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Programa"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Programa"
+  HELP "Informe o programa Datasul."
+  ORDER 30
+
+ADD INDEX "pk-param-prog" ON "thl-ambiente-param-prog" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: parâmetro e programa."
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+  INDEX-FIELD "cod-prog-dtsul" ASCENDING 
+
+ADD INDEX "fk-param" ON "thl-ambiente-param-prog" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-ambiente-param."
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD TABLE "thl-ambiente-param-variavel"
+  AREA "Schema Area"
+  LABEL "Variável do Parâmetro"
+  DESCRIPTION "Valores de configuração de um parâmetro em cada ambiente (ex.: URL, usuário, pasta), identificados por código de variável."
+  DUMP-NAME "thl005"
+
+ADD FIELD "cod-ambiente" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Código do ambiente de execução (thl-ambiente)."
+  FORMAT "x(3)"
+  INITIAL ""
+  LABEL "Ambiente"
+  POSITION 2
+  MAX-WIDTH 6
+  COLUMN-LABEL "Ambiente"
+  HELP "Informe o código do ambiente."
+  ORDER 10
+
+ADD FIELD "cod-param-ambiente" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Código do parâmetro de ambiente (thl-ambiente-param)."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Ambiente"
+  POSITION 3
+  MAX-WIDTH 6
+  COLUMN-LABEL "Parâmetro!Ambiente"
+  HELP "Informe o código do parâmetro de ambiente."
+  ORDER 20
+
+ADD FIELD "descr-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Descrição da finalidade da variável."
+  FORMAT "x(140)"
+  INITIAL ""
+  LABEL "Descrição Variável"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descrição!Variável"
+  HELP "Informe a descrição da variável."
+  ORDER 50
+
+ADD FIELD "valor-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Valor da variável no ambiente."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Valor"
+  POSITION 5
+  MAX-WIDTH 400
+  COLUMN-LABEL "Valor"
+  HELP "Informe o valor da variável neste ambiente."
+  ORDER 60
+
+ADD FIELD "cod-variavel" OF "thl-ambiente-param-variavel" AS character 
+  DESCRIPTION "Código da variável do parâmetro, ex.: URL, USUARIO, PASTA."
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Variável"
+  POSITION 6
+  MAX-WIDTH 30
+  COLUMN-LABEL "Variável"
+  HELP "Informe o código da variável."
+  ORDER 30
+
+ADD INDEX "idx-ambiente-param-variavel" ON "thl-ambiente-param-variavel" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Busca das variáveis de um parâmetro no ambiente."
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+
+ADD INDEX "pk-ambiente-param-variavel" ON "thl-ambiente-param-variavel" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: ambiente, parâmetro e variável."
+  INDEX-FIELD "cod-ambiente" ASCENDING 
+  INDEX-FIELD "cod-param-ambiente" ASCENDING 
+  INDEX-FIELD "cod-variavel" ASCENDING 
+
+ADD TABLE "thl-aplicacao"
+  AREA "Schema Area"
+  DUMP-NAME "thl004"
+
+ADD FIELD "aplicacao" OF "thl-aplicacao" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo)."
+  ORDER 10
+
+ADD FIELD "descricao" OF "thl-aplicacao" AS character 
+  DESCRIPTION "Descrição"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descrição"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descrição"
+  HELP "Descrição"
+  ORDER 20
+
+ADD FIELD "ind-interna" OF "thl-aplicacao" AS logical 
+  DESCRIPTION "Indica que a aplicação é do próprio THL (cadastros, consultas e métricas) e não de um sistema externo. Usado para separar o tráfego interno nos monitores e nas métricas."
+  FORMAT "Sim/Não"
+  INITIAL "Não"
+  LABEL "Interna"
+  POSITION 4
+  MAX-WIDTH 1
+  COLUMN-LABEL "Interna"
+  HELP "Marque Sim para aplicação do próprio THL."
+  ORDER 30
+
+ADD INDEX "pk-aplicacao" ON "thl-aplicacao" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "aplicacao" ASCENDING 
+
+ADD TABLE "thl-audit-registro"
+  AREA "Schema Area"
+  LABEL "Registro de Auditoria"
+  DESCRIPTION "Eventos de auditoria gravados pelos triggers (AuditLogService): uma linha por inclusão, alteração ou exclusão em tabela auditada. Os valores ficam em thl-audit-registro-detalhe."
+  DUMP-NAME "thl006"
+
+ADD FIELD "tabela" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Nome da tabela auditada."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 2
+  MAX-WIDTH 80
+  COLUMN-LABEL "Tabela"
+  HELP "Tabela auditada."
+  ORDER 30
+
+ADD FIELD "data-criacao" OF "thl-audit-registro" AS datetime 
+  DESCRIPTION "Data e hora em que o evento foi auditado."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Evento"
+  POSITION 4
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Evento"
+  HELP "Data e hora do evento."
+  ORDER 90
+
+ADD FIELD "tipo" OF "thl-audit-registro" AS integer 
+  DESCRIPTION "Operação auditada: 1=Inclusão, 2=Alteração, 3=Exclusão (AuditOperationEnum)."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Operação"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "Operação"
+  HELP "1=Inclusão, 2=Alteração, 3=Exclusão."
+  ORDER 40
+
+ADD FIELD "usuario" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Usuário Datasul que executou a operação."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Usuário"
+  POSITION 6
+  MAX-WIDTH 60
+  COLUMN-LABEL "Usuário"
+  HELP "Usuário Datasul que executou a operação."
+  ORDER 60
+
+ADD FIELD "programa-executado" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Pilha de programas em execução no momento do evento."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Programas"
+  POSITION 7
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Programas"
+  HELP "Programas em execução no momento do evento."
+  ORDER 70
+
+ADD FIELD "referencia" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Valores da chave do registro auditado, montados com os campos informados em thl-audit-tabela.pk."
+  FORMAT "x(400)"
+  INITIAL ""
+  LABEL "Referência"
+  POSITION 9
+  MAX-WIDTH 60
+  COLUMN-LABEL "Referência"
+  HELP "Chave do registro auditado."
+  ORDER 50
+
+ADD FIELD "id-registro" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Identificador único (GUID) do evento de auditoria."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "ID Registro"
+  POSITION 11
+  MAX-WIDTH 128
+  COLUMN-LABEL "ID!Registro"
+  HELP "Identificador gerado automaticamente."
+  ORDER 10
+
+ADD FIELD "campos" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Lista dos campos alterados no evento, separados por vírgula."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Campos Alterados"
+  POSITION 12
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Campos!Alterados"
+  HELP "Campos alterados no evento."
+  ORDER 80
+
+ADD FIELD "banco" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Banco da tabela auditada, gravado com o prefixo sh + nome lógico do banco."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 13
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Banco da tabela auditada."
+  ORDER 20
+
+ADD FIELD "usuario-so" OF "thl-audit-registro" AS character 
+  DESCRIPTION "Usuário do sistema operacional da sessão (USERNAME)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Usuário SO"
+  POSITION 14
+  MAX-WIDTH 200
+  COLUMN-LABEL "Usuário!SO"
+  HELP "Usuário do sistema operacional."
+  ORDER 100
+
+ADD INDEX "pk-audit" ON "thl-audit-registro" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: identificador do evento."
+  INDEX-FIELD "id-registro" ASCENDING 
+
+ADD INDEX "fk-audit-tabela" ON "thl-audit-registro" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-audit-tabela (banco com prefixo sh)."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD INDEX "idx-audit-data" ON "thl-audit-registro" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca por data do evento."
+  INDEX-FIELD "data-criacao" ASCENDING 
+
+ADD INDEX "idx-tabela-data" ON "thl-audit-registro" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca dos eventos de uma tabela por período (consulta de auditoria e purge)."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "data-criacao" ASCENDING 
+
+ADD TABLE "thl-audit-registro-detalhe"
+  AREA "Schema Area"
+  LABEL "Detalhe da Auditoria"
+  DESCRIPTION "Imagens (snapshots) do registro auditado em JSON: valores atuais e anteriores de cada evento de thl-audit-registro."
+  DUMP-NAME "thl025"
+
+ADD FIELD "id-registro" OF "thl-audit-registro-detalhe" AS character 
+  DESCRIPTION "Evento de auditoria (thl-audit-registro) ao qual o detalhe pertence."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "ID Registro"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "ID!Registro"
+  HELP "Identificador do evento de auditoria."
+  ORDER 10
+
+ADD FIELD "tipo" OF "thl-audit-registro-detalhe" AS integer 
+  DESCRIPTION "Imagem do registro: 1=Atual (depois do evento), 2=Anterior (antes do evento) (AuditSnapshotEnum)."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Imagem"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Imagem"
+  HELP "1=Atual, 2=Anterior."
+  ORDER 20
+
+ADD FIELD "valor" OF "thl-audit-registro-detalhe" AS clob 
+  DESCRIPTION "Valores dos campos do registro auditado em JSON."
+  FORMAT "x(8)"
+  INITIAL ?
+  LABEL "Valores"
+  POSITION 5
+  LOB-AREA "Schema Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  CLOB-CODEPAGE "iso8859-1"
+  CLOB-COLLATION "basic"
+  CLOB-TYPE 1
+  COLUMN-LABEL "Valores"
+  HELP "Valores do registro em JSON."
+  ORDER 30
+
+ADD INDEX "fk-audit-registro" ON "thl-audit-registro-detalhe" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Chave estrangeira: thl-audit-registro."
+  INDEX-FIELD "id-registro" ASCENDING 
+
+ADD INDEX "pk-reg-detalhe" ON "thl-audit-registro-detalhe" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: evento e tipo de imagem."
+  INDEX-FIELD "id-registro" ASCENDING 
+  INDEX-FIELD "tipo" ASCENDING 
+
+ADD TABLE "thl-audit-registro-notificar"
+  AREA "Schema Area"
+  LABEL "Notificação de Auditoria"
+  DESCRIPTION "Controle de envio das notificações de auditoria por evento e nível de sensibilidade (fila de pendentes, enviados e com erro)."
+  DUMP-NAME "thl031"
+
+ADD FIELD "id-registro" OF "thl-audit-registro-notificar" AS character 
+  DESCRIPTION "Evento de auditoria (thl-audit-registro) a notificar."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "ID Registro"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "ID!Registro"
+  HELP "Identificador do evento de auditoria."
+  ORDER 10
+
+ADD FIELD "nivel-sensibilidade" OF "thl-audit-registro-notificar" AS integer 
+  DESCRIPTION "Nível de sensibilidade notificado: 1=Normal, 5=Restrito, 9=Crítico."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Nível Sensibilidade"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Nível!Sensib."
+  HELP "1=Normal, 5=Restrito, 9=Crítico."
+  ORDER 20
+
+ADD FIELD "situacao" OF "thl-audit-registro-notificar" AS integer 
+  DESCRIPTION "Situação do envio: 0=Pendente, 1=Enviado, 9=Erro."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Situação"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "Situação"
+  HELP "0=Pendente, 1=Enviado, 9=Erro."
+  ORDER 30
+
+ADD FIELD "dt-notificacao" OF "thl-audit-registro-notificar" AS datetime 
+  DESCRIPTION "Data e hora do envio da notificação."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Notificação"
+  POSITION 5
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Notificação"
+  HELP "Data e hora do envio."
+  ORDER 40
+
+ADD FIELD "msg-erro" OF "thl-audit-registro-notificar" AS character 
+  DESCRIPTION "Mensagem de erro quando o envio falha."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Mensagem Erro"
+  POSITION 6
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Mensagem!Erro"
+  HELP "Erro retornado no envio."
+  ORDER 50
+
+ADD INDEX "fk-audit-registro" ON "thl-audit-registro-notificar" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Chave estrangeira: thl-audit-registro."
+  INDEX-FIELD "id-registro" ASCENDING 
+
+ADD INDEX "idx-notificar-situacao" ON "thl-audit-registro-notificar" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca das notificações por situação (fila de pendentes)."
+  INDEX-FIELD "situacao" ASCENDING 
+  INDEX-FIELD "id-registro" ASCENDING 
+
+ADD INDEX "pk-notificar" ON "thl-audit-registro-notificar" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: evento e nível de sensibilidade."
+  INDEX-FIELD "id-registro" ASCENDING 
+  INDEX-FIELD "nivel-sensibilidade" ASCENDING 
+
+ADD TABLE "thl-audit-tabela"
+  AREA "Schema Area"
+  LABEL "Tabela Auditada"
+  DESCRIPTION "Configuração das tabelas auditadas: quais operações registrar, nível de sensibilidade e campos da chave usados na referência (cadastros thl0020/thl0021)."
+  DUMP-NAME "thl026"
+
+ADD FIELD "tabela" OF "thl-audit-tabela" AS character 
+  DESCRIPTION "Nome da tabela auditada."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Tabela"
+  HELP "Informe o nome da tabela a auditar."
+  ORDER 20
+
+ADD FIELD "banco" OF "thl-audit-tabela" AS character 
+  DESCRIPTION "Nome lógico do banco de dados da tabela auditada (DBNAME do buffer no trigger)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Informe o nome lógico do banco de dados."
+  ORDER 10
+
+ADD FIELD "pk" OF "thl-audit-tabela" AS character 
+  DESCRIPTION "Campos que identificam o registro auditado, separados por vírgula. Seus valores formam a referência do evento."
+  FORMAT "x(500)"
+  INITIAL ""
+  LABEL "Campos Chave"
+  POSITION 5
+  MAX-WIDTH 1000
+  COLUMN-LABEL "Campos!Chave"
+  HELP "Informe os campos da chave, separados por vírgula."
+  ORDER 40
+
+ADD FIELD "ind-ativo-create" OF "thl-audit-tabela" AS logical 
+  DESCRIPTION "Indica se as inclusões na tabela são auditadas."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Audita Inclusão"
+  POSITION 6
+  MAX-WIDTH 1
+  COLUMN-LABEL "Audita!Inclusão"
+  HELP "Marque Sim para auditar inclusões."
+  ORDER 50
+
+ADD FIELD "ind-ativo-update" OF "thl-audit-tabela" AS logical 
+  DESCRIPTION "Indica se as alterações na tabela são auditadas."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Audita Alteração"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "Audita!Alteração"
+  HELP "Marque Sim para auditar alterações."
+  ORDER 60
+
+ADD FIELD "ind-ativo-delete" OF "thl-audit-tabela" AS logical 
+  DESCRIPTION "Indica se as exclusões na tabela são auditadas."
+  FORMAT "Sim/Nao"
+  INITIAL "Nao"
+  LABEL "Audita Exclusão"
+  POSITION 8
+  MAX-WIDTH 1
+  COLUMN-LABEL "Audita!Exclusão"
+  HELP "Marque Sim para auditar exclusões."
+  ORDER 70
+
+ADD FIELD "nivel-sensibilidade" OF "thl-audit-tabela" AS integer 
+  DESCRIPTION "Nível de sensibilidade da tabela: 1=Normal, 5=Restrito, 9=Crítico. O usuário só consulta se seu nível de acesso for igual ou maior."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Nível Sensibilidade"
+  POSITION 9
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl026.i 2}"
+  COLUMN-LABEL "Nível!Sensib."
+  HELP "1=Normal, 5=Restrito, 9=Crítico."
+  ORDER 80
+
+ADD FIELD "dt-atualizacao" OF "thl-audit-tabela" AS datetime 
+  DESCRIPTION "Data e hora da última alteração da configuração."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Atualização"
+  POSITION 10
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Atualização"
+  HELP "Data e hora da última alteração."
+  ORDER 90
+
+ADD FIELD "cod-usuario" OF "thl-audit-tabela" AS character 
+  DESCRIPTION "Usuário que fez a última alteração da configuração."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Usuário Atualização"
+  POSITION 11
+  MAX-WIDTH 80
+  COLUMN-LABEL "Usuário!Atualização"
+  HELP "Usuário da última alteração."
+  ORDER 100
+
+ADD FIELD "ind-audit-tabela" OF "thl-audit-tabela" AS logical 
+  DESCRIPTION "Indica se todos os campos são auditados. Quando Não, só os campos ativos de thl-audit-tabela-campo."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Todos os Campos"
+  POSITION 12
+  MAX-WIDTH 1
+  COLUMN-LABEL "Todos!Campos"
+  HELP "Marque Sim para auditar todos os campos."
+  ORDER 110
+
+ADD INDEX "pk-tabela" ON "thl-audit-tabela" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: banco e tabela."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD TABLE "thl-audit-tabela-acesso"
+  AREA "Schema Area"
+  LABEL "Acesso à Auditoria"
+  DESCRIPTION "Permissão de consulta ao histórico de auditoria por usuário e tabela, com nível de acesso comparado à sensibilidade dos campos."
+  DUMP-NAME "thl028"
+
+ADD FIELD "banco" OF "thl-audit-tabela-acesso" AS character 
+  DESCRIPTION "Nome lógico do banco de dados da tabela auditada (DBNAME do buffer no trigger)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Informe o nome lógico do banco de dados."
+  ORDER 10
+
+ADD FIELD "tabela" OF "thl-audit-tabela-acesso" AS character 
+  DESCRIPTION "Nome da tabela auditada. Com o banco, identifica a configuração em thl-audit-tabela."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Tabela"
+  HELP "Informe o nome da tabela auditada."
+  ORDER 20
+
+ADD FIELD "cod-usuario" OF "thl-audit-tabela-acesso" AS character 
+  DESCRIPTION "Usuário Datasul autorizado a consultar a auditoria da tabela."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Usuário"
+  POSITION 4
+  MAX-WIDTH 80
+  COLUMN-LABEL "Usuário"
+  HELP "Informe o usuário Datasul."
+  ORDER 30
+
+ADD FIELD "nivel-acesso" OF "thl-audit-tabela-acesso" AS integer 
+  DESCRIPTION "Nível de acesso do usuário: 1=Normal, 5=Restrito, 9=Crítico. Campos com sensibilidade maior ficam ocultos."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Nível Acesso"
+  POSITION 5
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl026.i 2}"
+  COLUMN-LABEL "Nível!Acesso"
+  HELP "1=Normal, 5=Restrito, 9=Crítico."
+  ORDER 40
+
+ADD FIELD "ind-ativo" OF "thl-audit-tabela-acesso" AS logical 
+  DESCRIPTION "Indica se o acesso está ativo."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Ativo"
+  POSITION 6
+  MAX-WIDTH 1
+  COLUMN-LABEL "Ativo"
+  HELP "Marque Sim para liberar o acesso."
+  ORDER 50
+
+ADD INDEX "pk-acesso" ON "thl-audit-tabela-acesso" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: banco, tabela e usuário."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "cod-usuario" ASCENDING 
+
+ADD INDEX "fk-audit-tabela" ON "thl-audit-tabela-acesso" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-audit-tabela."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD INDEX "idx-usuario" ON "thl-audit-tabela-acesso" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca das tabelas liberadas a um usuário (consulta de auditoria)."
+  INDEX-FIELD "cod-usuario" ASCENDING 
+  INDEX-FIELD "ind-ativo" ASCENDING 
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD TABLE "thl-audit-tabela-campo"
+  AREA "Schema Area"
+  LABEL "Campo Auditado"
+  DESCRIPTION "Campos monitorados em cada tabela auditada e seu nível de sensibilidade. Usado quando a tabela não audita todos os campos."
+  DUMP-NAME "thl013"
+
+ADD FIELD "banco" OF "thl-audit-tabela-campo" AS character 
+  DESCRIPTION "Nome lógico do banco de dados da tabela auditada (DBNAME do buffer no trigger)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Informe o nome lógico do banco de dados."
+  ORDER 10
+
+ADD FIELD "tabela" OF "thl-audit-tabela-campo" AS character 
+  DESCRIPTION "Nome da tabela auditada. Com o banco, identifica a configuração em thl-audit-tabela."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Tabela"
+  HELP "Informe o nome da tabela auditada."
+  ORDER 20
+
+ADD FIELD "campo" OF "thl-audit-tabela-campo" AS character 
+  DESCRIPTION "Nome do campo monitorado."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Campo"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Campo"
+  HELP "Informe o nome do campo."
+  ORDER 30
+
+ADD FIELD "nivel-sensibilidade" OF "thl-audit-tabela-campo" AS integer 
+  DESCRIPTION "Nível de sensibilidade do campo: 1=Normal, 5=Restrito, 9=Crítico. Só aparece para quem tem nível de acesso igual ou maior."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Nível Sensibilidade"
+  POSITION 5
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl026.i 2}"
+  COLUMN-LABEL "Nível!Sensib."
+  HELP "1=Normal, 5=Restrito, 9=Crítico."
+  ORDER 40
+
+ADD FIELD "ind-ativo" OF "thl-audit-tabela-campo" AS logical 
+  DESCRIPTION "Indica se o campo está ativo no monitoramento."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Ativo"
+  POSITION 6
+  MAX-WIDTH 1
+  COLUMN-LABEL "Ativo"
+  HELP "Marque Sim para monitorar o campo."
+  ORDER 50
+
+ADD INDEX "pk-campo" ON "thl-audit-tabela-campo" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: banco, tabela e campo."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "campo" ASCENDING 
+
+ADD INDEX "idx-ativo" ON "thl-audit-tabela-campo" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca dos campos ativos de uma tabela (trigger de auditoria)."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "ind-ativo" ASCENDING 
+  INDEX-FIELD "campo" ASCENDING 
+
+ADD INDEX "idx-campo-tabela" ON "thl-audit-tabela-campo" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca por tabela."
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "banco" ASCENDING 
+
+ADD TABLE "thl-audit-tabela-notificacao"
+  AREA "Schema Area"
+  LABEL "Notificação da Tabela Auditada"
+  DESCRIPTION "Regras de notificação por tabela auditada e nível de sensibilidade: qual grupo de e-mail avisar."
+  DUMP-NAME "thl029"
+
+ADD FIELD "banco" OF "thl-audit-tabela-notificacao" AS character 
+  DESCRIPTION "Nome lógico do banco de dados da tabela auditada (DBNAME do buffer no trigger)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Informe o nome lógico do banco de dados."
+  ORDER 10
+
+ADD FIELD "tabela" OF "thl-audit-tabela-notificacao" AS character 
+  DESCRIPTION "Nome da tabela auditada. Com o banco, identifica a configuração em thl-audit-tabela."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Tabela"
+  HELP "Informe o nome da tabela auditada."
+  ORDER 20
+
+ADD FIELD "nivel-sensibilidade" OF "thl-audit-tabela-notificacao" AS integer 
+  DESCRIPTION "Nível de sensibilidade que dispara a notificação: 1=Normal, 5=Restrito, 9=Crítico."
+  FORMAT "9"
+  INITIAL "9"
+  LABEL "Nível Sensibilidade"
+  POSITION 4
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl026.i 2}"
+  COLUMN-LABEL "Nível!Sensib."
+  HELP "1=Normal, 5=Restrito, 9=Crítico."
+  ORDER 30
+
+ADD FIELD "grupo-email" OF "thl-audit-tabela-notificacao" AS character 
+  DESCRIPTION "Código do grupo de e-mail (thl-ambiente-param-grupo, cadastrado no thl0004)."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Grupo E-mail"
+  POSITION 5
+  MAX-WIDTH 80
+  COLUMN-LABEL "Grupo!E-mail"
+  HELP "Informe o código do grupo de e-mail."
+  ORDER 40
+
+ADD FIELD "ind-ativo" OF "thl-audit-tabela-notificacao" AS logical 
+  DESCRIPTION "Indica se a notificação está ativa."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Ativo"
+  POSITION 6
+  MAX-WIDTH 1
+  COLUMN-LABEL "Ativo"
+  HELP "Marque Sim para ativar a notificação."
+  ORDER 50
+
+ADD INDEX "pk-notificacao" ON "thl-audit-tabela-notificacao" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: banco, tabela e nível de sensibilidade."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+  INDEX-FIELD "nivel-sensibilidade" ASCENDING 
+
+ADD INDEX "fk-audit-tabela" ON "thl-audit-tabela-notificacao" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-audit-tabela."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD TABLE "thl-audit-tabela-purge"
+  AREA "Schema Area"
+  LABEL "Retenção da Auditoria"
+  DESCRIPTION "Política de retenção (purge) do histórico de auditoria por tabela: dias mantidos e data da última execução."
+  DUMP-NAME "thl030"
+
+ADD FIELD "banco" OF "thl-audit-tabela-purge" AS character 
+  DESCRIPTION "Nome lógico do banco de dados da tabela auditada (DBNAME do buffer no trigger)."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Banco"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Banco"
+  HELP "Informe o nome lógico do banco de dados."
+  ORDER 10
+
+ADD FIELD "tabela" OF "thl-audit-tabela-purge" AS character 
+  DESCRIPTION "Nome da tabela auditada. Com o banco, identifica a configuração em thl-audit-tabela."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Tabela"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Tabela"
+  HELP "Informe o nome da tabela auditada."
+  ORDER 20
+
+ADD FIELD "retencao-dias" OF "thl-audit-tabela-purge" AS integer 
+  DESCRIPTION "Quantidade de dias que os eventos de auditoria da tabela são mantidos antes do purge."
+  FORMAT ">>>>9"
+  INITIAL "365"
+  LABEL "Retenção (dias)"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "Retenção!(dias)"
+  HELP "Informe quantos dias manter o histórico."
+  ORDER 30
+
+ADD FIELD "dt-ultima-execucao" OF "thl-audit-tabela-purge" AS datetime 
+  DESCRIPTION "Data e hora da última execução do purge."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Última Execução"
+  POSITION 5
+  MAX-WIDTH 8
+  COLUMN-LABEL "Última!Execução"
+  HELP "Data e hora da última execução do purge."
+  ORDER 40
+
+ADD INDEX "pk-purge" ON "thl-audit-tabela-purge" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: banco e tabela (relação 1:1 com thl-audit-tabela)."
+  INDEX-FIELD "banco" ASCENDING 
+  INDEX-FIELD "tabela" ASCENDING 
+
+ADD TABLE "thl-conexao-rest"
+  AREA "Schema Area"
+  LABEL "Conexão REST"
+  DESCRIPTION "Conexões com APIs externas: URL base e indicadores de autenticação e de cabeçalho calculado. Endpoints em thl-conexao-rest-path."
+  DUMP-NAME "thl018"
+
+ADD FIELD "cod-conexao" OF "thl-conexao-rest" AS character 
+  DESCRIPTION "Código da conexão REST. A integração o obtém da variável do parâmetro de ambiente da conexão."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Conexão REST"
+  POSITION 2
+  MAX-WIDTH 80
+  COLUMN-LABEL "Conexão!REST"
+  HELP "Informe o código da conexão REST."
+  ORDER 10
+
+ADD FIELD "des-conexao" OF "thl-conexao-rest" AS character 
+  DESCRIPTION "Descrição da API externa da conexão."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descrição"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descrição"
+  HELP "Informe a descrição da conexão."
+  ORDER 20
+
+ADD FIELD "url-base" OF "thl-conexao-rest" AS character 
+  DESCRIPTION "URL base da API externa; o path do endpoint é concatenado a ela."
+  FORMAT "x(500)"
+  INITIAL ""
+  LABEL "URL Base"
+  POSITION 4
+  MAX-WIDTH 1000
+  COLUMN-LABEL "URL Base"
+  HELP "Informe a URL base da API."
+  ORDER 30
+
+ADD FIELD "ind-requisita-autenticacao" OF "thl-conexao-rest" AS logical 
+  DESCRIPTION "Indica se a conexão usa a configuração de thl-conexao-rest-autenticacao."
+  FORMAT "Sim/Nao"
+  INITIAL "Nao"
+  LABEL "Requer Autenticação"
+  POSITION 6
+  MAX-WIDTH 1
+  COLUMN-LABEL "Requer!Autent."
+  HELP "Marque Sim se a API exige autenticação."
+  ORDER 50
+
+ADD FIELD "ind-requisita-header" OF "thl-conexao-rest" AS logical 
+  DESCRIPTION "Indica se a conexão calcula cabeçalhos pela classe de thl-conexao-rest-header."
+  FORMAT "Sim/Nao"
+  INITIAL "Nao"
+  LABEL "Requer Cabeçalho"
+  POSITION 27
+  MAX-WIDTH 1
+  COLUMN-LABEL "Requer!Cabeçalho"
+  HELP "Marque Sim se a API exige cabeçalho calculado."
+  ORDER 60
+
+ADD INDEX "pk-conexao-rest" ON "thl-conexao-rest" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código da conexão."
+  INDEX-FIELD "cod-conexao" ASCENDING 
+
+ADD TABLE "thl-conexao-rest-autenticacao"
+  AREA "Schema Area"
+  LABEL "Autenticação REST"
+  DESCRIPTION "Configuração de autenticação de uma conexão REST (token, usuário e senha, classe parser) e o token vigente com sua expiração."
+  DUMP-NAME "thl020"
+
+ADD FIELD "cod-conexao" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Código da conexão REST (thl-conexao-rest)."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Conexão REST"
+  POSITION 2
+  MAX-WIDTH 80
+  COLUMN-LABEL "Conexão!REST"
+  HELP "Informe o código da conexão REST."
+  ORDER 10
+
+ADD FIELD "url-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "URL do serviço que gera o token."
+  FORMAT "x(300)"
+  INITIAL ""
+  LABEL "URL Token"
+  POSITION 3
+  MAX-WIDTH 600
+  COLUMN-LABEL "URL!Token"
+  HELP "Informe a URL do serviço de token."
+  ORDER 20
+
+ADD FIELD "content-type-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Content-Type da requisição de token."
+  FORMAT "x(80)"
+  INITIAL "application/json"
+  LABEL "Content-Type Token"
+  POSITION 4
+  MAX-WIDTH 160
+  COLUMN-LABEL "Content-Type!Token"
+  HELP "Informe o content-type da requisição de token."
+  ORDER 30
+
+ADD FIELD "accept-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Accept da requisição de token."
+  FORMAT "x(80)"
+  INITIAL "application/json"
+  LABEL "Accept Token"
+  POSITION 5
+  MAX-WIDTH 160
+  COLUMN-LABEL "Accept!Token"
+  HELP "Informe o accept da requisição de token."
+  ORDER 40
+
+ADD FIELD "headers-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Cabeçalhos da requisição de token, em JSON."
+  FORMAT "x(4000)"
+  INITIAL ?
+  LABEL "Cabeçalhos Token"
+  POSITION 6
+  MAX-WIDTH 16
+  COLUMN-LABEL "Cabeçalhos!Token"
+  HELP "Informe os cabeçalhos da requisição de token em JSON."
+  ORDER 50
+
+ADD FIELD "parameters-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Parâmetros da requisição de token, em JSON."
+  FORMAT "x(4000)"
+  INITIAL ?
+  LABEL "Parâmetros Token"
+  POSITION 7
+  MAX-WIDTH 16
+  COLUMN-LABEL "Parâmetros!Token"
+  HELP "Informe os parâmetros da requisição de token em JSON."
+  ORDER 60
+
+ADD FIELD "tipo-autenticacao" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Tipo de autenticação: NONE, BASIC, BEARER, API_KEY, OAUTH2 ou CUSTOM."
+  FORMAT "x(20)"
+  INITIAL "NONE"
+  LABEL "Tipo Autenticação"
+  POSITION 8
+  MAX-WIDTH 40
+  COLUMN-LABEL "Tipo!Autenticação"
+  HELP "Informe NONE, BASIC, BEARER, API_KEY, OAUTH2 ou CUSTOM."
+  ORDER 70
+
+ADD FIELD "ind-requisita-token" OF "thl-conexao-rest-autenticacao" AS logical 
+  DESCRIPTION "Indica se é preciso chamar o serviço de token antes das requisições."
+  FORMAT "Sim/Não"
+  INITIAL "no"
+  LABEL "Requer Token"
+  POSITION 9
+  MAX-WIDTH 1
+  COLUMN-LABEL "Requer!Token"
+  HELP "Marque Sim para obter token antes das requisições."
+  ORDER 80
+
+ADD FIELD "usuario" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Usuário da autenticação, quando aplicável."
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Usuário"
+  POSITION 10
+  MAX-WIDTH 160
+  COLUMN-LABEL "Usuário"
+  HELP "Informe o usuário da autenticação."
+  ORDER 90
+
+ADD FIELD "senha" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Senha ou credencial da autenticação. Gravada sem criptografia."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Senha"
+  POSITION 11
+  MAX-WIDTH 400
+  COLUMN-LABEL "Senha"
+  HELP "Informe a senha ou credencial da autenticação."
+  ORDER 100
+
+ADD FIELD "token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Token vigente, gravado pela biblioteca após a autenticação."
+  FORMAT "x(4000)"
+  INITIAL ?
+  LABEL "Token"
+  POSITION 12
+  MAX-WIDTH 16
+  COLUMN-LABEL "Token"
+  HELP "Gravado automaticamente pela biblioteca."
+  ORDER 110
+
+ADD FIELD "raw-token-data" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Retorno bruto do serviço de token."
+  FORMAT "x(4000)"
+  INITIAL ?
+  LABEL "Retorno Token"
+  POSITION 13
+  MAX-WIDTH 16
+  COLUMN-LABEL "Retorno!Token"
+  HELP "Gravado automaticamente pela biblioteca."
+  ORDER 120
+
+ADD FIELD "dt-expiracao-token" OF "thl-conexao-rest-autenticacao" AS datetime 
+  DESCRIPTION "Data e hora de expiração do token vigente."
+  FORMAT "99/99/9999 HH:MM:SS"
+  INITIAL ?
+  LABEL "Expiração Token"
+  POSITION 14
+  MAX-WIDTH 8
+  COLUMN-LABEL "Expiração!Token"
+  HELP "Gravado automaticamente pela biblioteca."
+  ORDER 130
+
+ADD FIELD "classe-parser-token" OF "thl-conexao-rest-autenticacao" AS character 
+  DESCRIPTION "Classe (ITokenProvider) que interpreta o retorno do token, com o nome completo do pacote. Opcional."
+  FORMAT "x(400)"
+  INITIAL ""
+  LABEL "Classe Parser Token"
+  POSITION 15
+  MAX-WIDTH 400
+  COLUMN-LABEL "Classe!Parser"
+  HELP "Informe a classe ITokenProvider (pacote completo)."
+  ORDER 140
+
+ADD INDEX "pk-conexao-rest" ON "thl-conexao-rest-autenticacao" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: conexão (relação 1:1 com thl-conexao-rest)."
+  INDEX-FIELD "cod-conexao" ASCENDING 
+
+ADD TABLE "thl-conexao-rest-header"
+  AREA "Schema Area"
+  LABEL "Cabeçalho Calculado REST"
+  DESCRIPTION "Classe (IHeaderProvider) que calcula cabeçalhos HTTP de uma conexão REST, ex.: assinatura do corpo, com seus parâmetros."
+  DUMP-NAME "thl022"
+
+ADD FIELD "cod-conexao" OF "thl-conexao-rest-header" AS character 
+  DESCRIPTION "Código da conexão REST (thl-conexao-rest)."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Conexão REST"
+  POSITION 2
+  MAX-WIDTH 80
+  COLUMN-LABEL "Conexão!REST"
+  HELP "Informe o código da conexão REST."
+  ORDER 10
+
+ADD FIELD "classe-parser" OF "thl-conexao-rest-header" AS character 
+  DESCRIPTION "Classe (IHeaderProvider) que calcula os cabeçalhos HTTP, com o nome completo do pacote."
+  FORMAT "x(400)"
+  INITIAL ""
+  LABEL "Classe Cabeçalho"
+  POSITION 3
+  MAX-WIDTH 800
+  COLUMN-LABEL "Classe!Cabeçalho"
+  HELP "Informe a classe IHeaderProvider (pacote completo)."
+  ORDER 20
+
+ADD FIELD "parameters" OF "thl-conexao-rest-header" AS character 
+  DESCRIPTION "Parâmetros repassados à classe de cabeçalho, em JSON."
+  FORMAT "x(4000)"
+  INITIAL ?
+  LABEL "Parâmetros"
+  POSITION 4
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Parâmetros"
+  HELP "Informe os parâmetros da classe em JSON."
+  ORDER 30
+
+ADD INDEX "pk-conexao-rest" ON "thl-conexao-rest-header" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: conexão (relação 1:1 com thl-conexao-rest)."
+  INDEX-FIELD "cod-conexao" ASCENDING 
+
+ADD TABLE "thl-conexao-rest-path"
+  AREA "Schema Area"
+  LABEL "Endpoint REST"
+  DESCRIPTION "Endpoints (paths) REST reutilizáveis: caminho relativo à URL base, content-type, accept, timeout, parâmetros e cabeçalhos."
+  DUMP-NAME "thl019"
+
+ADD FIELD "cod-path" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Código do endpoint REST, referenciado pelos parâmetros de ambiente das integrações."
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Código Endpoint"
+  POSITION 3
+  MAX-WIDTH 80
+  COLUMN-LABEL "Código!Endpoint"
+  HELP "Informe o código do endpoint."
+  ORDER 20
+
+ADD FIELD "des-path" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Descrição da finalidade do endpoint."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descrição"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Descrição"
+  HELP "Informe a descrição do endpoint."
+  ORDER 30
+
+ADD FIELD "path" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Caminho relativo do endpoint, concatenado à URL base da conexão."
+  FORMAT "x(500)"
+  INITIAL ""
+  LABEL "Path"
+  POSITION 7
+  MAX-WIDTH 1000
+  COLUMN-LABEL "Path"
+  HELP "Informe o caminho relativo do endpoint."
+  ORDER 60
+
+ADD FIELD "content-type" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Content-Type do endpoint, quando diferente do padrão."
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Content-Type"
+  POSITION 8
+  MAX-WIDTH 160
+  COLUMN-LABEL "Content-Type"
+  HELP "Informe o content-type do endpoint."
+  ORDER 70
+
+ADD FIELD "accept" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Accept do endpoint: formato esperado no retorno."
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Accept"
+  POSITION 9
+  MAX-WIDTH 160
+  COLUMN-LABEL "Accept"
+  HELP "Informe o accept do endpoint."
+  ORDER 80
+
+ADD FIELD "timeout" OF "thl-conexao-rest-path" AS integer 
+  DESCRIPTION "Tempo limite da requisição, em segundos."
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Timeout (s)"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "Timeout!(s)"
+  HELP "Informe o timeout em segundos."
+  ORDER 120
+
+ADD FIELD "parameters" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Parâmetros fixos do endpoint (query string, variáveis de path), em JSON."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Parâmetros"
+  POSITION 20
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Parâmetros"
+  HELP "Informe os parâmetros do endpoint em JSON."
+  ORDER 130
+
+ADD FIELD "headers" OF "thl-conexao-rest-path" AS character 
+  DESCRIPTION "Cabeçalhos fixos do endpoint, em JSON."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Cabeçalhos"
+  POSITION 21
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Cabeçalhos"
+  HELP "Informe os cabeçalhos do endpoint em JSON."
+  ORDER 140
+
+ADD INDEX "pk-path" ON "thl-conexao-rest-path" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código do endpoint."
+  INDEX-FIELD "cod-path" ASCENDING 
+
+ADD TABLE "thl-email"
+  AREA "Schema Area"
+  LABEL "Log de E-mail"
+  DESCRIPTION "Registro de cada e-mail enviado pela THL (EmailService): remetente, destino, assunto, anexo, situação e retorno do envio."
+  DUMP-NAME "thl007"
+
+ADD FIELD "data-envio" OF "thl-email" AS datetime 
+  DESCRIPTION "Data e hora do envio."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Envio"
+  POSITION 3
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Envio"
+  HELP "Data e hora do envio."
+  ORDER 20
+
+ADD FIELD "cod-prog-dtsul" OF "thl-email" AS character 
+  DESCRIPTION "Programa Datasul que originou o envio."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Programa"
+  POSITION 4
+  MAX-WIDTH 16
+  COLUMN-LABEL "Programa"
+  HELP "Programa que originou o envio."
+  ORDER 30
+
+ADD FIELD "remetente" OF "thl-email" AS character 
+  DESCRIPTION "Endereço do remetente."
+  FORMAT "x(300)"
+  INITIAL ""
+  LABEL "Remetente"
+  POSITION 5
+  MAX-WIDTH 200
+  COLUMN-LABEL "Remetente"
+  HELP "Remetente do e-mail."
+  ORDER 40
+
+ADD FIELD "destino" OF "thl-email" AS character 
+  DESCRIPTION "Endereços dos destinatários."
+  FORMAT "x(300)"
+  INITIAL ""
+  LABEL "Destinatários"
+  POSITION 6
+  MAX-WIDTH 200
+  COLUMN-LABEL "Destinatários"
+  HELP "Destinatários do e-mail."
+  ORDER 50
+
+ADD FIELD "assunto" OF "thl-email" AS character 
+  DESCRIPTION "Assunto do e-mail."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Assunto"
+  POSITION 7
+  MAX-WIDTH 200
+  COLUMN-LABEL "Assunto"
+  HELP "Assunto do e-mail."
+  ORDER 60
+
+ADD FIELD "arq-anexo" OF "thl-email" AS character 
+  DESCRIPTION "Arquivo(s) anexado(s) ao e-mail."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Anexo"
+  POSITION 8
+  MAX-WIDTH 200
+  COLUMN-LABEL "Anexo"
+  HELP "Arquivo anexado."
+  ORDER 70
+
+ADD FIELD "log-envio" OF "thl-email" AS integer 
+  DESCRIPTION "Situação do envio: 2=Sucesso, 3=Erro (EmailLogger)."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Situação Envio"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "Situação!Envio"
+  HELP "2=Sucesso, 3=Erro."
+  ORDER 80
+
+ADD FIELD "mensagem" OF "thl-email" AS character 
+  DESCRIPTION "Corpo do e-mail."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Mensagem"
+  POSITION 10
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Mensagem"
+  HELP "Corpo do e-mail."
+  ORDER 90
+
+ADD FIELD "retorno" OF "thl-email" AS character 
+  DESCRIPTION "Retorno da API de envio de e-mail."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Retorno"
+  POSITION 11
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Retorno"
+  HELP "Retorno do envio."
+  ORDER 100
+
+ADD FIELD "info-envio" OF "thl-email" AS character 
+  DESCRIPTION "Informações complementares do envio."
+  FORMAT "x(4000)"
+  INITIAL ""
+  LABEL "Informações Envio"
+  POSITION 12
+  MAX-WIDTH 8000
+  COLUMN-LABEL "Informações!Envio"
+  HELP "Informações complementares do envio."
+  ORDER 110
+
+ADD FIELD "id" OF "thl-email" AS character 
+  DESCRIPTION "Identificador único do envio."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "ID E-mail"
+  POSITION 14
+  MAX-WIDTH 128
+  COLUMN-LABEL "ID!E-mail"
+  HELP "Identificador gerado automaticamente."
+  ORDER 10
+
+ADD FIELD "cod-param-ambiente" OF "thl-email" AS character 
+  DESCRIPTION "Código do parâmetro de ambiente (thl-ambiente-param)."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Ambiente"
+  POSITION 15
+  MAX-WIDTH 30
+  COLUMN-LABEL "Parâmetro!Ambiente"
+  HELP "Informe o código do parâmetro de ambiente."
+  ORDER 120
+
+ADD INDEX "idx-data-envio" ON "thl-email" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Busca dos envios de um programa por data (monitor thl2000)."
+  INDEX-FIELD "cod-prog-dtsul" ASCENDING 
+  INDEX-FIELD "data-envio" ASCENDING 
+
+ADD INDEX "pk-email" ON "thl-email" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: identificador do envio."
+  INDEX-FIELD "id" ASCENDING 
+
+ADD TABLE "thl-email-param"
+  AREA "Schema Area"
+  LABEL "Parâmetro de E-mail"
+  DESCRIPTION "Modelos de envio de e-mail: remetente, cópia, assunto, mensagem, importância e grupo de destinatários (cadastro thl0011)."
+  DUMP-NAME "th023"
+
+ADD FIELD "assunto" OF "thl-email-param" AS character 
+  DESCRIPTION "Assunto padrão do e-mail."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Assunto"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Assunto"
+  HELP "Informe o assunto do e-mail."
+  ORDER 40
+
+ADD FIELD "cod-grp-usuar" OF "thl-email-param" AS character 
+  DESCRIPTION "Código do grupo de e-mail (thl-ambiente-param-grupo, cadastrado no thl0004)."
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Grupo E-mail"
+  POSITION 3
+  MAX-WIDTH 20
+  COLUMN-LABEL "Grupo!E-mail"
+  HELP "Informe o código do grupo de e-mail."
+  ORDER 20
+
+ADD FIELD "log-gerar" OF "thl-email-param" AS logical 
+  DESCRIPTION "Indica se o envio é registrado em thl-email."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Gera Log"
+  POSITION 5
+  MAX-WIDTH 1
+  COLUMN-LABEL "Gera!Log"
+  HELP "Marque Sim para registrar o envio em log."
+  ORDER 60
+
+ADD FIELD "mensagem" OF "thl-email-param" AS character 
+  DESCRIPTION "Corpo padrão do e-mail."
+  FORMAT "x(2000)"
+  INITIAL ""
+  LABEL "Mensagem"
+  POSITION 6
+  MAX-WIDTH 4000
+  COLUMN-LABEL "Mensagem"
+  HELP "Informe o corpo do e-mail."
+  ORDER 50
+
+ADD FIELD "remetente" OF "thl-email-param" AS character 
+  DESCRIPTION "Endereço do remetente."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Remetente"
+  POSITION 7
+  MAX-WIDTH 200
+  COLUMN-LABEL "Remetente"
+  HELP "Informe o e-mail do remetente."
+  ORDER 30
+
+ADD FIELD "copia" OF "thl-email-param" AS character 
+  DESCRIPTION "Endereços em cópia."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Cópia"
+  POSITION 8
+  MAX-WIDTH 200
+  COLUMN-LABEL "Cópia"
+  HELP "Informe os e-mails em cópia."
+  ORDER 70
+
+ADD FIELD "importancia" OF "thl-email-param" AS integer 
+  DESCRIPTION "Importância do e-mail, repassada à API de envio do Datasul."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Importância"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "Importância"
+  HELP "Informe a importância do e-mail."
+  ORDER 80
+
+ADD FIELD "cod-email-param" OF "thl-email-param" AS character 
+  DESCRIPTION "Código do modelo de envio de e-mail."
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Parâmetro E-mail"
+  POSITION 10
+  MAX-WIDTH 60
+  COLUMN-LABEL "Parâmetro!E-mail"
+  HELP "Informe o código do parâmetro de e-mail."
+  ORDER 10
+
+ADD INDEX "pk-param-email" ON "thl-email-param" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: código do parâmetro de e-mail."
+  INDEX-FIELD "cod-email-param" ASCENDING 
+
+ADD TABLE "thl-mensagem"
+  AREA "Schema Area"
+  LABEL "Mensagem de Integração"
+  DESCRIPTION "Registro principal de cada mensagem de integração, de entrada ou saída: objeto, aplicação, operação, método, modelo, forma de execução, destino, situações consolidadas da última tentativa e controle de tentativas e agendamento."
+  DUMP-NAME "thl009"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem" AS character 
+  DESCRIPTION "Identificador único da mensagem de integração."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Código Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Código!Mensagem"
+  HELP "Informe o código da mensagem."
+  ORDER 10
+
+ADD FIELD "objeto" OF "thl-mensagem" AS character 
+  DESCRIPTION "Objeto de integração, ex.: NotaFiscal, Documento, Embarque. Com a aplicação, identifica o cadastro em thl-objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 3
+  MAX-WIDTH 100
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto de integração."
+  ORDER 20
+
+ADD FIELD "metodo" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Método da mensagem: 1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET (MethodTypeEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Método"
+  POSITION 5
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i02thl011.i 2}"
+  COLUMN-LABEL "Método"
+  HELP "1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET."
+  ORDER 40
+
+ADD FIELD "modelo-integracao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Modelo técnico: 1=REST, 2=SOAP, 3=Banco, 4=Arquivo (ConnectorTypeEnum). Só REST está implementado."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Modelo Integração"
+  POSITION 7
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i03thl011.i 2}"
+  COLUMN-LABEL "Modelo!Integração"
+  HELP "1=REST, 2=SOAP, 3=Banco, 4=Arquivo."
+  ORDER 60
+
+ADD FIELD "forma-execucao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Forma de execução: 1=Online, 2=Agendada, 3=Batch (ExecutionMode)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Forma Execução"
+  POSITION 8
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i04thl011.i 2}"
+  COLUMN-LABEL "Forma!Execução"
+  HELP "1=Online, 2=Agendada, 3=Batch."
+  ORDER 70
+
+ADD FIELD "sit-requisicao" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situação da requisição na última tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Requisição"
+  POSITION 9
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Requisição"
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 80
+
+ADD FIELD "sit-retorno" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situação do retorno na última tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Retorno"
+  POSITION 10
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Retorno"
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 90
+
+ADD FIELD "sit-processamento" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situação do processamento de negócio na última tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Processamento"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Process."
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 100
+
+ADD FIELD "qtd-tentativas" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Quantidade de tentativas já feitas, incluindo reenvios e reprocessamentos."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Tentativas"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tentativas"
+  HELP "Quantidade de tentativas."
+  ORDER 110
+
+ADD FIELD "dt-criacao" OF "thl-mensagem" AS datetime 
+  DESCRIPTION "Data e hora de criação da mensagem."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Criação"
+  POSITION 13
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Criação"
+  HELP "Data e hora de criação."
+  ORDER 120
+
+ADD FIELD "dt-integracao" OF "thl-mensagem" AS datetime 
+  DESCRIPTION "Data e hora da última tentativa de integração, com qualquer resultado. Vazia enquanto nenhuma tentativa foi feita."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Integração"
+  POSITION 14
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Integração"
+  HELP "Data e hora da última tentativa."
+  ORDER 130
+
+ADD FIELD "destino" OF "thl-mensagem" AS character 
+  DESCRIPTION "Destino técnico da última tentativa, ex.: URL do endpoint."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Destino"
+  POSITION 15
+  MAX-WIDTH 220
+  COLUMN-LABEL "Destino"
+  HELP "Destino da última tentativa."
+  ORDER 140
+
+ADD FIELD "num-ped-exec" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Pedido de execução RPW quando a mensagem é agendada."
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Pedido Execução"
+  POSITION 16
+  MAX-WIDTH 4
+  COLUMN-LABEL "Pedido!Execução"
+  HELP "Pedido de execução do agendamento."
+  ORDER 150
+
+ADD FIELD "sentido-fluxo" OF "thl-mensagem" AS logical 
+  DESCRIPTION "Sentido da mensagem: Saída (do ERP para o sistema externo) ou Entrada (do sistema externo para o ERP)."
+  FORMAT "Saída/Entrada"
+  INITIAL "Saída"
+  LABEL "Sentido"
+  POSITION 17
+  MAX-WIDTH 1
+  COLUMN-LABEL "Sentido"
+  HELP "Saída ou Entrada."
+  ORDER 50
+
+ADD FIELD "cod-status-retorno" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Código de status retornado na última tentativa, ex.: HTTP 200, 400, 500."
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Status Retorno"
+  POSITION 18
+  MAX-WIDTH 4
+  COLUMN-LABEL "Status!Retorno"
+  HELP "Código de status do retorno."
+  ORDER 160
+
+ADD FIELD "descr-retorno" OF "thl-mensagem" AS character 
+  DESCRIPTION "Descrição resumida do retorno da última tentativa."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Descrição Retorno"
+  POSITION 19
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descrição!Retorno"
+  HELP "Descrição do retorno."
+  ORDER 170
+
+ADD FIELD "operacao" OF "thl-mensagem" AS character 
+  DESCRIPTION "Operação do objeto de integração. Diferencia configurações do mesmo objeto em thl-objeto-parametro."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Operação"
+  POSITION 20
+  MAX-WIDTH 120
+  COLUMN-LABEL "Operação"
+  HELP "Informe a operação da integração."
+  ORDER 180
+
+ADD FIELD "aplicacao" OF "thl-mensagem" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub. Com o objeto, identifica o cadastro em thl-objeto."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 21
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo) da integração."
+  ORDER 190
+
+ADD FIELD "sit-mensagem" OF "thl-mensagem" AS integer 
+  DESCRIPTION "Situação geral da mensagem, derivada das três fases: 1=Pendente (alguma fase pendente ou agendamento ainda não executado), 2=Erro (alguma fase com erro), 3=Sucesso (todas as fases em sucesso ou não aplicável). Gravada pelo MessageRepository."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Situação"
+  POSITION 22
+  MAX-WIDTH 4
+  COLUMN-LABEL "Situação"
+  HELP "1=Pendente, 2=Erro, 3=Sucesso."
+  ORDER 200
+
+ADD INDEX "idx-objeto-criacao" ON "thl-mensagem" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Busca das mensagens de um objeto por data de criação (monitores)."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "dt-criacao" ASCENDING 
+
+ADD INDEX "fk-objeto" ON "thl-mensagem" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-objeto."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD INDEX "idx-objeto-parametro" ON "thl-mensagem" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca das mensagens de um objeto por operação."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "operacao" ASCENDING 
+
+ADD INDEX "idx-objeto-situacao" ON "thl-mensagem" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca das mensagens de um objeto por situação geral e data de criação (expurgo thl0222 e métricas)."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "sit-mensagem" ASCENDING 
+  INDEX-FIELD "dt-criacao" ASCENDING 
+
+ADD INDEX "pk-mensagem" ON "thl-mensagem" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: código da mensagem."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD TABLE "thl-mensagem-conteudo"
+  AREA "Schema Area"
+  LABEL "Conteúdo da Mensagem"
+  DESCRIPTION "Conteúdos (payloads) trafegados pela mensagem: o enviado e o recebido pelo ERP, em JSON, XML ou texto."
+  DUMP-NAME "thl016"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-conteudo" AS character 
+  DESCRIPTION "Identificador único da mensagem de integração (thl-mensagem)."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Código Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Código!Mensagem"
+  HELP "Informe o código da mensagem."
+  ORDER 10
+
+ADD FIELD "tipo-conteudo" OF "thl-mensagem-conteudo" AS integer 
+  DESCRIPTION "Sentido do conteúdo: 1=Enviado pelo ERP, 2=Recebido pelo ERP (DirectionEnum OUTBOUND/INBOUND)."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Tipo Conteúdo"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tipo!Conteúdo"
+  HELP "1=Enviado pelo ERP, 2=Recebido pelo ERP."
+  ORDER 20
+
+ADD FIELD "conteudo" OF "thl-mensagem-conteudo" AS clob 
+  DESCRIPTION "Conteúdo (payload) trafegado: JSON, XML ou texto."
+  FORMAT "x(8)"
+  INITIAL ?
+  LABEL "Conteúdo"
+  POSITION 4
+  LOB-AREA "Schema Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  CLOB-CODEPAGE "iso8859-1"
+  CLOB-COLLATION "basic"
+  CLOB-TYPE 1
+  COLUMN-LABEL "Conteúdo"
+  HELP "Conteúdo trafegado."
+  ORDER 30
+
+ADD INDEX "fk-mensagem" ON "thl-mensagem-conteudo" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Chave estrangeira: thl-mensagem."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD INDEX "pk-mensagem-conteudo" ON "thl-mensagem-conteudo" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: mensagem e tipo de conteúdo."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "tipo-conteudo" ASCENDING 
+
+ADD TABLE "thl-mensagem-historico"
+  AREA "Schema Area"
+  LABEL "Histórico da Mensagem"
+  DESCRIPTION "Histórico de tentativas da mensagem: uma linha por tentativa, com datas, destino, situações e retorno."
+  DUMP-NAME "thl008"
+
+ADD FIELD "tentativa" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Número sequencial da tentativa."
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Tentativa"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tentativa"
+  HELP "Número da tentativa."
+  ORDER 20
+
+ADD FIELD "sit-requisicao" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situação da requisição nesta tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Requisição"
+  POSITION 9
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Requisição"
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 30
+
+ADD FIELD "sit-retorno" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situação do retorno nesta tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Retorno"
+  POSITION 10
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Retorno"
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 40
+
+ADD FIELD "sit-processamento" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Situação do processamento de negócio nesta tentativa: 1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Situação Processamento"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Situação!Process."
+  HELP "1=Pendente, 2=Erro, 3=Sucesso, 4=Não aplicável (MessageStatusEnum)."
+  ORDER 50
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Identificador único da mensagem de integração (thl-mensagem)."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Código Mensagem"
+  POSITION 12
+  MAX-WIDTH 128
+  COLUMN-LABEL "Código!Mensagem"
+  HELP "Informe o código da mensagem."
+  ORDER 10
+
+ADD FIELD "dt-criacao" OF "thl-mensagem-historico" AS datetime 
+  DESCRIPTION "Data e hora de criação da mensagem na tentativa."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Criação"
+  POSITION 13
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Criação"
+  HELP "Data e hora de criação."
+  ORDER 60
+
+ADD FIELD "dt-integracao" OF "thl-mensagem-historico" AS datetime 
+  DESCRIPTION "Data e hora desta tentativa de integração."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Integração"
+  POSITION 14
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Integração"
+  HELP "Data e hora da tentativa."
+  ORDER 70
+
+ADD FIELD "destino" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Destino técnico desta tentativa, ex.: URL do endpoint."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Destino"
+  POSITION 15
+  MAX-WIDTH 220
+  COLUMN-LABEL "Destino"
+  HELP "Destino da tentativa."
+  ORDER 80
+
+ADD FIELD "cod-status-retorno" OF "thl-mensagem-historico" AS integer 
+  DESCRIPTION "Código de status retornado nesta tentativa, ex.: HTTP 200, 400, 500."
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Status Retorno"
+  POSITION 21
+  MAX-WIDTH 4
+  COLUMN-LABEL "Status!Retorno"
+  HELP "Código de status do retorno."
+  ORDER 90
+
+ADD FIELD "descr-retorno" OF "thl-mensagem-historico" AS character 
+  DESCRIPTION "Descrição resumida do retorno desta tentativa."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Descrição Retorno"
+  POSITION 22
+  MAX-WIDTH 400
+  COLUMN-LABEL "Descrição!Retorno"
+  HELP "Descrição do retorno."
+  ORDER 100
+
+ADD INDEX "pk-mensagem-histor" ON "thl-mensagem-historico" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: mensagem e tentativa."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "tentativa" ASCENDING 
+
+ADD INDEX "fk-mensagem" ON "thl-mensagem-historico" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-mensagem."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD TABLE "thl-mensagem-item"
+  AREA "Schema Area"
+  LABEL "Item da Mensagem"
+  DESCRIPTION "Registros de negócio vinculados à mensagem (chave no ERP e no sistema externo). Permite localizar as mensagens de um registro."
+  DUMP-NAME "thl015"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Identificador único da mensagem de integração (thl-mensagem)."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Código Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Código!Mensagem"
+  HELP "Informe o código da mensagem."
+  ORDER 10
+
+ADD FIELD "chave-registro" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Chave do registro de negócio no ERP vinculado à mensagem."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Chave Registro"
+  POSITION 3
+  MAX-WIDTH 120
+  COLUMN-LABEL "Chave!Registro"
+  HELP "Chave do registro no ERP."
+  ORDER 30
+
+ADD FIELD "chave-registro-ext" OF "thl-mensagem-item" AS character 
+  DESCRIPTION "Chave do mesmo registro no sistema externo, quando houver."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Chave Externa"
+  POSITION 4
+  MAX-WIDTH 120
+  COLUMN-LABEL "Chave!Externa"
+  HELP "Chave do registro no sistema externo."
+  ORDER 40
+
+ADD INDEX "idx-chave-registro" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  PRIMARY
+  DESCRIPTION "Busca das mensagens de um registro de negócio."
+  INDEX-FIELD "chave-registro" ASCENDING 
+
+ADD INDEX "fk-mensagem" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-mensagem."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD INDEX "pk-mensagem-item" ON "thl-mensagem-item" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "Chave primária: mensagem, chave no ERP e chave externa."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+  INDEX-FIELD "chave-registro" ASCENDING 
+  INDEX-FIELD "chave-registro-ext" ASCENDING 
+
+ADD TABLE "thl-mensagem-ped-exec"
+  AREA "Schema Area"
+  LABEL "Mensagem Agendada"
+  DESCRIPTION "Mensagens agendadas para execução em RPW: data de agendamento e pedido de execução."
+  DUMP-NAME "thl023"
+
+ADD FIELD "codigo-mensagem" OF "thl-mensagem-ped-exec" AS character 
+  DESCRIPTION "Identificador único da mensagem de integração (thl-mensagem)."
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Código Mensagem"
+  POSITION 2
+  MAX-WIDTH 128
+  COLUMN-LABEL "Código!Mensagem"
+  HELP "Informe o código da mensagem."
+  ORDER 10
+
+ADD FIELD "data-agendamento" OF "thl-mensagem-ped-exec" AS datetime 
+  DESCRIPTION "Data e hora programadas para a execução."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Data Agendamento"
+  POSITION 3
+  MAX-WIDTH 8
+  COLUMN-LABEL "Data!Agendamento"
+  HELP "Data e hora do agendamento."
+  ORDER 20
+
+ADD FIELD "num-ped-exec" OF "thl-mensagem-ped-exec" AS integer 
+  DESCRIPTION "Pedido de execução RPW criado para a mensagem."
+  FORMAT ">>>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Pedido Execução"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "Pedido!Execução"
+  HELP "Pedido de execução RPW."
+  ORDER 30
+
+ADD INDEX "pk-mensagem" ON "thl-mensagem-ped-exec" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: mensagem (relação 1:1 com thl-mensagem)."
+  INDEX-FIELD "codigo-mensagem" ASCENDING 
+
+ADD INDEX "idx-data-agendamento" ON "thl-mensagem-ped-exec" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca por data de agendamento."
+  INDEX-FIELD "data-agendamento" ASCENDING 
+
+ADD TABLE "thl-objeto"
+  AREA "Schema Area"
+  LABEL "Objeto de Integração"
+  DESCRIPTION "Cadastro dos objetos de integração por aplicação: classe que implementa a mensagem (carregada por dynamic-new), sentido, modelo e indicadores."
+  DUMP-NAME "thl010"
+
+ADD FIELD "objeto" OF "thl-objeto" AS character 
+  DESCRIPTION "Nome do objeto de integração, ex.: NotaFiscal, Documento, Embarque."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o nome do objeto de integração."
+  ORDER 10
+
+ADD FIELD "programa-consulta" OF "thl-objeto" AS character 
+  DESCRIPTION "Programa Datasul de consulta do registro de negócio do objeto. Cadastrado no thl0005; ainda não é lido pela biblioteca."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Programa Consulta"
+  POSITION 6
+  MAX-WIDTH 60
+  COLUMN-LABEL "Programa!Consulta"
+  HELP "Informe o programa de consulta."
+  ORDER 50
+
+ADD FIELD "ind-inativo" OF "thl-objeto" AS logical 
+  DESCRIPTION "Indica se o objeto está inativo e não gera novas mensagens."
+  FORMAT "Sim/Não"
+  INITIAL "Não"
+  LABEL "Inativo"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "Inativo"
+  HELP "Marque Sim para inativar o objeto."
+  ORDER 60
+
+ADD FIELD "ind-gera-historico" OF "thl-objeto" AS logical 
+  DESCRIPTION "Indica se as tentativas das mensagens do objeto são gravadas em thl-mensagem-historico."
+  FORMAT "Sim/Não"
+  INITIAL "Sim"
+  LABEL "Gera Histórico"
+  POSITION 8
+  MAX-WIDTH 1
+  COLUMN-LABEL "Gera!Histórico"
+  HELP "Marque Sim para gravar o histórico de tentativas."
+  ORDER 70
+
+ADD FIELD "sentido-fluxo" OF "thl-objeto" AS logical 
+  DESCRIPTION "Sentido do objeto: Saída (do ERP para o sistema externo) ou Entrada (do sistema externo para o ERP)."
+  FORMAT "Saída/Entrada"
+  INITIAL "Saída"
+  LABEL "Sentido"
+  POSITION 9
+  MAX-WIDTH 1
+  COLUMN-LABEL "Sentido"
+  HELP "Saída ou Entrada."
+  ORDER 80
+
+ADD FIELD "aplicacao" OF "thl-objeto" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 10
+  MAX-WIDTH 100
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo)."
+  ORDER 90
+
+ADD FIELD "modelo-integracao" OF "thl-objeto" AS integer 
+  DESCRIPTION "Modelo técnico: 1=REST, 2=SOAP, 3=Banco, 4=Arquivo (ConnectorTypeEnum). Só REST está implementado."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Modelo Integração"
+  POSITION 11
+  MAX-WIDTH 4
+  VIEW-AS "VIEW-AS COMBO-BOX LIST-ITEM-PAIRS {thl/include/i03thl011.i 02}"
+  COLUMN-LABEL "Modelo!Integração"
+  HELP "1=REST, 2=SOAP, 3=Banco, 4=Arquivo."
+  ORDER 100
+
+ADD FIELD "classe-objeto" OF "thl-objeto" AS character 
+  DESCRIPTION "Classe da mensagem com o nome completo do pacote, instanciada por dynamic-new. Entrada: a padrão é thl-lib.integration.messaging.inbound.core.InboundMessage; informe uma filha só quando o objeto tem protocolo próprio. Saída: a classe OutboundMessage do objeto."
+  FORMAT "x(150)"
+  INITIAL "thl-lib.integration.messaging.inbound.core.InboundMessage"
+  LABEL "Classe"
+  POSITION 13
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe"
+  HELP "Classe da mensagem com o pacote completo (minúsculas)."
+  ORDER 110
+
+ADD FIELD "retencao-dias-sucesso" OF "thl-objeto" AS integer 
+  DESCRIPTION "Quantidade de dias que as mensagens concluídas com sucesso do objeto são mantidas antes do expurgo (thl0222). Zero = não expurga."
+  FORMAT ">>>>9"
+  INITIAL "21"
+  LABEL "Retenção Sucesso (dias)"
+  POSITION 14
+  MAX-WIDTH 4
+  COLUMN-LABEL "Retenção!Sucesso"
+  HELP "Dias para manter as mensagens com sucesso (0 = não expurga)."
+  ORDER 120
+
+ADD FIELD "retencao-dias-erro" OF "thl-objeto" AS integer 
+  DESCRIPTION "Quantidade de dias que as mensagens com erro ou pendentes do objeto são mantidas antes do expurgo (thl0222). Zero = não expurga."
+  FORMAT ">>>>9"
+  INITIAL "42"
+  LABEL "Retenção Erro (dias)"
+  POSITION 15
+  MAX-WIDTH 4
+  COLUMN-LABEL "Retenção!Erro"
+  HELP "Dias para manter as mensagens com erro ou pendentes (0 = não expurga)."
+  ORDER 130
+
+ADD FIELD "classe-processor" OF "thl-objeto" AS character 
+  DESCRIPTION "Classe de orquestração (Processor) com o nome completo do pacote, instanciada por dynamic-new. A padrão, thl-lib.integration.messaging.inbound.core.Processor, chama um Service (caso 1 para 1); informe uma filha quando o objeto reúne vários Services (agregado)."
+  FORMAT "x(150)"
+  INITIAL "thl-lib.integration.messaging.inbound.core.Processor"
+  LABEL "Classe Processor"
+  POSITION 16
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe!Processor"
+  HELP "Classe de orquestração com o pacote completo (minúsculas)."
+  ORDER 140
+
+ADD FIELD "classe-service" OF "thl-objeto" AS character 
+  DESCRIPTION "Classe do Service (regra e dados da entidade) com o nome completo do pacote, instanciada por dynamic-new pelo Processor. Obrigatória em objeto de entrada."
+  FORMAT "x(150)"
+  INITIAL ""
+  LABEL "Classe Service"
+  POSITION 17
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe!Service"
+  HELP "Classe do Service com o pacote completo (minúsculas)."
+  ORDER 150
+
+ADD INDEX "pk-objeto" ON "thl-objeto" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: aplicação e objeto."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD TABLE "thl-objeto-parametro"
+  AREA "Schema Area"
+  LABEL "Parâmetro do Objeto"
+  DESCRIPTION "Configuração do objeto por estabelecimento e operação: método, forma de execução, estrutura da mensagem, parâmetros de ambiente, persistência e log."
+  DUMP-NAME "thl011"
+
+ADD FIELD "objeto" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Objeto de integração, ex.: NotaFiscal, Documento, Embarque. Com a aplicação, identifica o cadastro em thl-objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 4
+  MAX-WIDTH 100
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto de integração."
+  ORDER 20
+
+ADD FIELD "cod-estabel" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Estabelecimento da configuração; * vale para todos."
+  FORMAT "x(5)"
+  INITIAL ""
+  LABEL "Estabelecimento"
+  POSITION 6
+  MAX-WIDTH 10
+  COLUMN-LABEL "Estab"
+  HELP "Informe o estabelecimento ou * para todos."
+  ORDER 10
+
+ADD FIELD "ind-persistente" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indicador de persistência (reenvio) da integração. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT "Sim/Nao"
+  INITIAL "Nao"
+  LABEL "Persistente"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "Persistente"
+  HELP "Indica se a integração é persistente."
+  ORDER 60
+
+ADD FIELD "frequencia-execucao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Frequência de execução do processamento agendado ou batch. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT ">>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Frequência Execução"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "Frequência!Execução"
+  HELP "Informe a frequência de execução."
+  ORDER 80
+
+ADD FIELD "cod-servid-exec" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Servidor RPW do pedido de execução criado para a mensagem agendada (thl1989z.p)."
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Servidor Execução"
+  POSITION 10
+  MAX-WIDTH 24
+  COLUMN-LABEL "Servidor!Execução"
+  HELP "Informe o servidor RPW."
+  ORDER 90
+
+ADD FIELD "qtd-tentativas-persist" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Quantidade de tentativas da persistência. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Tentativas Persist."
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "Tentativas!Persist."
+  HELP "Informe a quantidade de tentativas."
+  ORDER 100
+
+ADD FIELD "qtd-dias-persist" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Quantidade de dias da persistência. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Dias Persistência"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "Dias!Persist."
+  HELP "Informe a quantidade de dias."
+  ORDER 110
+
+ADD FIELD "tipo-log-requisicao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Tipo de registro (log) da requisição. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Log Requisição"
+  POSITION 14
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Log!Requisição"
+  HELP "Informe o tipo de log da requisição."
+  ORDER 130
+
+ADD FIELD "ind-gera-historico" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se as tentativas desta configuração são gravadas em thl-mensagem-historico."
+  FORMAT "Sim/Não"
+  INITIAL "Sim"
+  LABEL "Gera Histórico"
+  POSITION 17
+  MAX-WIDTH 1
+  COLUMN-LABEL "Gera!Histórico"
+  HELP "Marque Sim para gravar o histórico de tentativas."
+  ORDER 160
+
+ADD FIELD "cod-param-ambiente" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Parâmetro de ambiente cuja variável indica a conexão REST da integração (ConnectorConfig)."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Conexão"
+  POSITION 22
+  MAX-WIDTH 30
+  COLUMN-LABEL "Parâmetro!Conexão"
+  HELP "Informe o parâmetro de ambiente da conexão."
+  ORDER 210
+
+ADD FIELD "cod-param-ambiente-destino" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Parâmetro de ambiente que resolve o destino (endpoint) da integração."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Parâmetro Destino"
+  POSITION 25
+  MAX-WIDTH 30
+  COLUMN-LABEL "Parâmetro!Destino"
+  HELP "Informe o parâmetro de ambiente do destino."
+  ORDER 240
+
+ADD FIELD "tipo-log-retorno" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Tipo de registro (log) do retorno. Cadastrado no thl0006; ainda não é lido pela biblioteca."
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Log Retorno"
+  POSITION 26
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i01thl011.i 2}"
+  COLUMN-LABEL "Log!Retorno"
+  HELP "Informe o tipo de log do retorno."
+  ORDER 140
+
+ADD FIELD "ind-inativo" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Indica se esta configuração está inativa."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Inativo"
+  POSITION 27
+  MAX-WIDTH 1
+  COLUMN-LABEL "Inativo"
+  HELP "Marque Sim para inativar a configuração."
+  ORDER 120
+
+ADD FIELD "forma-execucao" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Forma de execução: 1=Online, 2=Agendada, 3=Batch (ExecutionMode)."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Forma Execução"
+  POSITION 28
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i04thl011.i 2}"
+  COLUMN-LABEL "Forma!Execução"
+  HELP "1=Online, 2=Agendada, 3=Batch."
+  ORDER 250
+
+ADD FIELD "ind-mensagem-simples" OF "thl-objeto-parametro" AS logical 
+  DESCRIPTION "Sim: uma mensagem por registro (objeto JSON). Não: vários registros na mesma mensagem (array JSON)."
+  FORMAT "Sim/Não"
+  INITIAL "Sim"
+  LABEL "Mensagem Simples"
+  POSITION 29
+  MAX-WIDTH 1
+  COLUMN-LABEL "Mensagem!Simples"
+  HELP "Sim = um registro por mensagem; Não = vários."
+  ORDER 260
+
+ADD FIELD "operacao" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Operação do objeto de integração. Diferencia configurações do mesmo objeto em thl-objeto-parametro."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Operação"
+  POSITION 30
+  MAX-WIDTH 120
+  COLUMN-LABEL "Operação"
+  HELP "Informe a operação da integração."
+  ORDER 270
+
+ADD FIELD "aplicacao" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub. Com o objeto, identifica o cadastro em thl-objeto."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 31
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo) da integração."
+  ORDER 280
+
+ADD FIELD "tipo-grava-conteudo" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Gravação do conteúdo (requisição e retorno) das mensagens desta operação em thl-mensagem-conteudo: 1=Sempre, 2=Somente em erro, 3=Nunca (fica só a thl-mensagem). Inbound agendado e outbound gravam a requisição sempre."
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Grava Conteúdo"
+  POSITION 32
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i05thl011.i 2}"
+  COLUMN-LABEL "Grava!Conteúdo"
+  HELP "1=Sempre, 2=Somente em erro, 3=Nunca."
+  ORDER 290
+
+ADD FIELD "metodo" OF "thl-objeto-parametro" AS integer 
+  DESCRIPTION "Método da operação; a lista acompanha o modelo de integração do objeto. REST: 1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET (MethodTypeEnum). Banco: 6=Insert, 7=Update, 8=Select. Faz parte da chave."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Método"
+  POSITION 33
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i02thl011.i 2}"
+  COLUMN-LABEL "Método"
+  HELP "REST: 1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET."
+  ORDER 30
+
+ADD FIELD "classe-objeto" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Classe da mensagem só desta operação, com o nome completo do pacote. Em branco vale a classe do objeto (thl-objeto.classe-objeto)."
+  FORMAT "x(150)"
+  INITIAL ""
+  LABEL "Classe"
+  POSITION 34
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe"
+  HELP "Classe da mensagem desta operação; em branco vale a do objeto."
+  ORDER 310
+
+ADD FIELD "classe-processor" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Classe de orquestração (Processor) só desta operação, com o nome completo do pacote. Em branco vale a do objeto (thl-objeto.classe-processor)."
+  FORMAT "x(150)"
+  INITIAL ""
+  LABEL "Classe Processor"
+  POSITION 35
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe!Processor"
+  HELP "Classe Processor desta operação; em branco vale a do objeto."
+  ORDER 320
+
+ADD FIELD "classe-service" OF "thl-objeto-parametro" AS character 
+  DESCRIPTION "Classe do Service só desta operação, com o nome completo do pacote. Em branco vale a do objeto (thl-objeto.classe-service)."
+  FORMAT "x(150)"
+  INITIAL ""
+  LABEL "Classe Service"
+  POSITION 36
+  MAX-WIDTH 200
+  COLUMN-LABEL "Classe!Service"
+  HELP "Classe do Service desta operação; em branco vale a do objeto."
+  ORDER 330
+
+ADD INDEX "pk-objeto-parametro" ON "thl-objeto-parametro" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: estabelecimento, aplicação, objeto, operação e ação."
+  INDEX-FIELD "cod-estabel" ASCENDING 
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "operacao" ASCENDING 
+  INDEX-FIELD "metodo" ASCENDING 
+
+ADD INDEX "fk-objeto" ON "thl-objeto-parametro" 
+  AREA "Schema Area"
+  DESCRIPTION "Chave estrangeira: thl-objeto."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+
+ADD TABLE "thl-objeto-parametro-rest"
+  AREA "Schema Area"
+  LABEL "Operação REST"
+  DESCRIPTION "Extensão REST da operação do objeto (1 para 1 com thl-objeto-parametro): verbo HTTP, campos obrigatórios do payload e campos da chave externa. Criada junto com a operação quando o modelo de integração do objeto é REST."
+  DUMP-NAME "thl032"
+
+ADD FIELD "cod-estabel" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Estabelecimento da operação; * vale para todos."
+  FORMAT "x(5)"
+  INITIAL ""
+  LABEL "Estabelecimento"
+  POSITION 2
+  MAX-WIDTH 10
+  COLUMN-LABEL "Estab"
+  HELP "Informe o estabelecimento ou * para todos."
+  ORDER 10
+
+ADD FIELD "aplicacao" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 3
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo) da integração."
+  ORDER 20
+
+ADD FIELD "objeto" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Objeto de integração."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 4
+  MAX-WIDTH 100
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto de integração."
+  ORDER 30
+
+ADD FIELD "operacao" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Operação do objeto de integração."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Operação"
+  POSITION 5
+  MAX-WIDTH 120
+  COLUMN-LABEL "Operação"
+  HELP "Informe a operação da integração."
+  ORDER 40
+
+ADD FIELD "metodo" OF "thl-objeto-parametro-rest" AS integer 
+  DESCRIPTION "Método da operação (verbo HTTP): 1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET (MethodTypeEnum). Chave herdada de thl-objeto-parametro; só se altera na operação."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Método"
+  POSITION 6
+  MAX-WIDTH 4
+  VIEW-AS "view-as radio-set horizontal radio-buttons {thl\include\i02thl011.i 2}"
+  COLUMN-LABEL "Método"
+  HELP "1=POST, 2=PUT, 3=PATCH, 4=DELETE, 5=GET."
+  ORDER 50
+
+ADD FIELD "campos-obrigatorios" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Campos obrigatórios do payload de entrada, em array JSON de texto. Em branco ou [] = nenhum."
+  FORMAT "x(500)"
+  INITIAL ""
+  LABEL "Campos Obrigatórios"
+  POSITION 8
+  MAX-WIDTH 1000
+  COLUMN-LABEL "Campos!Obrigatórios"
+  HELP "Array JSON com os campos obrigatórios do payload."
+  ORDER 70
+
+ADD FIELD "chave-externa" OF "thl-objeto-parametro-rest" AS character 
+  DESCRIPTION "Campos do payload que formam a referência do sistema externo, em array JSON de texto, na ordem da chave (valores unidos por #). [] desliga a referência; em branco vale o padrão da mensagem (externalID)."
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Chave Externa"
+  POSITION 9
+  MAX-WIDTH 400
+  COLUMN-LABEL "Chave!Externa"
+  HELP "Array JSON com os campos da chave externa; [] desliga."
+  ORDER 80
+
+ADD INDEX "pk-objeto-parametro-rest" ON "thl-objeto-parametro-rest" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: a mesma da operação (thl-objeto-parametro)."
+  INDEX-FIELD "cod-estabel" ASCENDING 
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "operacao" ASCENDING 
+  INDEX-FIELD "metodo" ASCENDING 
+
+ADD TABLE "thl-objeto-rota"
+  AREA "Schema Area"
+  LABEL "Rota do Objeto"
+  DESCRIPTION "Rota pública do objeto de integração na API REST de entrada (resourcen): associa o caminho chamado pelo sistema externo à aplicação e ao objeto. Uma rota por objeto. Substitui thl-inbound-rota."
+  DUMP-NAME "thl021"
+
+ADD FIELD "aplicacao" OF "thl-objeto-rota" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub. Com o objeto, identifica o cadastro em thl-objeto."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 2
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo) da integração."
+  ORDER 10
+
+ADD FIELD "objeto" OF "thl-objeto-rota" AS character 
+  DESCRIPTION "Objeto de integração, ex.: NotaFiscal, Documento, Embarque. Com a aplicação, identifica o cadastro em thl-objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 3
+  MAX-WIDTH 120
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto de integração."
+  ORDER 20
+
+ADD FIELD "rota-publica" OF "thl-objeto-rota" AS character 
+  DESCRIPTION "Caminho chamado pelo sistema externo após /resourcen/, ex.: ninahub/NotaFiscal. Único."
+  FORMAT "x(120)"
+  INITIAL ""
+  LABEL "Rota Pública"
+  POSITION 4
+  MAX-WIDTH 240
+  COLUMN-LABEL "Rota!Pública"
+  HELP "Informe a rota pública, ex.: ninahub/NotaFiscal."
+  ORDER 30
+
+ADD FIELD "ind-ativo" OF "thl-objeto-rota" AS logical 
+  DESCRIPTION "Indica se a rota aceita requisições."
+  FORMAT "Sim/Nao"
+  INITIAL "Sim"
+  LABEL "Ativa"
+  POSITION 5
+  MAX-WIDTH 1
+  COLUMN-LABEL "Ativa"
+  HELP "Marque Sim para ativar a rota."
+  ORDER 40
+
+ADD FIELD "inicio-operacao" OF "thl-objeto-rota" AS integer 
+  DESCRIPTION "Segmento da URL em que começa a operação, para rota com mais de um nível de operação. Zero (padrão) = a operação é só o último segmento. Ex.: rota notafiscal/embarque com início 2 e URL notafiscal/embarque/geracao -> operação embarque/geracao."
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Início Operação"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "Início!Operação"
+  HELP "Segmento da URL em que começa a operação; 0 = só o último."
+  ORDER 50
+
+ADD INDEX "pk-objeto-rota" ON "thl-objeto-rota" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave única: rota pública (resolução da requisição inbound)."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "rota-publica" ASCENDING 
+
+ADD TABLE "thl-objeto-usuario"
+  AREA "Schema Area"
+  LABEL "Usuário do Objeto"
+  DESCRIPTION "Usuários que podem ver as mensagens de um objeto de integração nos monitores (thl1986 e API de mensageria)."
+  DUMP-NAME "thl012"
+
+ADD FIELD "objeto" OF "thl-objeto-usuario" AS character 
+  DESCRIPTION "Objeto de integração, ex.: NotaFiscal, Documento, Embarque. Com a aplicação, identifica o cadastro em thl-objeto."
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Objeto"
+  POSITION 2
+  MAX-WIDTH 40
+  COLUMN-LABEL "Objeto"
+  HELP "Informe o objeto de integração."
+  ORDER 10
+
+ADD FIELD "cod-usuario" OF "thl-objeto-usuario" AS character 
+  DESCRIPTION "Usuário Datasul que pode ver as mensagens do objeto nos monitores."
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Usuário"
+  POSITION 3
+  MAX-WIDTH 24
+  COLUMN-LABEL "Usuário"
+  HELP "Informe o usuário Datasul."
+  ORDER 20
+
+ADD FIELD "aplicacao" OF "thl-objeto-usuario" AS character 
+  DESCRIPTION "Aplicação (sistema externo) da integração, ex.: Loog.ai, Ninahub. Com o objeto, identifica o cadastro em thl-objeto."
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Aplicação"
+  POSITION 4
+  MAX-WIDTH 200
+  COLUMN-LABEL "Aplicação"
+  HELP "Informe a aplicação (sistema externo) da integração."
+  ORDER 30
+
+ADD INDEX "pk-objeto-usuario" ON "thl-objeto-usuario" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  DESCRIPTION "Chave primária: aplicação, objeto e usuário."
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+  INDEX-FIELD "cod-usuario" ASCENDING 
+
+ADD INDEX "idx-usuario" ON "thl-objeto-usuario" 
+  AREA "Schema Area"
+  DESCRIPTION "Busca dos objetos liberados a um usuário (monitor de mensageria)."
+  INDEX-FIELD "cod-usuario" ASCENDING 
+  INDEX-FIELD "aplicacao" ASCENDING 
+  INDEX-FIELD "objeto" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000091705

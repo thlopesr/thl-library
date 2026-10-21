@@ -9,30 +9,53 @@
 using Progress.Lang.*.
 using Progress.Json.ObjectModel.*.
 
+using thl-lib.core.error.ThlError.
+
 block-level on error undo, throw.
 
-class thl-lib.core.error.ErrorHandler.
+class thl-lib.core.error.ErrorHandler inherits Progress.Lang.AppError.
 
     define private temp-table ttError no-undo
         field errorNumber  as integer
         field errorMessage as character.
 
+    define private property className  as character no-undo get. set.
+    define private property methodName as character no-undo get. set.
+    define private property stepName   as character no-undo get. set.
+    
     constructor public ErrorHandler().
     end constructor.
 
-    method public void clearErrors().
-        empty temp-table ttError no-error.
-    end method.
+    constructor public ErrorHandler( className as character ).
+        assign this-object:className = className.
+    end constructor.
+    
+    constructor public ErrorHandler( className  as character,
+                                     methodName as character,
+                                     stepName   as character).
+        assign this-object:className  = className
+               this-object:methodName = methodName
+               this-object:stepName   = stepName.   
+    end constructor.
 
-    method public void createError().
-        this-object:clearErrors().
+    method private character createErrorMessage( errorMessage as character ).
+        return this-object:createErrorMessage( errorMessage, this-object:methodName, this-object:stepName).
+    end method.
+    
+    method private character createErrorMessage( errorMessage as character ,
+                                                 methodName   as character ,
+                                                 stepName     as character ).
+        if stepName = '' then 
+            return substitute('&1 [&2.&3]', errorMessage, className, methodName).
+                
+        return substitute('&1 [&4][&2.&3]', errorMessage, className, methodName, stepName).
     end method.
 
     method public void addError( errorNumber  as integer  ,
                                  errorMessage as character).
         create ttError.
         assign ttError.errorNumber  = errorNumber
-               ttError.errorMessage = errorMessage.
+               ttError.errorMessage = createErrorMessage(errorMessage).
     end method.
 
     method public logical hasErrors().
@@ -42,12 +65,16 @@ class thl-lib.core.error.ErrorHandler.
     method public AppError getError().
 
         define variable currentError as AppError no-undo.
+        define variable isFirst      as logical  no-undo initial true.
 
         if this-object:hasErrors() then do.
-            assign currentError = new AppError().
-            for each ttError no-lock.
-                currentError:AddMessage( ttError.errorMessage,
-                                         ttError.errorNumber ).
+            for each ttError no-lock:
+                if isFirst then do:
+                    assign currentError = new ThlError( ttError.errorMessage, ttError.errorNumber )
+                           isFirst      = false.
+                end.
+                else
+                    currentError:AddMessage( ttError.errorMessage, ttError.errorNumber ).
             end.
         end.
 
@@ -62,12 +89,21 @@ class thl-lib.core.error.ErrorHandler.
 
     method public void throwError( errorNumber  as integer   ,
                                    errorMessage as character ).
-  
-        this-object:clearErrors().
-        this-object:addError(errorNumber, errorMessage).
 
+        this-object:addError(errorNumber, errorMessage).
         this-object:throwIfHasErrors().
 
+    end method.
+
+    method public void throwError( methodName   as character,
+                                   errorMessage as character ).
+        this-object:throwError( 17006, this-object:createErrorMessage( errorMessage, methodName, '' ) ).
+    end method.
+
+    method public void throwError( errorNumber  as integer  ,
+                                   methodName   as character,
+                                   errorMessage as character ).
+        this-object:throwError( errorNumber, this-object:createErrorMessage( errorMessage, methodName, '' ) ).
     end method.
 
     method public integer getErrorStatusCode(input errorObject as Error).
@@ -87,7 +123,7 @@ class thl-lib.core.error.ErrorHandler.
         define variable errorIndex   as integer   no-undo.
         define variable errorMessage as character no-undo.
 
-        if not isValideErrorObject(errorObject) then
+        if not isValidErrorObject(errorObject) then
             return 'Erro nao identificado no processamento da mensagem.'.
 
         do errorIndex = 1 to errorObject:NumMessages.
@@ -99,11 +135,11 @@ class thl-lib.core.error.ErrorHandler.
     end method.
     
     
-    method public logical isValideErrorObject ( errorObject as Error).
+    method public logical isValidErrorObject ( errorObject as Error).
         return valid-object(errorObject) and errorObject:NumMessages <> 0.
     end method.
 
-    method public JsonObject getErrorJson(input errorObject as Error).
+    method private JsonObject getErrorJson(input errorObject as Error).
 
         define variable errorJson  as JsonObject no-undo.
         define variable errorsJson as JsonArray  no-undo.
@@ -116,7 +152,7 @@ class thl-lib.core.error.ErrorHandler.
 
         errorJson:Add('success', false).
 
-        if not isValideErrorObject(errorObject) then do.
+        if not isValidErrorObject(errorObject) then do.
 
             assign itemJson = new JsonObject().
 

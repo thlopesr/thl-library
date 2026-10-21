@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, itokenprovider]
+updated: 2026-10-13
+---
+
 # ITokenProvider
 
 > **Interface** · `thl-lib.integration.connectors.auth.interfaces.ITokenProvider` · `Fontes\thl-lib\integration\connectors\auth\interfaces\ITokenProvider.cls` · volta ao [hub de arquitetura](../arquitetura.md)

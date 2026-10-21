@@ -9,7 +9,7 @@
     Notes       : 
   ----------------------------------------------------------------------*/
 
-enum thl-lib.integration.messaging.enum.ExecutionMode flags. 
+enum thl-lib.integration.messaging.enum.ExecutionMode. 
     define enum ONLINE   = 1 //= 1
                 SCHEDULE = 2 //= 2
                 BATCH    = 3 //= 3

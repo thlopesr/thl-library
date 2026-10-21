@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # PO-UI Knowledge Base — Índice Geral
 
 Knowledge base de referência para geração de telas front-end PO-UI (Angular/TypeScript) para o módulo THL no TOTVS Datasul 12.

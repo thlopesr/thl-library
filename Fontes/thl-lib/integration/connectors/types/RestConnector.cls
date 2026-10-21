@@ -20,10 +20,17 @@ using System.Net.ServicePointManager.
 using thl-lib.integration.connectors.core.*.
 using thl-lib.integration.connectors.types.IntegrationConnector.
 using thl-lib.integration.connectors.enum.MethodTypeEnum.
+using thl-lib.integration.connectors.auth.factory.TokenProviderFactory.
+using thl-lib.integration.connectors.auth.interfaces.ITokenProvider.
+using thl-lib.integration.connectors.auth.core.AuthenticationConfig.
+using thl-lib.integration.connectors.headers.interfaces.IHeaderProvider.
+using thl-lib.integration.connectors.headers.factory.HeaderProviderFactory.
+using thl-lib.util.string.StringUtil.
+using thl-lib.core.error.ThlError.
 
-routine-level on error undo, throw.
+block-level on error undo, throw.
 
-class thl-lib.integration.connectors.types.RestConnector inherits IntegrationConnector:
+class thl-lib.integration.connectors.types.RestConnector inherits IntegrationConnector.
 
     method public override ConnectorResponse execute( input connectorRequest as ConnectorRequest).
 
@@ -64,57 +71,101 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
     method protected void validateExecutionInput(input connectorRequest as ConnectorRequest).
 
         if not valid-object(connectorRequest) then
-            undo, throw new AppError('ConnectorRequest was not informed.', 17006).
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'validateExecutionInput', 'ConnectorRequest nao informado.' ).
 
         if not valid-object(connectorRequest:connectorConfig) then
-            undo, throw new AppError('ConnectorConfig was not informed.' , 17006).
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'validateExecutionInput', 'ConnectorConfig nao informado.' ).
+
+        if connectorRequest:connectorConfig:requiresAuthentication        and
+           not valid-object(connectorRequest:connectorConfig:authentication) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'validateExecutionInput', 'AuthenticationConfig nao informado para uma conexao que requer autenticacao.' ).
 
     end method.
 
     method protected character buildRequestUrl( input connectorRequest as ConnectorRequest).
-        if connectorRequest:connectorConfig:parameters <> '' then
-            return connectorRequest:connectorConfig:baseUrl + connectorRequest:connectorConfig:path + connectorRequest:connectorConfig:parameters.
-        return connectorRequest:connectorConfig:baseUrl + connectorRequest:connectorConfig:path.
+        define variable resolvedPath as character no-undo.
+    
+        assign resolvedPath = this-object:resolvePathParameters( connectorRequest:connectorConfig:path,
+                                                                 connectorRequest:pathParameters      ).
+    
+        if StringUtil:hasValue( connectorRequest:connectorConfig:parameters ) then
+            return connectorRequest:connectorConfig:baseUrl
+                 + resolvedPath
+                 + connectorRequest:connectorConfig:parameters.
+    
+        return connectorRequest:connectorConfig:baseUrl
+             + resolvedPath.
+        
     end method.
+    
+    method protected character resolvePathParameters( input pathTemplate   as character ,
+                                                      input pathParameters as JsonArray ).
 
-    method protected character resolveAuthorizationKey(input connectorConfig as ConnectorConfig):
-        if connectorConfig:requiresTokenRequest then
-            return executeTokenRequest(connectorConfig).
+        define variable count as integer no-undo.
+
+        if valid-object (pathParameters) then do.
+            do count = 1 to pathParameters:Length.
+                assign pathTemplate = replace( pathTemplate                                             , 
+                                               pathParameters:GetJsonObject(count):getcharacter('name') ,
+                                               pathParameters:GetJsonObject(count):getcharacter('value')).
+            end.
+        end.
+    
+        return pathTemplate.
+    
+    end method.
+    
+    method protected character resolveAuthorizationKey ( connectorConfig as ConnectorConfig ).
+
+        define variable authentication as AuthenticationConfig no-undo.
+
+        assign authentication = connectorConfig:authentication.
+
+        if not valid-object(authentication) then
+            return ''.
+
+        if authentication:requiresTokenRequest then do.
+            if authentication:isTokenExpired() then
+                executeTokenRequest(authentication).
+            return authentication:token.
+        end.
+
         return ''.
+
     end method.
 
-    method protected character executeTokenRequest(input connectorConfig as ConnectorConfig):
+    method protected void executeTokenRequest( authentication as AuthenticationConfig).
 
         define variable tokenRequest    as ConnectorRequest  no-undo.
         define variable tokenResponse   as ConnectorResponse no-undo.
-        define variable responseContent as longchar         no-undo.
-        define variable responseJson    as JsonObject        no-undo.
+        define variable responseContent as longchar          no-undo.
+        define variable response        as JsonObject        no-undo.
         define variable tokenUrl        as character         no-undo.
-
+ 
         assign tokenRequest                  = new ConnectorRequest()
                tokenResponse                 = new ConnectorResponse()
-               tokenUrl                      = connectorConfig:baseUrl + connectorConfig:pathToken
-               tokenRequest:connectorConfig  = connectorConfig
+               tokenUrl                      = authentication:tokenUrl
+               tokenRequest:connectorConfig  = new ConnectorConfig( authentication )
                tokenRequest:methodType       = MethodTypeEnum:POST:getValue()
-               tokenRequest:content          = connectorConfig:token
+               tokenRequest:contentText      = authentication:rawTokenData
                responseContent               = executeRequest( tokenUrl      ,
                                                                tokenRequest  , 
                                                                ''            ,
                                                                tokenResponse ).
 
-        if tokenResponse:statusCode <> 200 then
-            undo, throw new AppError('Error obtaining authorization key.', 17006).
+        if not isTechnicalSuccess( tokenResponse:statusCode ) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'executeTokenRequest', 'Erro ao obter chave de autorizacao.' ).
 
         if responseContent = '' then
-            undo, throw new AppError('Error response content is null', 17006).
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'executeTokenRequest', 'Conteudo da resposta de erro e nulo.' ).
+
+        assign response = cast( new ObjectModelParser():Parse(responseContent), JsonObject ).
+
+        if not valid-object(response) then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'executeTokenRequest', 'Erro ao parsear resposta do token.' ).
             
-        assign responseJson = cast(new ObjectModelParser():Parse(responseContent), JsonObject).
+        TokenProviderFactory:getProvider( authentication:tokenParserClass ):parsingToken( authentication, response).
         
-        if not valid-object(responseJson) or
-           not responseJson:Has('value')  then
-            undo, throw new AppError('Error response', 17006). 
-        
-        return responseJson:GetCharacter('value').
 
     end method.
 
@@ -122,7 +173,6 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
                                               input        connectorRequest  as ConnectorRequest  ,
                                               input        authorizationKey  as character         ,
                                               input-output connectorResponse as ConnectorResponse ).
-
 
         define variable request         as HttpWebRequest   no-undo.
         define variable response        as HttpWebResponse  no-undo.
@@ -155,9 +205,9 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
 
     end method.
 
-    method protected HttpWebRequest createHttpRequest( input  requestUrl       as character       ,
-                                                       input  connectorRequest as ConnectorRequest,
-                                                       input  authorizationKey as character       ).
+    method protected HttpWebRequest createHttpRequest( requestUrl       as character       ,
+                                                       connectorRequest as ConnectorRequest,
+                                                       authorizationKey as character       ).
 
         define variable request as HttpWebRequest no-undo.
 
@@ -165,29 +215,32 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
                ServicePointManager:SecurityProtocol  = SecurityProtocolType:Tls12
                request                               = cast( WebRequest:Create(requestUrl), HttpWebRequest)
                request:KeepAlive                     = false
-               request:Accept                        = 'application/json'
+               request:Timeout                       = connectorRequest:connectorConfig:timeout
+               request:Accept                        = connectorRequest:connectorConfig:accept
                request:Method                        = resolveHttpMethod( connectorRequest:methodType )
                request:ContentType                   = getContentType( connectorRequest:connectorConfig ).
             
         setHeader( request, connectorRequest:connectorConfig:headers ).
-        
-        applyAuthentication( request                         ,
-                             connectorRequest:connectorConfig,
-                             authorizationKey                ).
+
+        applyAuthentication( request          ,
+                             connectorRequest ,
+                             authorizationKey ).
+
+        applyCalculatedHeaders( request, connectorRequest ).
 
         return request.
 
     end method.
     
     method protected void setHeader ( input request         as HttpWebRequest,
-                                      input headersParamter as character     ).
+                                      input headersParameter as character     ).
 
         define variable headers as JsonArray no-undo.
         define variable count   as integer   no-undo.
         
-        if headersParamter <> '' then do.
+        if StringUtil:hasValue( headersParameter ) then do.
             
-            assign headers = cast( new ObjectModelParser():Parse(headersParamter), JsonArray).
+            assign headers = cast( new ObjectModelParser():Parse(headersParameter), JsonArray).
 
             do count = 1 to headers:Length.
                 request:Headers:add( headers:GetJsonObject(count):GetCharacter('key')   ,
@@ -203,10 +256,10 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
 
         define variable requestBytes as 'System.Byte[]' no-undo.
 
-        if connectorRequest:content = ''    or 
-           request:Method           = 'GET' then return.
+        if connectorRequest:contentText = ''    or 
+           request:Method               = 'GET' then return.
 
-        assign requestBytes = Encoding:UTF8:GetBytes(connectorRequest:content).
+        assign requestBytes = Encoding:UTF8:GetBytes(connectorRequest:contentText).
 
         request:GetRequestStream():Write(requestBytes, 0, requestBytes:Length).
 
@@ -233,9 +286,10 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
             assign response                        = cast(webError:Response, HttpWebResponse)
                    responseContent                 = readResponseContent( response )
                    connectorResponse:statusCode    = response:StatusCode:value__
-                   connectorResponse:statusMessage = substitute( '&1 - &2', response:StatusDescription, responseContent )
+                   connectorResponse:statusMessage = response:StatusDescription + ' - ' + if length( responseContent ) > 3000 then 'Logger error'
+                                                                                                                              else responseContent
                    .
-            return normalizeResponseContent( responseContent ).
+            return responseContent.
         end.
 
         assign connectorResponse:statusCode    = 500
@@ -254,22 +308,56 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
         return responseContent.
     end method.
 
-    method protected void applyAuthentication( input request          as HttpWebRequest ,
-                                               input connectorConfig  as ConnectorConfig,
-                                               input authorizationKey as character      ).
+    method protected void applyCalculatedHeaders( input request          as HttpWebRequest  ,
+                                                  input connectorRequest as ConnectorRequest ).
+
+        define variable provider as IHeaderProvider no-undo.
+        define variable headers  as JsonArray       no-undo.
+        define variable count    as integer         no-undo.
+
+        if not connectorRequest:connectorConfig:requiresHeaderProvider then
+            return.
+
+        assign provider = HeaderProviderFactory:getProvider( connectorRequest:connectorConfig:headerProviderClass )
+               headers  = provider:getHeaders( connectorRequest:contentText                    ,
+                                               connectorRequest:connectorConfig:headerParameter )
+               .
+
+        do count = 1 to headers:Length:
+            request:Headers:Add( headers:GetJsonObject(count):GetCharacter('key')   ,
+                                 headers:GetJsonObject(count):GetCharacter('value') ).
+        end.
+
+    end method.
+
+    method protected void applyAuthentication( request          as HttpWebRequest  ,
+                                               connectorRequest as ConnectorRequest,
+                                               authorizationKey as character       ).
         
-        case connectorConfig:authenticationType.
+        define variable authentication as AuthenticationConfig no-undo.
+        
+        assign authentication = connectorRequest:connectorConfig:authentication.
+
+        if not valid-object(authentication) then return.
+
+        case authentication:authenticationType.
 
             when 'BASIC' then 
-                request:Headers:Add('Authorization', 'Basic ' + ConvertBase64( connectorConfig:userName + ':' + connectorConfig:password ) ).
+                request:Headers:Add('Authorization', 'Basic ' + ConvertBase64( authentication:userName + ':' + authentication:password ) ).
             
             when 'BEARER' or
             when 'TOKEN'  then do.
-                if authorizationKey <> '' then
+                if StringUtil:hasValue( authorizationKey ) then
                     request:Headers:Add('KeyAuthentication', authorizationKey).
-                else 
-                    if connectorConfig:token <> '' then
-                        request:Headers:Add('Authorization', substitute('&1 &2', connectorConfig:authenticationType, connectorConfig:token )).
+                else
+                    if StringUtil:hasValue( authentication:token ) then
+                        request:Headers:Add('Authorization', substitute('&1 &2', authentication:authenticationType, authentication:token )).
+            end.
+            when 'CUSTOM.BODY' then do.
+                if type-of(connectorRequest:content, JsonObject) then do.
+                    cast( connectorRequest:content, JsonObject):set( 'token', authorizationKey  ).
+                    assign connectorRequest:contentText = cast( connectorRequest:content, JsonObject):GetJsonText().
+                end.             
             end.
             
         end case.
@@ -292,7 +380,7 @@ class thl-lib.integration.connectors.types.RestConnector inherits IntegrationCon
 
     method protected character getContentType( input connectorConfig as ConnectorConfig ).
 
-        if connectorConfig:contentType <> '' then
+        if StringUtil:hasValue( connectorConfig:contentType ) then
             return connectorConfig:contentType.
 
         return 'application/json'.

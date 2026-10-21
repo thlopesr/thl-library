@@ -14,14 +14,14 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i V99XX999 9.99.99.999}
+{include/i-prgvrs.i thl0002-v01 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 /*                                                                                */
-/* OBS: Para os smartobjects o parametro m¢dulo dever  ser MUT                    */
+/* OBS: Para os smartobjects o parametro modulo devera ser MUT                    */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
     {include/i-license-manager.i <programa> MUT}
@@ -62,26 +62,27 @@ def var v-row-parent as rowid no-undo.
 &Scoped-define FRAME-NAME f-main
 
 /* External Tables                                                      */
-&Scoped-define EXTERNAL-TABLES thl-ambiente
-&Scoped-define FIRST-EXTERNAL-TABLE thl-ambiente
+&Scoped-define EXTERNAL-TABLES thl-ambiente-param
+&Scoped-define FIRST-EXTERNAL-TABLE thl-ambiente-param
 
 
 /* Need to scope the external tables to this procedure                  */
-DEFINE QUERY external_tables FOR thl-ambiente.
+DEFINE QUERY external_tables FOR thl-ambiente-param.
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-FIELDS thl-ambiente.cod-ambiente thl-ambiente.ip ~
-thl-ambiente.nome-ambiente 
-&Scoped-define ENABLED-TABLES thl-ambiente
-&Scoped-define FIRST-ENABLED-TABLE thl-ambiente
+&Scoped-Define ENABLED-FIELDS thl-ambiente-param.descr-param-ambiente 
+&Scoped-define ENABLED-TABLES thl-ambiente-param
+&Scoped-define FIRST-ENABLED-TABLE thl-ambiente-param
 &Scoped-Define ENABLED-OBJECTS rt-key rt-mold 
-&Scoped-Define DISPLAYED-FIELDS thl-ambiente.cod-ambiente thl-ambiente.ip ~
-thl-ambiente.nome-ambiente 
-&Scoped-define DISPLAYED-TABLES thl-ambiente
-&Scoped-define FIRST-DISPLAYED-TABLE thl-ambiente
+&Scoped-Define DISPLAYED-FIELDS thl-ambiente-param.cod-param-ambiente ~
+thl-ambiente-param.descr-param-ambiente 
+&Scoped-define DISPLAYED-TABLES thl-ambiente-param
+&Scoped-define FIRST-DISPLAYED-TABLE thl-ambiente-param
 
 
 /* Custom List Definitions                                              */
 /* ADM-CREATE-FIELDS,ADM-ASSIGN-FIELDS,ADM-MODIFY-FIELDS,List-4,List-5,List-6 */
+&Scoped-define ADM-CREATE-FIELDS thl-ambiente-param.cod-param-ambiente 
+&Scoped-define ADM-ASSIGN-FIELDS thl-ambiente-param.cod-param-ambiente 
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
@@ -94,16 +95,15 @@ thl-ambiente.nome-ambiente
 THIS-PROCEDURE
 </KEY-OBJECT>
 <FOREIGN-KEYS>
-ip|y|y|mgnitro.thl-ambiente.ip
-cod-ambiente|y|y|mgnitro.thl-ambiente.cod-ambiente
+cod-param-ambiente|y|y|mgnitro.thl-ambiente-param.cod-param-ambiente
 </FOREIGN-KEYS> 
 <EXECUTING-CODE>
 **************************
 * Set attributes related to FOREIGN KEYS
 */
 RUN set-attribute-list (
-    'Keys-Accepted = "ip,cod-ambiente",
-     Keys-Supplied = "ip,cod-ambiente"':U).
+    'Keys-Accepted = "cod-param-ambiente",
+     Keys-Supplied = "cod-param-ambiente"':U).
 /**************************
 </EXECUTING-CODE> */
 /* _UIB-CODE-BLOCK-END */
@@ -120,21 +120,20 @@ DEFINE RECTANGLE rt-key
 
 DEFINE RECTANGLE rt-mold
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 88.57 BY 2.25.
+     SIZE 88.57 BY 1.25.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME f-main
-     thl-ambiente.cod-ambiente AT ROW 1.17 COL 33.86 COLON-ALIGNED WIDGET-ID 2
+     thl-ambiente-param.cod-param-ambiente AT ROW 1.17 COL 30 COLON-ALIGNED WIDGET-ID 2
+          LABEL "Codigo Parametro"
           VIEW-AS FILL-IN 
-          SIZE 7.14 BY .88
-     thl-ambiente.ip AT ROW 2.67 COL 33.86 COLON-ALIGNED WIDGET-ID 4
+          SIZE 17.57 BY .88
+     thl-ambiente-param.descr-param-ambiente AT ROW 2.67 COL 11.43 WIDGET-ID 4
+          LABEL "Descricao Parametro"
           VIEW-AS FILL-IN 
-          SIZE 21.14 BY .88
-     thl-ambiente.nome-ambiente AT ROW 3.67 COL 33.86 COLON-ALIGNED WIDGET-ID 6
-          VIEW-AS FILL-IN 
-          SIZE 41.14 BY .88
+          SIZE 50 BY .88
      rt-key AT ROW 1 COL 1
      rt-mold AT ROW 2.5 COL 1
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
@@ -147,7 +146,7 @@ DEFINE FRAME f-main
 &ANALYZE-SUSPEND _PROCEDURE-SETTINGS
 /* Settings for THIS-PROCEDURE
    Type: SmartViewer
-   External Tables: mgnitro.thl-ambiente
+   External Tables: mgnitro.thl-ambiente-param
    Allow: Basic,DB-Fields
    Frames: 1
    Add Fields to: EXTERNAL-TABLES
@@ -169,7 +168,7 @@ END.
 &ANALYZE-SUSPEND _CREATE-WINDOW
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW V-table-Win ASSIGN
-         HEIGHT             = 3.75
+         HEIGHT             = 2.75
          WIDTH              = 88.57.
 /* END WINDOW DEFINITION */
                                                                         */
@@ -200,6 +199,10 @@ ASSIGN
        FRAME f-main:SCROLLABLE       = FALSE
        FRAME f-main:HIDDEN           = TRUE.
 
+/* SETTINGS FOR FILL-IN thl-ambiente-param.cod-param-ambiente IN FRAME f-main
+   NO-ENABLE 1 2 EXP-LABEL                                              */
+/* SETTINGS FOR FILL-IN thl-ambiente-param.descr-param-ambiente IN FRAME f-main
+   ALIGN-L EXP-LABEL                                                    */
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 
@@ -214,13 +217,6 @@ ASSIGN
 &ANALYZE-RESUME
 
  
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _XFTR "SmartViewerCues" V-table-Win _INLINE
-/* Actions: adecomm/_so-cue.w ? adecomm/_so-cued.p ? adecomm/_so-cuew.p */
-/*:T SmartViewer,uib,50030 
-Destroy on next read */
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK V-table-Win 
@@ -260,15 +256,10 @@ PROCEDURE adm-find-using-key :
   /* Find the current record using the current Key-Name. */
   RUN get-attribute ('Key-Name':U).
   CASE RETURN-VALUE:
-    WHEN 'ip':U THEN
+    WHEN 'cod-param-ambiente':U THEN
        {src/adm/template/find-tbl.i
-           &TABLE = thl-ambiente
-           &WHERE = "WHERE thl-ambiente.ip eq key-value"
-       }
-    WHEN 'cod-ambiente':U THEN
-       {src/adm/template/find-tbl.i
-           &TABLE = thl-ambiente
-           &WHERE = "WHERE thl-ambiente.cod-ambiente eq key-value"
+           &TABLE = thl-ambiente-param
+           &WHERE = "WHERE thl-ambiente-param.cod-param-ambiente eq key-value"
        }
   END CASE.
 
@@ -291,13 +282,13 @@ PROCEDURE adm-row-available :
   {src/adm/template/row-head.i}
 
   /* Create a list of all the tables that we need to get.            */
-  {src/adm/template/row-list.i "thl-ambiente"}
+  {src/adm/template/row-list.i "thl-ambiente-param"}
 
   /* Get the record ROWID's from the RECORD-SOURCE.                  */
   {src/adm/template/row-get.i}
 
   /* FIND each record specified by the RECORD-SOURCE.                */
-  {src/adm/template/row-find.i "thl-ambiente"}
+  {src/adm/template/row-find.i "thl-ambiente-param"}
 
   /* Process the newly available records (i.e. display fields,
      open queries, and/or pass records on to any RECORD-TARGETS).    */
@@ -334,10 +325,12 @@ PROCEDURE local-assign-record :
 ------------------------------------------------------------------------------*/
 
     /* Code placed here will execute PRIOR to standard behavior. */
-    {include/i-valid.i}
+    run pi-validate.
+    if return-value = 'ADM-ERROR':U then
+        return 'ADM-ERROR':U.
     
-    /*:T Ponha na pi-validate todas as valida‡äes */
-    /*:T NÆo gravar nada no registro antes do dispatch do assign-record e 
+    /*:T Ponha na pi-validate todas as validacoes */
+    /*:T Nao gravar nada no registro antes do dispatch do assign-record e 
        nem na PI-validate. */
     
     /* Dispatch standard ADM method.                             */
@@ -345,8 +338,48 @@ PROCEDURE local-assign-record :
     if RETURN-VALUE = 'ADM-ERROR':U then 
         return 'ADM-ERROR':U.
     
-    /*:T Todos os assignïs nÆo feitos pelo assign-record devem ser feitos aqui */  
+    /*:T Todos os assign's nao feitos pelo assign-record devem ser feitos aqui */  
     /* Code placed here will execute AFTER standard behavior.    */
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE local-delete-record V-table-Win
+PROCEDURE local-delete-record :
+/*------------------------------------------------------------------------------
+  Purpose:     Override standard ADM method
+  Notes:       Eliminar o parametro elimina tambem as variaveis (thl0002b) e os
+               programas (thl0002c) dele, na mesma transacao.
+------------------------------------------------------------------------------*/
+    define variable c-param as character no-undo.
+
+    /* Code placed here will execute PRIOR to standard behavior. */
+    if available thl-ambiente-param then
+        assign c-param = thl-ambiente-param.cod-param-ambiente.
+
+    do transaction on error undo, return 'ADM-ERROR':U:
+
+        /* Dispatch standard ADM method.                             */
+        RUN dispatch IN THIS-PROCEDURE ( INPUT 'delete-record':U ) .
+        if RETURN-VALUE = 'ADM-ERROR':U then
+            undo, return 'ADM-ERROR':U.
+
+        /* filhos do parametro eliminado */
+        if c-param <> "" then do:
+            for each thl-ambiente-param-variavel exclusive-lock
+                where thl-ambiente-param-variavel.cod-param-ambiente = c-param:
+                delete thl-ambiente-param-variavel.
+            end.
+
+            for each thl-ambiente-param-prog exclusive-lock
+                where thl-ambiente-param-prog.cod-param-ambiente = c-param:
+                delete thl-ambiente-param-prog.
+            end.
+        end.
+
+    end.
 
 END PROCEDURE.
 
@@ -419,13 +452,31 @@ PROCEDURE Pi-validate :
 /*:T------------------------------------------------------------------------------
   Purpose:Validar a viewer     
   Parameters:  <none>
-  Notes: NÆo fazer assign aqui. Nesta procedure
-  devem ser colocadas apenas valida‡äes, pois neste ponto do programa o registro 
-  ainda nÆo foi criado.       
+  Notes: Nao fazer assign aqui. Nesta procedure
+  devem ser colocadas apenas validacoes, pois neste ponto do programa o registro 
+  ainda nao foi criado.       
 ------------------------------------------------------------------------------*/
-    {include/i-vldfrm.i} /*:T Valida‡Æo de dicion rio */
+    {include/i-vldfrm.i} /*:T Validacao de dicionario */
     
-/*:T    Segue um exemplo de valida‡Æo de programa */
+
+    if adm-new-record then do:
+        if input frame {&frame-name} thl-ambiente-param.cod-param-ambiente = "" then do:
+            {include/i-vldprg.i}
+            run utp/ut-msgs.p (input "show":U, input 17006,
+                               input "Parametro nao informado~~Informe o codigo do parametro de ambiente.").
+            apply "entry":U to thl-ambiente-param.cod-param-ambiente in frame {&frame-name}.
+            return "ADM-ERROR":U.
+        end.
+        if can-find(thl-ambiente-param where thl-ambiente-param.cod-param-ambiente = input frame {&frame-name} thl-ambiente-param.cod-param-ambiente) then do:
+            {include/i-vldprg.i}
+            run utp/ut-msgs.p (input "show":U, input 17006,
+                               input "Parametro ja cadastrado~~Informe outro codigo.").
+            apply "entry":U to thl-ambiente-param.cod-param-ambiente in frame {&frame-name}.
+            return "ADM-ERROR":U.
+        end.
+    end.
+
+/*:T    Segue um exemplo de validacao de programa */
 /*       find tabela where tabela.campo1 = c-variavel and               */
 /*                         tabela.campo2 > i-variavel no-lock no-error. */
       
@@ -451,8 +502,7 @@ PROCEDURE send-key :
   {src/adm/template/sndkytop.i}
 
   /* Return the key value associated with each key case.             */
-  {src/adm/template/sndkycas.i "ip" "thl-ambiente" "ip"}
-  {src/adm/template/sndkycas.i "cod-ambiente" "thl-ambiente" "cod-ambiente"}
+  {src/adm/template/sndkycas.i "cod-param-ambiente" "thl-ambiente-param" "cod-param-ambiente"}
 
   /* Close the CASE statement and end the procedure.                 */
   {src/adm/template/sndkyend.i}
@@ -474,7 +524,7 @@ PROCEDURE send-records :
   {src/adm/template/snd-head.i}
 
   /* For each requested table, put it's ROWID in the output list.      */
-  {src/adm/template/snd-list.i "thl-ambiente"}
+  {src/adm/template/snd-list.i "thl-ambiente-param"}
 
   /* Deal with any unexpected table requests before closing.           */
   {src/adm/template/snd-end.i}

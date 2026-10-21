@@ -1,4 +1,14 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, mensageria, outbound]
+updated: 2026-10-13
+---
+
 # Pacote: integration/messaging — Outbound
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** `OutboundMessageService` usa `OutboundConfigLoader` (mesma busca e mesmas mensagens de erro do `MessageConfigLoader:load` por estabelecimento). Nenhuma outra mudança na saída.
 
 > **Sincronizado em 2026-09-24:** removidos `OutboundObjectContext:hasRecordId()/hasReferenceCode()` (não existem mais — removidos pelo prompt de correção de 2026-08-13); documentados os métodos protected de `OutboundMessageService`.
 
@@ -247,3 +257,11 @@
 **Observações:**
 - `destination = 'RPW'` no `ConnectorResponse` para identificar que é agendamento.
 - CATCH loga e persiste erro; o throw acontece com `undo, throw` apenas nos branches de falha, mas o CATCH pode não relançar em todos os cenários — verificar se exceções do `run thl0220z.p` são corretamente propagadas (ausência de `undo, throw e` no CATCH é um ponto de atenção).
+
+## Situação das fases no outbound — ajustes de 2026-10-03 (não compilado)
+
+Decisão em [adr/metricas-conteudo-expurgo-mensagens.md](../adr/metricas-conteudo-expurgo-mensagens.md) §2.3.
+
+- `OutboundMessage.saveResponse`: quando o envio falha (`successResponse` falso), `successProcess` passa a `?` e o processamento é gravado como **Não aplicável** (antes ficava Erro, mesmo em objeto sem regra de processamento). Vale para qualquer objeto, inclusive os que sobrescrevem `parseBusinessProcess`: com o envio em falha, o processamento de negócio não chega a ocorrer. A situação geral continua Erro, pelo retorno.
+- `SchedulingService.schedule`: no agendamento aceito, depois do `saveResponse`, chama `message_:markPending()`. As fases ficam 3, 3, 4 como antes, mas `sit-mensagem` fica 1 (Pendente) até o RPW executar e gravar o resultado.
+- Inbound agendado não muda: o `InboundSchedulingService` não grava resultado na aceitação, então a mensagem segue com as três fases e a situação geral em pendente.

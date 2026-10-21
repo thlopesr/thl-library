@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, apperror]
+updated: 2026-10-13
+---
+
 # AppError (erros da THL)
 
 > Base **do OpenEdge** · `Progress.Lang.AppError` · filhas em `Fontes\thl-lib\core\error\` · volta ao [hub de arquitetura](../arquitetura.md)

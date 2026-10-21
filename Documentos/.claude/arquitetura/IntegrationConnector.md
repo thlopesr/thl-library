@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, integrationconnector]
+updated: 2026-10-13
+---
+
 # IntegrationConnector
 
 > Classe-base **abstrata** · `thl-lib.integration.connectors.types.IntegrationConnector` · `Fontes\thl-lib\integration\connectors\types\IntegrationConnector.cls` · volta ao [hub de arquitetura](../arquitetura.md)

@@ -1,0 +1,6 @@
+<div class="thl-empty-state">
+  <po-info [p-label]="titulo" [p-value]="descricao"></po-info>
+  @if (acao) {
+    <po-button [p-label]="acao" [p-icon]="icone" p-kind="secondary" (p-click)="acaoClick.emit()"></po-button>
+  }
+</div>

@@ -1,0 +1,77 @@
+/*------------------------------------------------------------------------
+    File        : ConexaoRestMessage
+    Purpose     : Inbound message para CRUD de conexoes REST (URL base)
+                  (thl-conexao-rest, tela thl0030). Rota: /resourcen/conexao-rest
+                  (aplicacao THL, objeto CONEXAO-REST).
+    Author(s)   : Lopes
+    Created     : 2026-10-01
+    Notes       : Padrao AmbienteMessage (thl-extensions.integration.thl).
+                  POST/PATCH/DELETE pelos defaults de InboundMessage; GET com
+                  listagem paginada pela chave (conexaoIni/conexaoFin,
+                  page, pageSize).
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.ConexaoRestService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.ConexaoRestMessage inherits InboundMessage.
+
+    constructor public ConexaoRestMessage ( objectName           as character ,
+                                            applicationName      as character ,
+                                            integrationOperation as character ,
+                                            methodType           as integer   ,
+                                            connectorType        as integer   ,
+                                            integrationDirection as logical   ,
+                                            executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new ConexaoRestService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable conexaoRestService as ConexaoRestService no-undo.
+
+        assign conexaoRestService  = cast( this-object:createService(), ConexaoRestService )
+               this-object:payload = appendItems(
+                    conexaoRestService:get(
+                        createPagination( 100 ),
+                        context:getQueryParam( 'conexaoIni', ''              ),
+                        context:getQueryParam( 'conexaoFin', fill( 'z', 40 ) )
+                    )
+               ).
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    //cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'conexao'.
+    end method.
+
+end class.

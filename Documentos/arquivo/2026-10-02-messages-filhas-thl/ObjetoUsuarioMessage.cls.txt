@@ -1,0 +1,80 @@
+/*------------------------------------------------------------------------
+    File        : ObjetoUsuarioMessage
+    Purpose     : Inbound message para CRUD de usuarios liberados para o objeto de integracao
+                  (thl-objeto-usuario, tela thl0022b). Rota: /resourcen/objeto-usuario
+                  (aplicacao THL, objeto OBJETO-USUARIO).
+    Author(s)   : Lopes
+    Created     : 2026-10-01
+    Notes       : Padrao AmbienteMessage (thl-extensions.integration.thl).
+                  POST/DELETE pelos defaults de InboundMessage; GET com
+                  listagem paginada pela chave (aplicacaoIni/aplicacaoFin/objetoIni/objetoFin,
+                  page, pageSize).
+                  PATCH nao suportado: o registro so tem a chave.
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.ObjetoUsuarioService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.ObjetoUsuarioMessage inherits InboundMessage.
+
+    constructor public ObjetoUsuarioMessage ( objectName           as character ,
+                                              applicationName      as character ,
+                                              integrationOperation as character ,
+                                              methodType           as integer   ,
+                                              connectorType        as integer   ,
+                                              integrationDirection as logical   ,
+                                              executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new ObjetoUsuarioService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable objetoUsuarioService as ObjetoUsuarioService no-undo.
+
+        assign objetoUsuarioService = cast( this-object:createService(), ObjetoUsuarioService )
+               this-object:payload  = appendItems(
+                    objetoUsuarioService:get(
+                        createPagination( 100 ),
+                        context:getQueryParam( 'aplicacaoIni', ''               ),
+                        context:getQueryParam( 'aplicacaoFin', fill( 'z', 100 ) ),
+                        context:getQueryParam( 'objetoIni'   , ''              ),
+                        context:getQueryParam( 'objetoFin'   , fill( 'z', 60 ) )
+                    )
+               ).
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    //cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'aplicacao,objeto,usuario'.
+    end method.
+
+end class.

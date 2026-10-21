@@ -1,0 +1,37 @@
+/* Separação visual dos grupos do menu (o po-menu não tem divisor nativo).
+   Cada grupo é ancorado no link do seu primeiro item; se a estrutura interna do po-menu mudar,
+   some só a separação, não a navegação. */
+
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/ambiente'])::before,
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/aplicacao'])::before,
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/auditoria'])::before {
+  display: block;
+  padding: 14px 16px 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-neutral-mid-60);
+}
+
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/ambiente'])::before {
+  content: 'Configuração';
+}
+
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/aplicacao'])::before {
+  content: 'Integração';
+}
+
+:host ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/auditoria'])::before {
+  content: 'Auditoria';
+}
+
+/* Recolhido: só uma linha fina entre os grupos. Desde a página inicial (2026-10-14),
+   o grupo Configuração deixou de ser o primeiro item e também ganha linha acima. */
+:host(.po-collapsed-menu) ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/ambiente'])::before,
+:host(.po-collapsed-menu) ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/aplicacao'])::before,
+:host(.po-collapsed-menu) ::ng-deep po-menu li.po-menu-list-item:has(> po-menu-item > a[href$='#/auditoria'])::before {
+  content: '';
+  height: 0;
+  padding: 0;
+  margin: 6px 12px;
+  border-top: 1px solid var(--color-neutral-light-20);
+}

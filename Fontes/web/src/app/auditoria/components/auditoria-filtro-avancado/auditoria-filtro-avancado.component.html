@@ -1,0 +1,44 @@
+<po-modal #modal p-title="Filtro Avançado" p-size="lg"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction">
+  <form>
+    <div class="po-row">
+      <po-datetimepicker class="po-md-6" name="dtCriacaoIni" [(ngModel)]="dtCriacaoIni"
+        (ngModelChange)="aoDigitarData()"
+        p-label="Dt. Criação (Inicial)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+      </po-datetimepicker>
+      <po-datetimepicker class="po-md-6" name="dtCriacaoFin" [(ngModel)]="dtCriacaoFin"
+        (ngModelChange)="aoDigitarData()"
+        p-label="Dt. Criação (Final)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+      </po-datetimepicker>
+    </div>
+
+    <thl-date-shortcuts [selecionado]="atalho" [ini]="dtCriacaoIni"
+      (selecionadoChange)="atalho = $event" (faixaChange)="aplicarAtalho($event)">
+    </thl-date-shortcuts>
+    <div class="po-row">
+      <po-input class="po-md-6" name="bancoIni" [(ngModel)]="filtro.bancoIni"
+        p-label="Banco (Inicial)" p-placeholder="Ex: shmg">
+      </po-input>
+      <po-input class="po-md-6" name="bancoFin" [(ngModel)]="filtro.bancoFin"
+        p-label="Banco (Final)" p-placeholder="Ex: shmg">
+      </po-input>
+    </div>
+    <div class="po-row">
+      <po-input class="po-md-6" name="tabelaIni" [(ngModel)]="filtro.tabelaIni"
+        p-label="Tabela (Inicial)" p-placeholder="Ex: embarque">
+      </po-input>
+      <po-input class="po-md-6" name="tabelaFin" [(ngModel)]="filtro.tabelaFin"
+        p-label="Tabela (Final)" p-placeholder="Ex: embarque">
+      </po-input>
+    </div>
+    <div class="po-row">
+      <po-input class="po-md-6" name="usuarioIni" [(ngModel)]="filtro.usuarioIni"
+        p-label="Usuário (Inicial)" p-placeholder="Ex: ext.thiagorl">
+      </po-input>
+      <po-input class="po-md-6" name="usuarioFin" [(ngModel)]="filtro.usuarioFin"
+        p-label="Usuário (Final)" p-placeholder="Ex: ext.thiagorl">
+      </po-input>
+    </div>
+  </form>
+</po-modal>

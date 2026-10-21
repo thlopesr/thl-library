@@ -3,6 +3,8 @@ tipo: adr
 modulo: auditoria
 status: proposta
 updated: 2026-10-02
+camada: ambos
+tags: [adr, auditoria]
 ---
 
 # ADR — Desempenho da gravação de auditoria na trigger

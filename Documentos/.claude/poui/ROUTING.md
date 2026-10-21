@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # SEÇÃO 7 — NAVEGAÇÃO E ROTAS (ROUTING.md)
 
 ## 7.1 Padrão de rotas Angular para CRUD PO-UI

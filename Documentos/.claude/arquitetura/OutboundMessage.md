@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, outboundmessage]
+updated: 2026-10-13
+---
+
 # OutboundMessage
 
 > Classe-base **abstrata** · `thl-lib.integration.messaging.outbound.core.OutboundMessage` · herda de [Message](Message.md) · `Fontes\thl-lib\integration\messaging\outbound\core\OutboundMessage.cls` · volta ao [hub de arquitetura](../arquitetura.md)

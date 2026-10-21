@@ -1,0 +1,17 @@
+<div class="thl-search-bar">
+  <div class="thl-search-bar__field">
+    <input #input type="text" class="thl-search-bar__input"
+      [placeholder]="placeholder" [value]="value" [attr.aria-label]="placeholder"
+      (keyup.enter)="emitSearch(input.value)" (input)="onInput(input.value)">
+    <button type="button" class="thl-search-bar__icon-btn" aria-label="Buscar"
+      (click)="emitSearch(input.value)">
+      <span class="an an-magnifying-glass"></span>
+    </button>
+  </div>
+  @if (showAdvanced) {
+    <button type="button" class="thl-search-bar__advanced" (click)="advanced.emit()">
+      <span class="an an-funnel"></span>
+      Busca avançada
+    </button>
+  }
+</div>

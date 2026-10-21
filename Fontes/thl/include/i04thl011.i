@@ -15,7 +15,7 @@
 {include/i-lgcode.i}
 
 &global val1 Online 
-&global val2 Batch
-&global val3 Agendar
+&global val2 Agendar
+&global val3 Batch
 
 {include/ind01-10.i {1} {2}}

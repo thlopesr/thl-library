@@ -1,0 +1,54 @@
+<po-page-list p-title="">
+
+  <thl-page-header title="Auditoria" subtitle="Consulta de registros de auditoria · mais recentes primeiro" [lastUpdate]="lastUpdateLabel">
+    <thl-search-bar
+      placeholder="Filtrar os registros carregados"
+      [value]="filtro.texto ?? ''"
+      (search)="buscaRapida($event)"
+      (advanced)="filtroAvancado.open()">
+    </thl-search-bar>
+  </thl-page-header>
+
+  <po-disclaimer-group class="thl-disclaimers"
+    [p-title]="disclaimerGroup.title"
+    [p-disclaimers]="disclaimerGroup.disclaimers"
+    (p-change)="disclaimerGroup.change!($event)">
+  </po-disclaimer-group>
+
+  <thl-stat-chips [chips]="filterChips" [equalWidth]="true" (chipClick)="onChipClick($event)"></thl-stat-chips>
+
+  @if (erro) {
+    <thl-error-state [detalhe]="erro" (retry)="tentarNovamente()"></thl-error-state>
+  } @else if (items.length === 0 && !loading) {
+    <thl-empty-state titulo="Nenhum registro de auditoria encontrado"
+      descricao="Tente ajustar os filtros ou o período de busca."></thl-empty-state>
+  }
+
+  @if (!erro && (items.length > 0 || loading)) {
+  <po-table
+    [p-columns]="columns"
+    [p-items]="items"
+    [p-loading]="loading"
+    [p-sort]="true"
+    [p-striped]="true"
+    p-container
+    [p-show-more-disabled]="!hasNext"
+    (p-show-more)="carregarMais()"
+    (p-sort-by)="onSort($event)">
+    <ng-template p-table-cell-template let-row="row">
+      <thl-row-actions [actions]="rowActions" [row]="row"></thl-row-actions>
+    </ng-template>
+  </po-table>
+  }
+
+</po-page-list>
+
+<app-auditoria-filtro-avancado #filtroAvancado
+  (filtrar)="onFiltroAvancado($event)">
+</app-auditoria-filtro-avancado>
+
+<po-modal #detailModal [p-title]="detailTitle" p-size="xl" [p-hide-close]="false">
+  @if (selectedAuditoria) {
+    <app-auditoria-detail [auditoria]="selectedAuditoria" [activeTab]="activeTab"></app-auditoria-detail>
+  }
+</po-modal>

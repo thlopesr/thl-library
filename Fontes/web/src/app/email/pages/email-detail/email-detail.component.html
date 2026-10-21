@@ -1,0 +1,45 @@
+<po-tabs>
+  <po-tab p-label="Informações" [p-active]="activeTab === 0">
+    <po-divider p-label="DADOS DO E-MAIL"></po-divider>
+    <div class="po-row">
+      <po-info class="po-lg-12" p-label="Cód. E-mail" [p-value]="email.id"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-6" p-label="Remetente" [p-value]="email.remetente"></po-info>
+      <po-info class="po-lg-6" p-label="Destino" [p-value]="email.destino"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-12" p-label="Assunto" [p-value]="email.assunto"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-4" p-label="Programa" [p-value]="email.codProgDtsul"></po-info>
+      <po-info class="po-lg-4" p-label="Param. Ambiente" [p-value]="email.codParamAmbiente"></po-info>
+      <po-info class="po-lg-4" p-label="Dt. Envio" [p-value]="email.dtEnvio"></po-info>
+    </div>
+
+    <po-divider p-label="STATUS"></po-divider>
+    <div class="po-row">
+      <div class="po-lg-4">
+        <div class="status-item">
+          <span class="status-label">Status Envio</span>
+          <po-tag [p-value]="email.logEnvio"
+                  [p-color]="getStatusColor(email.logEnvio)">
+          </po-tag>
+        </div>
+      </div>
+      <po-info class="po-lg-8" p-label="Arquivo Anexo" [p-value]="email.arqAnexo || '(nenhum)'"></po-info>
+    </div>
+  </po-tab>
+
+  <po-tab p-label="Mensagem" [p-active]="activeTab === 1">
+    <div class="content-box">{{ getMensagemTexto() }}</div>
+  </po-tab>
+
+  <po-tab p-label="Retorno" [p-active]="activeTab === 2">
+    <div class="content-box">{{ getRetornoTexto() }}</div>
+  </po-tab>
+
+  <po-tab p-label="Parâmetro" [p-active]="activeTab === 3">
+    <div class="content-box">{{ getInformacaoTexto() }}</div>
+  </po-tab>
+</po-tabs>

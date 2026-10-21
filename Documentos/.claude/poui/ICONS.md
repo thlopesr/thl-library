@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 ## SEÇÃO 12 — ICONS.md
 
 ### 12.1 Ícones do PO-UI (Animalia)

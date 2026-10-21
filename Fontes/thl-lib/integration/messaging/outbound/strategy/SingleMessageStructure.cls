@@ -1,6 +1,6 @@
  
  /*------------------------------------------------------------------------
-    File        : MessageRepository
+    File        : SingleMessageStructure
     Purpose     : 
     Syntax      : 
     Description : 
@@ -10,8 +10,8 @@
   ----------------------------------------------------------------------*/
 
 using Progress.Lang.*.
-using thl-lib.integration.messaging.Outbound.strategy.MessageStructureStrategy.
-using thl-lib.integration.messaging.Outbound.core.OutboundMessage.
+using thl-lib.integration.messaging.outbound.strategy.MessageStructureStrategy.
+using thl-lib.integration.messaging.outbound.core.*.
 
 block-level on error undo, throw.
 
@@ -26,19 +26,26 @@ class thl-lib.integration.messaging.outbound.strategy.SingleMessageStructure inh
         //In single mode, structure resolution happens during addObject().
     end method. 
 
-    method public override void addObject( register as recid ).
-        outboundMessage:loadData( register ).
-        if outboundMessage:hasReusableMessage() then
-            outboundMessage:loadByMessageItem().
-        else 
-            this-object:createNewMessageStructure().
+    method public override void addObject( objectContext as OutboundObjectContext ).
 
-    end method. 
+        outboundMessage:loadData( objectContext ).
+        
+        /*if outboundMessage:hasReusableMessage() then
+            outboundMessage:loadByMessageItem().
+        else */
+            this-object:createNewMessageStructure( objectContext ).
+
+    end method.
     
-    method private void createNewMessageStructure().
+    method private void createNewMessageStructure( objectContext as OutboundObjectContext ).
+
         outboundMessage:createMessage().
-        outboundMessage:appendPayloadObject().
+        if objectContext:hasAdditionalData() then
+            outboundMessage:appendPayloadObject( objectContext ).
+        else
+            outboundMessage:appendPayloadObject().
         outboundMessage:appendItem   ().
+        
     end method.
     
     method public override void finishMessage().

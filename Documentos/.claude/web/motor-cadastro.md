@@ -1,8 +1,37 @@
+---
+tipo: modulo
+camada: ambos
+status: vigente
+tags: [web, po-ui, motor-cadastro]
+updated: 2026-10-13
+---
+
 # Motor genérico de cadastros (`shared\crud\`)
 
 Contrato do motor que desenha **todos** os cadastros do app `cadastro`. Nenhum cadastro tem componente próprio: cada um é uma definição `CrudResource` em `cadastros\cadastros.defs.ts`, e a rota passa a definição em `data: { def }` para o `ThlCrudPageComponent` (`cadastro.routes.ts`).
 
 Visão geral do app e rotas em [app-web.md](app-web.md). Armadilhas do PO UI que moldaram estas decisões em [poui-licoes.md](poui-licoes.md).
+
+## Por que motor, e não um componente por cadastro
+
+Medido em 09/10/2026, com os dois modelos convivendo no mesmo repositório (cadastros no motor, monitores à mão):
+
+| | Linhas | Chunk (raw / transferido) | Cobre |
+|---|---|---|---|
+| Motor (`shared/crud/`, 5 arquivos) | 1.085 | 35,08 kB / **9,37 kB** | **9 cadastros + 16 abas de filhos** |
+| `cadastros.defs.ts` (as 9 definições) | 486 | — | 43 linhas por cadastro, de 13 (Ambiente) a 94 (Objeto) |
+| `mensagem-list` (tela à mão) | — | 33,66 kB / 7,85 kB | 1 tela |
+| `email-list` (tela à mão) | — | 21,27 kB / 5,98 kB | 1 tela |
+
+O motor inteiro pesa o mesmo que **uma** tela escrita à mão. Nove componentes de cadastro gerariam nove chunks de 15–30 kB, cada um com sua cópia de tabela, modal, formulário e confirmação de exclusão.
+
+**Runtime não muda:** o navegador paga pelo que está na tela, não por cadastro existente. Abrir um cadastro instancia um `po-table` e, no Editar, um `po-modal` — a mesma árvore que um componente próprio criaria; os outros oito nem são baixados (rota lazy). Os três componentes do motor são `OnPush`, e `visiveis` é **campo**, não getter: o filtro é recalculado quando o termo muda, não a cada ciclo de detecção. A única diferença real é o `po-dynamic-form`, que monta os campos a partir de um array em vez de um template compilado — alguns milissegundos na abertura do modal, invisíveis ao lado da chamada ao PASOE. O custo inicial do app é dominado por PO UI e tema (510 kB de JS + 63 kB de CSS); o motor é ~1,8% disso.
+
+**O teste de saúde da generalização:** o motor **não conhece nenhum cadastro pelo nome** — uma busca por `'conexao'`, `'objeto'`, `'ambiente'` e os demais em `shared/crud/` não devolve nenhuma condição, só um comentário com exemplo. As 26 propriedades do `CrudField` descrevem *o que o campo é*, nunca *qual cadastro é*.
+
+**Quando abrir exceção e escrever tela própria:** fluxo com passos (assistente, "testar conexão antes de salvar"), tela cuja unidade não é a linha (mapeamento de-para, diagrama, matriz) ou forma da tela que muda conforme o dado. Nenhum dos 9 pede isso hoje.
+
+**Sinais de alerta:** uma propriedade nova no `CrudField` que sirva a um único cadastro, ou um `if` no motor testando o nome de um recurso. Nessa hora a tela própria sai mais barata que a flag — `thl-crud-list.component.ts` já tem 606 linhas e é a peça mais pesada do app.
 
 ## Peças
 
@@ -26,6 +55,8 @@ Visão geral do app e rotas em [app-web.md](app-web.md). Armadilhas do PO UI que
 | `parentFilter` | Prefixo do filtro quando difere do campo (`{ codParametro: 'parametro' }` → `parametroIni/Fin`) |
 | `single` | No máximo um registro por pai: esconde "Adicionar" e o contador da aba |
 | `noUpdate` | Recurso sem PATCH: só inclui e exclui |
+| `cascadeDelete` | Texto do que o backend elimina junto com o pai; entra na confirmação de exclusão |
+| `links` | Atalhos no "⋯" da linha para outra tela, levando o valor como filtro (`{ label, icon, rota, campo }`) |
 | `titleField` | Campo usado como título do card da linha expandida |
 
 ## `CrudField`
@@ -67,9 +98,11 @@ Visão geral do app e rotas em [app-web.md](app-web.md). Armadilhas do PO UI que
 
 - **Incluir e editar** — sempre em modal, no pai e nos filhos. O Salvar valida **todas** as abas (uma instância de `po-dynamic-form` por aba) e avisa quando há pendência em aba não aberta.
 - **Detalhar** — usa o mesmo `po-dynamic-form` do Editar com os campos em `readonly`: mesma moldura, larguras, divisores e abas. Todo campo vira texto em leitura com o valor já traduzido por `exibir` (rótulo do domínio, `Sim`/`Não`, `********`, `—` para vazio). **`readonly`, não `disabled`** — `disabled` tiraria os campos da navegação por teclado e do leitor de tela.
+- **Exclusão em cascata** — desde 2026-10-08 o backend elimina os filhos junto com o pai (ambiente, parâmetro, grupo, objeto, conexão e tabela auditada). A confirmação diz o que vai junto, pelo texto de `cascadeDelete`; o erro de exclusão mostra a mensagem do backend, não mais o palpite "verifique se há vínculos" (o grupo de e-mail em uso continua bloqueado).
 - **Erro de carregamento** — mensagem do backend e botão **Tentar novamente** no lugar da tabela. Erro e lista vazia não podem se parecer. Só a mensagem do corpo da resposta é exibida; a do `HttpErrorResponse` é técnica demais. O `PoHttpInterceptorModule` ainda mostra a notificação dele, que é complementar.
 - **Busca** — filtra só o que já está carregado (a API devolve até 100 registros), por isso o placeholder é "Filtrar os registros carregados". Quando a resposta traz `hasNext`/`total` maior que o carregado, aparece um aviso abaixo da tabela.
 - **Contador** — o subtítulo da página mostra "N registros".
+- **Filtro pela URL** — `?<campo>=<valor>` na rota da página entra no GET como `<campo>Ini/Fin` e aparece como tag com o botão **Limpar filtro**. É o que sustenta os `links` entre telas (Aplicação → Objeto). ⚠️ O "x" do `po-disclaimer` tira a tag da tela mas **não dispara `p-change`** aqui, por isso os disclaimers vão com `hideClose` e quem limpa é o botão.
 - **Valor fora do domínio** — entra como tag neutra com o valor cru (`completarTags`); sem isso o `type: 'label'` deixaria a célula vazia e esconderia dado inconsistente.
 - **Gerenciador de colunas** — escondido quando a tabela tem menos de três colunas de dados.
 
@@ -97,14 +130,14 @@ Tag colorida só para **estado do registro** e **escala de severidade**; atribut
 
 | Menu | Pai (`resource`, chave) | Filhos (abas) |
 |---|---|---|
+| Aplicação | `aplicacao` (`aplicacao`) | — (cadastro simples; `indInterna` separa o tráfego do próprio THL nas métricas). Atalho **Ver objetos** leva a `objeto` filtrado. **Sem cascata**: o Service bloqueia a exclusão quando há objeto |
 | Ambiente | `ambiente` (`codAmbiente`) | — (cadastro simples, por decisão do responsável) |
-| Parâmetro | `parametro-ambiente` (`codParametro`) | Variáveis `parametro-variavel` (N; `codAmbiente` + `codVariavel`; Ambiente por zoom de `ambiente` + `*`) · Programas `parametro-programa` (N; sem PATCH) |
-| Grupo de e-mail | `grupo-email` (`grupoEmail`) | Destinatários `grupo-email-usuario` (N; sem PATCH; chave `usuario` + `emailAlternativo`, então o mesmo usuário entra mais de uma vez com endereços diferentes) |
+| Parâmetro | `parametro-ambiente` (`codParametro`) | Variáveis `parametro-ambiente/variavel` (N; `codAmbiente` + `codVariavel`; Ambiente por zoom de `ambiente` + `*`) · Programas `parametro-ambiente/programa` (N; sem PATCH) |
+| Grupo de e-mail | `grupo-email` (`grupoEmail`) | Destinatários `grupo-email/usuario` (N; sem PATCH; chave `usuario` + `emailAlternativo`, então o mesmo usuário entra mais de uma vez com endereços diferentes) |
 | E-mail | `email-parametro` (`emailParam`) | — (Grupo de e-mail por zoom de `grupo-email`) |
-| Objeto | `objeto` (`aplicacao` + `objeto`) | Parâmetros `objeto-parametro` (N; `estabelecimento` + `operacao`; 16 campos em 4 blocos) · Usuários `objeto-usuario` (N; sem PATCH) |
-| Conexão | `conexao-rest` (`conexao`) | Autenticação `conexao-rest-autenticacao` (única; `senha`, `headersToken`, `parametersToken` mascarados) · Header `conexao-rest-header` (único) |
+| Objeto | `objeto` (`aplicacao` + `objeto`) | Parâmetros `objeto/parametro` (N; `estabelecimento` + `operacao`; 17 campos em 4 blocos) · **Rota** `objeto/rota` (única; `rotaPublica`, `indAtivo`, `inicioOperacao`) · Usuários `objeto/usuario` (N; sem PATCH) |
+| Conexão | `conexao-rest` (`conexao`) | Autenticação `conexao-rest/autenticacao` (única; `senha`, `headersToken`, `parametersToken` mascarados) · Header `conexao-rest/header` (único) |
 | Path | `conexao-rest-path` (`endpoint`) | — (independente da conexão: o mesmo path serve a várias conexões/ambientes) |
-| Rota | `inbound-rota` (`rota`) | — (zoom de Aplicação e Objeto a partir de `objeto`) |
 | Auditoria | `auditoria-tabela` (`banco` + `tabela`) | Campos · Acessos · Notificações (N; Grupo de e-mail por zoom) · Expurgo (único) |
 
 Abas em uso: Parâmetro do objeto (Geral · Ambiente · Persistência, com o divisor Log · Servidor), Autenticação (Acesso · Token), Path (Geral · Parâmetros · Headers) e E-mail (Geral · Mensagem).
@@ -118,6 +151,7 @@ Informados pelo responsável em 2026-10-01, a partir dos `&global` das telas:
 - Tipo de log da requisição/retorno: 1 Pendente · 2 Erro · 3 Sucesso · 4 Não aplicável
 - Nível de sensibilidade e de acesso: 1 Normal · 5 Crítico · 9 Restrito
 - **Tipo de autenticação**: `BASIC`, `BEARER`, `TOKEN`, `CUSTOM.BODY` — os únicos valores tratados pelo `case` do [RestConnector](../integration/connectors.md). Qualquer outro sai sem cabeçalho de autenticação, em silêncio.
+- Gravação do conteúdo (`objeto/parametro`): 1 Sempre · 2 Somente em erro · 3 Nunca
 - Ainda numérico, sem domínio definido: `importancia` (e-mail).
 
 ## Regras de negócio refletidas na tela

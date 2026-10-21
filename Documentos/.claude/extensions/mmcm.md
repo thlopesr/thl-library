@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, mmcm]
+updated: 2026-10-13
+---
+
 # Extensão: mmcm
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

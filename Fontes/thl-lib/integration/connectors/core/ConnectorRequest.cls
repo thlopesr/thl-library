@@ -1,6 +1,6 @@
  
  /*------------------------------------------------------------------------
-    File        : ConnectorService
+    File        : ConnectorRequest
     Purpose     : 
     Syntax      : 
     Description : 
@@ -12,12 +12,15 @@
 using Progress.Lang.*.
 
 using thl-lib.integration.connectors.core.ConnectorConfig.
+using Progress.Json.ObjectModel.*.
 
 class thl-lib.integration.connectors.core.ConnectorRequest.  
 
-    define public property connectorType      as integer         no-undo get. set. //Tipo de conector: Rest / SOAP / Database / File
+    define public property connectorType      as integer         no-undo get. set. 
     define public property methodType         as integer         no-undo get. set.
-    define public property content            as longchar        no-undo get. set. //Conteúdo da execução: payload, comando SQL ou conteúdo de arquivo
-    define public property connectorConfig    as ConnectorConfig no-undo get. set. // Configuração técnica da conexão
-      
+    define public property content            as JsonConstruct   no-undo get. set. 
+    define public property contentText        as longchar        no-undo get. set.
+    define public property connectorConfig    as ConnectorConfig no-undo get. set. 
+    define public property pathParameters     as JsonArray       no-undo get. set.  
+    
 end class.

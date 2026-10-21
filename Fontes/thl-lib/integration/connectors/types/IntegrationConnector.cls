@@ -14,8 +14,6 @@ using thl-lib.integration.connectors.core.*.
 
 class thl-lib.integration.connectors.types.IntegrationConnector abstract.
     
-    define variable connectorResponse as ConnectorResponse no-undo.
- 
     method public abstract ConnectorResponse execute ( connectorRequest as ConnectorRequest ).  
 end class.
 

@@ -1,0 +1,110 @@
+<po-modal #modal p-title="Filtro Avançado" p-size="lg"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction">
+  <form>
+    <po-tabs>
+
+      <po-tab [p-label]="rotuloAbaPrincipal" [p-active]="true">
+        <div class="po-row">
+          <po-datetimepicker class="po-md-6" name="dtCriacaoIni" [(ngModel)]="dtCriacaoIni"
+            (ngModelChange)="aoDigitarData()"
+            p-label="Dt. Criação (Inicial)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+          </po-datetimepicker>
+          <po-datetimepicker class="po-md-6" name="dtCriacaoFin" [(ngModel)]="dtCriacaoFin"
+            (ngModelChange)="aoDigitarData()"
+            p-label="Dt. Criação (Final)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+          </po-datetimepicker>
+        </div>
+
+        <thl-date-shortcuts [selecionado]="atalho" [ini]="dtCriacaoIni" [limite]="limiteRetencao"
+          (selecionadoChange)="atalho = $event" (faixaChange)="aplicarAtalho($event)">
+        </thl-date-shortcuts>
+        <div class="po-row">
+          <po-datetimepicker class="po-md-6" name="dtIntegracaoIni" [(ngModel)]="dtIntegracaoIni"
+            p-label="Dt. Integração (Inicial)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+          </po-datetimepicker>
+          <po-datetimepicker class="po-md-6" name="dtIntegracaoFin" [(ngModel)]="dtIntegracaoFin"
+            p-label="Dt. Integração (Final)" p-format="dd/mm/yyyy hh:mm" p-placeholder="dd/mm/aaaa hh:mm" p-clean>
+          </po-datetimepicker>
+        </div>
+        <div class="po-row">
+          <po-input class="po-md-6" name="aplicacaoIni" [(ngModel)]="filtro.aplicacaoIni"
+            p-label="Aplicação (Inicial)" p-placeholder="Ex: datasul">
+          </po-input>
+          <po-input class="po-md-6" name="aplicacaoFin" [(ngModel)]="filtro.aplicacaoFin"
+            p-label="Aplicação (Final)" p-placeholder="Ex: datasul">
+          </po-input>
+        </div>
+        <div class="po-row">
+          <po-input class="po-md-6" name="objetoIni" [(ngModel)]="filtro.objetoIni"
+            p-label="Objeto (Inicial)" p-placeholder="Ex: pedido">
+          </po-input>
+          <po-input class="po-md-6" name="objetoFin" [(ngModel)]="filtro.objetoFin"
+            p-label="Objeto (Final)" p-placeholder="Ex: pedido">
+          </po-input>
+        </div>
+        <div class="po-row">
+          <po-input class="po-md-6" name="operacaoIni" [(ngModel)]="filtro.operacaoIni"
+            p-label="Operação (Inicial)" p-placeholder="Ex: incluir">
+          </po-input>
+          <po-input class="po-md-6" name="operacaoFin" [(ngModel)]="filtro.operacaoFin"
+            p-label="Operação (Final)" p-placeholder="Ex: incluir">
+          </po-input>
+        </div>
+      </po-tab>
+
+      <po-tab [p-label]="rotuloAbaAvancado">
+        <!-- Vai ao servidor, como os campos da aba principal: fica aqui só porque o
+             código é técnico e raramente se tem em mãos. -->
+        <div class="thl-filtro-secao">Identificação</div>
+        <div class="po-row">
+          <po-input class="po-md-6" name="codMsgIni" [(ngModel)]="filtro.codMsgIni"
+            p-label="Cód. Mensagem (Inicial)" p-placeholder="UUID inicial">
+          </po-input>
+          <po-input class="po-md-6" name="codMsgFin" [(ngModel)]="filtro.codMsgFin"
+            p-label="Cód. Mensagem (Final)" p-placeholder="UUID final">
+          </po-input>
+        </div>
+
+        <div class="thl-filtro-secao">Refinar o resultado</div>
+        <div class="thl-filtro-aviso">
+          <po-icon p-icon="an an-warning-circle"></po-icon>
+          <span>
+            Estes filtros atuam <b>somente sobre as mensagens já carregadas</b> na tela. Para varrer todo o
+            período, use os campos da aba <b>Principal</b>.
+          </span>
+        </div>
+        <div class="po-row">
+          <po-select class="po-md-6" name="dispositivo"
+            [ngModel]="filtro.dispositivo" (p-change)="filtro.dispositivo = $event"
+            p-label="Dispositivo" [p-options]="dispositivoOptions">
+          </po-select>
+          <po-select class="po-md-6" name="metodo"
+            [ngModel]="filtro.metodo" (p-change)="filtro.metodo = $event"
+            p-label="Método" [p-options]="metodoOptions">
+          </po-select>
+        </div>
+        <div class="po-row">
+          <po-select class="po-md-6" name="statusRequisicao"
+            [ngModel]="filtro.statusRequisicao" (p-change)="filtro.statusRequisicao = $event"
+            p-label="Status Requisição" [p-options]="statusOptions">
+          </po-select>
+          <po-select class="po-md-6" name="statusProcessamento"
+            [ngModel]="filtro.statusProcessamento" (p-change)="filtro.statusProcessamento = $event"
+            p-label="Status Processamento" [p-options]="statusOptions">
+          </po-select>
+        </div>
+        <div class="po-row">
+          <po-select class="po-md-6" name="statusRetorno"
+            [ngModel]="filtro.statusRetorno" (p-change)="filtro.statusRetorno = $event"
+            p-label="Status Retorno" [p-options]="statusOptions">
+          </po-select>
+          <po-number class="po-md-6" name="codStatusRetorno" [(ngModel)]="filtro.codStatusRetorno"
+            p-label="Cód. Status Retorno" p-placeholder="Ex: 200">
+          </po-number>
+        </div>
+      </po-tab>
+
+    </po-tabs>
+  </form>
+</po-modal>

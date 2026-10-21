@@ -7,7 +7,7 @@ Instruções para agentes de código (Codex, Claude Code e similares) que trabal
 Framework corporativo em **OpenEdge ABL OO** para customizações e integrações no **TOTVS Datasul 12** (PASOE, Progress Developer Studio com Shared AVM). Oferece mensageria inbound/outbound, conectores REST, serviços ERP, e-mail, erros, log/auditoria e utilitários. Há também um front-end **Angular 21 + PO UI** (monitor de mensageria).
 
 ```text
-Database/thl.df              definição do banco THL (ISO-8859-1)
+Database/Definition/thl.df  definição do banco THL (ISO-8859-1); Database/Data/entrada = cargas .d
 Fontes/thl/                  telas .w, RPWs e APIs Datasul (resourcen.p = endpoint REST)
 Fontes/thl-lib/              framework genérico — core, ERP, integrações e utilitários
 Fontes/thl-extensions/       um sistema externo por pasta: erp/<sistema>/ e integration/<sistema>/
@@ -29,7 +29,10 @@ Utils/                       scripts de compilação/xcode, exemplos, testes
 |---|---|
 | Escrever/refatorar/revisar ABL (`.cls`, `.p`, `.w`) | [`.claude/skills/thl-coding/SKILL.md`](.claude/skills/thl-coding/SKILL.md) |
 | Auditar, testar, checklist de regressão | [`.claude/skills/thl-qa/SKILL.md`](.claude/skills/thl-qa/SKILL.md) |
-| Arquitetura, impacto de mudança, dúvidas OpenEdge/PASOE, sincronizar docs | [`.claude/skills/thl-architect/SKILL.md`](.claude/skills/thl-architect/SKILL.md) |
+| Arquitetura, impacto de mudança, dúvidas OpenEdge/PASOE, divergência código × documentação (protocolo de sincronização) | [`.claude/skills/thl-architect/SKILL.md`](.claude/skills/thl-architect/SKILL.md) |
+| Registrar/avaliar decisão de arquitetura (ADR) | [`.claude/skills/thl-adr/SKILL.md`](.claude/skills/thl-adr/SKILL.md) |
+| Identificar e priorizar dívida técnica | [`.claude/skills/thl-tech-debt/SKILL.md`](.claude/skills/thl-tech-debt/SKILL.md) |
+| Fechar tarefa: atualizar notas, INDEX, Notion, Postman e propor ajustes em skills | [`.claude/skills/thl-docs/SKILL.md`](.claude/skills/thl-docs/SKILL.md) |
 | Especificar tela (UX) em PO UI | [`.claude/skills/thl-poui-design/SKILL.md`](.claude/skills/thl-poui-design/SKILL.md) |
 | Código Angular/PO UI em `Fontes/web` | [`.claude/skills/thl-web-coding/SKILL.md`](.claude/skills/thl-web-coding/SKILL.md) |
 | Testar/auditar tela web (PO UI + TOTVS) | [`.claude/skills/thl-web-qa/SKILL.md`](.claude/skills/thl-web-qa/SKILL.md) |
@@ -72,7 +75,7 @@ A documentação é atalho: quando precisar de precisão (assinatura, regra), co
 - Antes de alterar parâmetros INPUT/OUTPUT/INPUT-OUTPUT de `.p` ou assinaturas OOABL, procure callers e confirme compatibilidade, inclusive chamadas dinâmicas e cadastros.
 - Não altere locking ou escopo de transação sem entender o fluxo completo e seus chamadores; avalie concorrência, tratamento de erros e ciclo de vida dos objetos envolvidos.
 
-### Banco de dados (`Database/thl.df`)
+### Banco de dados (`Database/Definition/thl.df`)
 - Nomes de índice: `pk-*` chave primária (única, uma por tabela), `fk-<tabela-pai>` chave estrangeira, `idx-*` busca (chave alternativa única = `idx-` + `UNIQUE`). Detalhes e regras de implantação em `convencoes.md` §6; inventário em `Documentos/.claude/data/schema.md`.
 - O `.df` é ISO-8859-1 com CRLF e trailer com deslocamento em bytes — não editar à mão; o responsável gera pelo Data Dictionary.
 

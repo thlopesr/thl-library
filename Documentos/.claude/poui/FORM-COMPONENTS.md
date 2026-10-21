@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # FORM-COMPONENTS.md
 
 > **Observação metodológica:** as propriedades abaixo foram extraídas do código-fonte oficial (`po-ui/po-angular`, arquivos `*-base.component.ts`) e da documentação `po-ui.io`. Onde o valor default não pôde ser confirmado, isso está indicado. Todos os componentes de campo aceitam `[(ngModel)]` (template-driven) ou binding reativo via `formControlName`, além das propriedades comuns `p-label`, `p-help`, `p-disabled`, `p-required`, `p-optional`, e emitem o evento `p-change`.

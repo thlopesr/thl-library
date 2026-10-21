@@ -17,6 +17,6 @@
 &global val1 Rest 
 &global val2 Saop
 &global val3 Database
-&global val3 File
+&global val4 File
 
 {include/ind01-10.i {1} {2}}

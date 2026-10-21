@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, businessobject]
+updated: 2026-10-13
+---
+
 # BusinessObject
 
 > Sub-base **abstrata** · `thl-lib.erp.core.BusinessObject` · herda de [Service](Service.md) · `Fontes\thl-lib\erp\core\BusinessObject.cls` · volta ao [hub de arquitetura](../arquitetura.md)

@@ -1,0 +1,45 @@
+<po-tabs>
+  <po-tab p-label="Informações" [p-active]="activeTab === 0">
+    <po-divider p-label="DADOS DA AUDITORIA"></po-divider>
+    <div class="po-row">
+      <po-info class="po-lg-12" p-label="ID" [p-value]="auditoria.id"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-4" p-label="Tabela" [p-value]="auditoria.tabela"></po-info>
+      <po-info class="po-lg-4" p-label="Banco" [p-value]="auditoria.banco"></po-info>
+      <po-info class="po-lg-4" p-label="Dt. Criação" [p-value]="auditoria.dtCriacao"></po-info>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-4" p-label="Usuário" [p-value]="auditoria.usuario"></po-info>
+      <po-info class="po-lg-4" p-label="Referência" [p-value]="auditoria.referencia || '(vazio)'"></po-info>
+      <div class="po-lg-4">
+        <div class="status-item">
+          <span class="status-label">Operação</span>
+          <po-tag [p-value]="auditoria.operacao"
+                  [p-color]="getOperacaoColor()">
+          </po-tag>
+        </div>
+      </div>
+    </div>
+    <div class="po-row">
+      <po-info class="po-lg-12" p-label="Campos Alterados" [p-value]="auditoria.campos || '(nenhum)'"></po-info>
+    </div>
+  </po-tab>
+
+  <po-tab p-label="Snapshot" [p-active]="activeTab === 1">
+    @if (snapshotRows.length > 0) {
+      <po-table
+        [p-columns]="snapshotColumns"
+        [p-items]="snapshotRows"
+        [p-striped]="true"
+        p-container>
+      </po-table>
+    } @else {
+      <div class="content-box">(sem dados de snapshot)</div>
+    }
+  </po-tab>
+
+  <po-tab p-label="Programa Executado" [p-active]="activeTab === 2">
+    <div class="content-box">{{ getProgramaTexto() }}</div>
+  </po-tab>
+</po-tabs>

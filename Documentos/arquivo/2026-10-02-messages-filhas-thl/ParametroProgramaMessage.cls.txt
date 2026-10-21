@@ -1,0 +1,78 @@
+/*------------------------------------------------------------------------
+    File        : ParametroProgramaMessage
+    Purpose     : Inbound message dos programas vinculados a um parametro de
+                  ambiente (thl-ambiente-param-prog, tela thl0002c). Rota:
+                  /resourcen/parametro-programa (aplicacao THL, objeto
+                  PARAMETRO-PROGRAMA).
+    Author(s)   : Lopes
+    Created     : 2026-09-25
+    Notes       : Padrao LpcoMessage (thl-extensions.integration.automatizador).
+                  POST/DELETE pelos defaults de InboundMessage; PATCH responde
+                  'Acao nao suportada' (o registro so tem a chave); GET com
+                  listagem paginada (codParametroIni/codParametroFin, page, pageSize).
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.ParametroProgramaService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.ParametroProgramaMessage inherits InboundMessage.
+
+    constructor public ParametroProgramaMessage ( objectName           as character ,
+                                                  applicationName      as character ,
+                                                  integrationOperation as character ,
+                                                  methodType           as integer   ,
+                                                  connectorType        as integer   ,
+                                                  integrationDirection as logical   ,
+                                                  executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new ParametroProgramaService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable programaService as ParametroProgramaService no-undo.
+
+        assign programaService     = cast( this-object:createService(), ParametroProgramaService )
+               this-object:payload = appendItems(
+                                        programaService:get(
+                                                createPagination( 100 ),
+                                                context:getQueryParam( 'parametroIni', ''             ),
+                                                context:getQueryParam( 'parametroFin', fill( 'z', 15 ))
+                                            )
+                                     ).
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    //cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'codParametro,codPrograma'.
+    end method.
+
+end class.

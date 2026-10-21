@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # PO-UI para TOTVS Datasul 12 — Documentação Técnica de Referência
 
 ## TL;DR

@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, ninahub]
+updated: 2026-10-13
+---
+
 # Extensão: ninahub
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |
@@ -102,3 +110,7 @@
 - ⚠️ Em `resolveNatureItem`, o parâmetro se chama `item` — o mesmo nome da tabela `item` usada no `find first item … where item.it-codigo = item:GetCharacter(...)`. Ambíguo de ler; confirmar que o compilador resolve como esperado.
 - `es_nota_terceiros` usa *underscore* (tabela customizada de outro schema) — NÃO CONFIRMADO em qual banco.
 - A natureza passou a depender também de `log-baixa-estoque` do item (a versão anterior desta nota não tinha esse critério).
+
+## 2026-10-05 — Message de entrada retirada (não compilado)
+
+`NinahubNotaFiscalMessage` virou `.cls.old`: Message e Processor padrão com `NinahubNotaFiscalService`; chave externa na extensão REST (`codigoEstabelecimento`, `serie`, `numeroNotaFiscal`, unidos por `#`, como a `NotaFiscalMessage` montava). `ChamadoMessage` (saída) não mudou. Sistema `ninahub`: 2 classes. Decisão em [adr/operacao-acao-extensao-rest.md](../adr/operacao-acao-extensao-rest.md). As seções acima que descrevem a Message de entrada são histórico.

@@ -1,0 +1,8 @@
+<div class="thl-error-state" role="alert">
+  <span class="thl-error-state__titulo">{{ titulo }}</span>
+  @if (detalhe) {
+    <span class="thl-error-state__detalhe">{{ detalhe }}</span>
+  }
+  <po-button [p-label]="rotuloAcao" p-icon="an an-arrow-clockwise" p-kind="secondary"
+    (p-click)="retry.emit()"></po-button>
+</div>

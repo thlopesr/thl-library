@@ -12,15 +12,15 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i Z99XX999 9.99.99.999}
+{include/i-prgvrs.i thl0002-z01 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
-    {include/i-license-manager.i <programa> <m¢dulo>}
+    {include/i-license-manager.i <programa> <modulo>}
 &ENDIF
 
 /* Create an unnamed pool to store all the widgets created 
@@ -78,7 +78,8 @@ DEFINE MENU POPUP-MENU-bt-ajuda
 
 /* Definitions of handles for SmartObjects                              */
 DEFINE VARIABLE h_folder AS HANDLE NO-UNDO.
-DEFINE VARIABLE h_thl0002-b01 AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_thl0002-b03 AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_thl0002-b04 AS HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON bt-ajuda 
@@ -139,7 +140,7 @@ DEFINE FRAME f-zoom
 IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW w-pesquisa ASSIGN
          HIDDEN             = YES
-         TITLE              = "Pesquisa de <Insira o complemento>"
+         TITLE              = "Pesquisa de Parametro de Ambiente"
          HEIGHT             = 17
          WIDTH              = 90
          MAX-HEIGHT         = 17
@@ -202,7 +203,7 @@ Destroy on next read */
 
 &Scoped-define SELF-NAME w-pesquisa
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-pesquisa w-pesquisa
-ON END-ERROR OF w-pesquisa /* Pesquisa de <Insira o complemento> */
+ON END-ERROR OF w-pesquisa /* Pesquisa de Parametro de Ambiente */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
@@ -215,7 +216,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL w-pesquisa w-pesquisa
-ON WINDOW-CLOSE OF w-pesquisa /* Pesquisa de <Insira o complemento> */
+ON WINDOW-CLOSE OF w-pesquisa /* Pesquisa de Parametro de Ambiente */
 DO:
   /* This ADM code must be left here in order for the SmartWindow
      and its descendents to terminate properly on exit. */
@@ -265,7 +266,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-implantar w-pesquisa
 ON CHOOSE OF bt-implantar IN FRAME f-zoom /* Implantar */
 DO:
-/*  {include/i-implan.i <programa de implanta‡Æo> 
+/*  {include/i-implan.i <programa de implantacao> 
                       <handle do browse1 de  zoom> 
                       <handle do browse2 de zoom>} 
    Devem ser passados os handles de todos os browsers do programa  */
@@ -322,7 +323,7 @@ PROCEDURE adm-create-objects :
        RUN init-object IN THIS-PROCEDURE (
              INPUT  'adm/objects/folder.w':U ,
              INPUT  FRAME f-zoom:HANDLE ,
-             INPUT  'FOLDER-LABELS = ':U + 'Ambiente' + ',
+             INPUT  'FOLDER-LABELS = ':U + 'Parametro|Programa' + ',
                      FOLDER-TAB-TYPE = 1':U ,
              OUTPUT h_folder ).
        RUN set-position IN h_folder ( 1.17 , 1.57 ) NO-ERROR.
@@ -337,20 +338,36 @@ PROCEDURE adm-create-objects :
     END. /* Page 0 */
     WHEN 1 THEN DO:
        RUN init-object IN THIS-PROCEDURE (
-             INPUT  'thl/thl0002-b01.w':U ,
+             INPUT  'thl/thl0002-b03.w':U ,
              INPUT  FRAME f-zoom:HANDLE ,
              INPUT  'Layout = ':U ,
-             OUTPUT h_thl0002-b01 ).
-       RUN set-position IN h_thl0002-b01 ( 3.54 , 6.29 ) NO-ERROR.
+             OUTPUT h_thl0002-b03 ).
+       RUN set-position IN h_thl0002-b03 ( 3.38 , 6.72 ) NO-ERROR.
        /* Size in UIB:  ( 10.17 , 80.14 ) */
 
-       /* Links to SmartBrowser h_thl0002-b01. */
-       RUN add-link IN adm-broker-hdl ( h_thl0002-b01 , 'State':U , THIS-PROCEDURE ).
+       /* Links to SmartBrowser h_thl0002-b03. */
+       RUN add-link IN adm-broker-hdl ( h_thl0002-b03 , 'State':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
-       RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-b01 ,
+       RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-b03 ,
              h_folder , 'AFTER':U ).
     END. /* Page 1 */
+    WHEN 2 THEN DO:
+       RUN init-object IN THIS-PROCEDURE (
+             INPUT  'thl/thl0002-b04.w':U ,
+             INPUT  FRAME f-zoom:HANDLE ,
+             INPUT  'Layout = ':U ,
+             OUTPUT h_thl0002-b04 ).
+       RUN set-position IN h_thl0002-b04 ( 3.38 , 6.72 ) NO-ERROR.
+       /* Size in UIB:  ( 10.17 , 80.14 ) */
+
+       /* Links to SmartBrowser h_thl0002-b04. */
+       RUN add-link IN adm-broker-hdl ( h_thl0002-b04 , 'State':U , THIS-PROCEDURE ).
+
+       /* Adjust the tab order of the smart objects. */
+       RUN adjust-tab-order IN adm-broker-hdl ( h_thl0002-b04 ,
+             h_folder , 'AFTER':U ).
+    END. /* Page 2 */
 
   END CASE.
   /* Select a Startup page. */
@@ -469,7 +486,7 @@ PROCEDURE local-initialize :
   /* Code placed here will execute PRIOR to standard behavior. */
   {include/win-size.i}
 
-  {utp/ut9000.i "Z99XX999" "9.99.99.999"}
+  {utp/ut9000.i "thl0002-z01" "12.00.00.000"}
 
   /* Dispatch standard ADM method.                             */
   RUN dispatch IN THIS-PROCEDURE ( INPUT 'initialize':U ) .

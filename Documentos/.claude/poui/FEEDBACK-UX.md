@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: ambos
+status: referencia
+tags: [po-ui, referencia, web]
+updated: 2026-10-13
+---
+
 # SEÇÃO 9 — FEEDBACK E UX (FEEDBACK-UX.md)
 
 ## 9.1 po-notification (PoNotificationService)

@@ -1,0 +1,5 @@
+<div #alvo class="po-clickable" role="button" tabindex="0" aria-label="Ação"
+  (click)="popup.toggle(row)" (keydown.enter)="popup.toggle(row)">
+  <po-icon class="po-field-icon" p-icon="ICON_MORE"></po-icon>
+</div>
+<po-popup #popup [p-target]="alvo" [p-actions]="actions" p-position="right-bottom"></po-popup>

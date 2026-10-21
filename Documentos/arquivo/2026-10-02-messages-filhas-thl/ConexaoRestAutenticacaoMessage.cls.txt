@@ -1,0 +1,146 @@
+/*------------------------------------------------------------------------
+    File        : ConexaoRestAutenticacaoMessage
+    Purpose     : Inbound message para CRUD de autenticacao da conexao REST
+                  (thl-conexao-rest-autenticacao, tela thl0032). Rota: /resourcen/conexao-rest-autenticacao
+                  (aplicacao THL, objeto CONEXAO-REST-AUTENTICACAO).
+    Author(s)   : Lopes
+    Created     : 2026-10-01
+    Notes       : Padrao AmbienteMessage (thl-extensions.integration.thl).
+                  POST/PATCH/DELETE pelos defaults de InboundMessage; GET com
+                  listagem paginada pela chave (conexaoIni/conexaoFin,
+                  page, pageSize).
+                  O THL sempre grava o conteudo das mensagens: saveContentByType
+                  mascara os campos sensiveis antes de gravar
+                  (ADR api-rest-cadastros-thl, secao 2.7).
+                  Registrada em thl-objeto.classe-objeto pelo nome completo.
+  ----------------------------------------------------------------------*/
+
+using Progress.Lang.*.
+using Progress.Json.ObjectModel.*.
+
+using thl-extensions.erp.thl.service.ConexaoRestAutenticacaoService.
+using thl-lib.erp.core.Service.
+using thl-lib.integration.messaging.inbound.core.*.
+
+block-level on error undo, throw.
+
+class thl-extensions.integration.thl.messaging.inbound.message.ConexaoRestAutenticacaoMessage inherits InboundMessage.
+
+    constructor public ConexaoRestAutenticacaoMessage ( objectName           as character ,
+                                                        applicationName      as character ,
+                                                        integrationOperation as character ,
+                                                        methodType           as integer   ,
+                                                        connectorType        as integer   ,
+                                                        integrationDirection as logical   ,
+                                                        executionMode        as integer   ).
+        super( objectName, applicationName, integrationOperation, methodType, connectorType, integrationDirection, executionMode ).
+    end constructor.
+
+    method protected override Service createService().
+        return new ConexaoRestAutenticacaoService().
+    end method.
+
+    method protected override void methodGet( ).
+
+        define variable conexaoRestAutenticacaoService as ConexaoRestAutenticacaoService no-undo.
+
+        assign conexaoRestAutenticacaoService = cast( this-object:createService(), ConexaoRestAutenticacaoService )
+               this-object:payload            = appendItems(
+                    conexaoRestAutenticacaoService:get(
+                        createPagination( 100 ),
+                        context:getQueryParam( 'conexaoIni', ''              ),
+                        context:getQueryParam( 'conexaoFin', fill( 'z', 40 ) )
+                    )
+               ).
+
+    end method.
+
+    //mascara os campos sensiveis no conteudo gravado (entrada e saida)
+    method public override void saveContentByType( input typeContent as int64    ,
+                                                   input content     as longchar ).
+        super:saveContentByType( typeContent, this-object:maskContent( content ) ).
+    end method.
+
+    method private longchar maskContent( input content as longchar ).
+
+        define variable parsedContent as JsonConstruct     no-undo.
+        define variable parser        as ObjectModelParser no-undo.
+        define variable conexaoRestAutenticacaoService as ConexaoRestAutenticacaoService no-undo.
+
+        assign parser        = new ObjectModelParser()
+               parsedContent = parser:Parse( content )
+               conexaoRestAutenticacaoService = cast( this-object:createService(), ConexaoRestAutenticacaoService ).
+
+        if type-of( parsedContent, JsonArray ) then do.
+            this-object:maskArray( cast( parsedContent, JsonArray ), conexaoRestAutenticacaoService ).
+            return cast( parsedContent, JsonArray ):GetJsonText().
+        end.
+
+        if type-of( parsedContent, JsonObject ) then do.
+            this-object:maskObject( cast( parsedContent, JsonObject ), conexaoRestAutenticacaoService ).
+            return cast( parsedContent, JsonObject ):GetJsonText().
+        end.
+
+        return content.
+
+        //conteudo que nao e JSON (ex.: texto de erro) nao tem campo sensivel
+        catch parseError as Progress.Lang.Error.
+            return content.
+        end catch.
+
+    end method.
+
+    method private void maskArray( input itemList as JsonArray ,
+                                   input conexaoRestAutenticacaoService as ConexaoRestAutenticacaoService ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to itemList:Length.
+            if itemList:GetType( count ) = JsonDataType:OBJECT then
+                this-object:maskObject( itemList:GetJsonObject( count ), conexaoRestAutenticacaoService ).
+        end.
+
+    end method.
+
+    method private void maskObject( input jsonItem as JsonObject ,
+                                    input conexaoRestAutenticacaoService as ConexaoRestAutenticacaoService ).
+
+        define variable fieldIndex as integer   no-undo.
+        define variable fieldName  as character no-undo.
+
+        do fieldIndex = 1 to num-entries( conexaoRestAutenticacaoService:SensitiveFields ).
+
+            assign fieldName = entry( fieldIndex, conexaoRestAutenticacaoService:SensitiveFields ).
+
+            if jsonItem:Has( fieldName ) and
+               jsonItem:GetType( fieldName ) = JsonDataType:STRING and
+               jsonItem:GetCharacter( fieldName ) <> '' then
+                jsonItem:Set( fieldName, conexaoRestAutenticacaoService:MaskedValue ).
+
+        end.
+
+    end method.
+
+    method private JsonArray appendItems( context as JsonArray ).
+
+        define variable count as integer no-undo.
+
+        do count = 1 to context:Length.
+            assign this-object:referenceCode = context:GetJsonObject( count ):GetCharacter( 'referenceCode' ).
+            this-object:appendItem().
+        end.
+
+        return context.
+
+    end method.
+
+    //cadastro interno: nao ha referencia de sistema externo
+    method protected override character getExternalReferenceField().
+        return ''.
+    end method.
+
+    method protected override character getRequiredFields().
+        return 'conexao'.
+    end method.
+
+end class.

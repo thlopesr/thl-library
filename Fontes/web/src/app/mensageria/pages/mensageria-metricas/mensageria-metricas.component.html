@@ -1,0 +1,55 @@
+<po-page-list p-title="">
+
+  <thl-page-header title="Métricas da mensageria"
+    [lastUpdate]="atualizadoEm"
+    [subtitle]="'Erros por rota · ' + rotuloPeriodo">
+    <thl-icon-toggle [ativo]="mostrarInternas"
+      rotuloLigar="Mostrar tráfego interno"
+      rotuloDesligar="Ocultar tráfego interno"
+      (ativoChange)="alternarInternas()">
+    </thl-icon-toggle>
+    <thl-period-filter [atalho]="atalho" (faixaChange)="aoMudarPeriodo($event)" (refresh)="carregar()">
+    </thl-period-filter>
+  </thl-page-header>
+
+  <div class="thl-metricas">
+
+    @if (avisoRetencao) {
+      <div class="thl-metricas__aviso">
+        <po-icon p-icon="an an-warning-circle"></po-icon>
+        <span>{{ avisoRetencao }}</span>
+      </div>
+    }
+
+    @if (carregando) {
+      <po-loading-overlay [p-screen-lock]="false" p-text="Carregando..."></po-loading-overlay>
+    }
+
+    @if (erro) {
+      <thl-error-state [detalhe]="erro" (retry)="carregar()"></thl-error-state>
+    } @else {
+      <thl-stat-chips [chips]="chips" [equalWidth]="true" (chipClick)="aoClicarChip($event)"></thl-stat-chips>
+
+      @if (!carregando && cards.length === 0) {
+        <thl-empty-state titulo="Nenhuma mensagem no período"
+          descricao="Nenhum objeto trocou mensagem na faixa escolhida."></thl-empty-state>
+      } @else {
+        <div class="thl-metricas__grade">
+          @for (card of cardsVisiveis; track card.id) {
+            <thl-metric-card [card]="card" (acaoClick)="verMensagens($event)"></thl-metric-card>
+          }
+        </div>
+        @if (!mostrarTodos && ocultos > 0) {
+          <po-button [p-label]="'Ver todos (' + ocultos + ' a mais)'" p-kind="secondary" p-size="small"
+            (p-click)="verTodos()"></po-button>
+        }
+        <div class="thl-metricas__nota">
+          Cada fase mostra sucesso, pendente, erro e não se aplica — na ordem dos ícones do cabeçalho.
+          Objeto sem mensagem no período não aparece.
+        </div>
+      }
+    }
+
+  </div>
+
+</po-page-list>

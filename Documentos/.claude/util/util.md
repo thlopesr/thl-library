@@ -1,8 +1,17 @@
+---
+tipo: modulo
+camada: core
+status: vigente
+tags: [thl-lib, util]
+updated: 2026-10-13
+---
+
 # Pacote: util
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |
 |---|---|---|---|---|
 | StringUtil | Utilitários estáticos para verificação, conversão e formatação de strings/longchar/datas | Nenhum | — | Praticamente toda a biblioteca (EnvironmentUtil, LogUtil, RestConnector, InboundMessage, OutboundMessage, AuthenticationConfig, EmailParamRepository, etc. — 20+ consumidores) |
+| DateTimeUtil | Soma de horas, dias, meses e anos devolvendo `datetime` (sem fuso); faz num lugar só a conversão do `datetime-tz` do `now` | Métodos `static` | — | MensageriaService, EmailService e AuditoriaService (padrão das faixas de data: últimas 24 horas, na listagem de mensageria e nos `consultMetrics`) |
 | JsonSetter | Mapeia campos de um `JsonObject` para variáveis ABL de diferentes tipos, sem lançar erro para campos ausentes | Nenhum | ThlError | resourcen.p, OutboundMessage, EmbarqueService, UsuarioService, LpcoService, ItemService, CentroCustoService, RequisicaoService |
 | JsonWriter | Serializa buffer handle para JSON e converte listas delimitadas para JsonArray | Nenhum | — | AuditLogService |
 | JsonUtil | Consultas estáticas sobre `JsonObject` (`hasAnyProperty`) | Nenhum | — | EmbarqueService, LoogAiEmbarqueService |
@@ -44,6 +53,7 @@
 | `method public static final character getText( variavel as integer )` | Converte integer para string e aplica `getText(longchar)`. |
 | `method public static final character getText( variavel as decimal )` | Converte decimal para string e aplica `getText(longchar)`. |
 | `method public static final logical hasValue( input valueText as longchar )` | Retorna `true` se `trim(getText(valueText)) <> ''`. |
+| `method public static final character enumToCode( input enumValue as Progress.Lang.Enum )` | Código de variável a partir do membro do enum: `replace( enumValue:toString(), '_', '.' )` (`MENSAGEM_ENTRADA` → `MENSAGEM.ENTRADA`; a busca não diferencia maiúsculas, então acha `mensagem.entrada`). Usado pelo `EnvironmentResource:getEnvironmentVariable( enum )`. |
 | `method public static final longchar removeCr( input valueText as longchar )` | Substitui `chr(13)` (CR) por `'||'`. |
 | `method public static final longchar removeLf( input valueText as longchar )` | Substitui `chr(10)` (LF) por `'||'`. |
 | `method public static final character removeCrLf( input valueText as longchar )` | Aplica `removeLf(removeCr(valueText))` e converte para `character`. |
@@ -53,6 +63,26 @@
 **Observações:**
 - Usado amplamente como guarda contra `?` antes de operações que não aceitam unknown value.
 - `removeCr`/`removeLf`/`removeCrLf` — sem consumidores conhecidos em `Fontes/` (possível código morto, verificar procedures externas).
+
+---
+
+## DateTimeUtil
+
+**Caminho:** `thl-lib\util\date\DateTimeUtil.cls`
+
+**Namespace ABL:** `thl-lib.util.date.DateTimeUtil`
+
+**Responsabilidade:** `add-interval` sobre `now` devolve `datetime-tz`, e esse valor não pode ser passado direto onde se espera `datetime`; a classe converte (atribui a uma variável `datetime`) num lugar só. Quantidade negativa volta no tempo; base `?` devolve `?`. Criada em 2026-10-13, não compilada.
+
+| Método | Descrição |
+|---|---|
+| `method public static final datetime currentDateTime()` | Data e hora atuais como `datetime` |
+| `method public static final datetime addHours( input baseDateTime as datetime-tz, input hours as integer )` | Soma (ou subtrai) horas |
+| `method public static final datetime addDays( input baseDateTime as datetime-tz, input days as integer )` | Soma (ou subtrai) dias |
+| `method public static final datetime addMonths( input baseDateTime as datetime-tz, input months as integer )` | Soma (ou subtrai) meses |
+| `method public static final datetime addYears( input baseDateTime as datetime-tz, input years as integer )` | Soma (ou subtrai) anos |
+
+Uso: `DateTimeUtil:addHours( now, -24 )` (padrão: últimas 24 horas) e `DateTimeUtil:currentDateTime()`, nos `consultMetrics` dos três serviços de consulta e na listagem de mensageria.
 
 ---
 
@@ -75,8 +105,8 @@
 | `constructor public JsonSetter( input payload as JsonObject )` | Inicializa com o payload. Lança `ThlError` se inválido. |
 | `method public void setPayload( input payload as JsonObject )` | Substitui o payload ativo. Lança `ThlError` se inválido. Útil para reusar instância em sub-objetos. |
 | `method public void SetValue( input-output valueField as character, input nameField as character )` | Atribui valor character (UTF-8) se campo presente no payload. |
-| `method public void SetValue( input-output valueField as integer, input nameField as character )` | Atribui valor integer se campo presente. |
-| `method public void SetValue( input-output valueField as decimal, input nameField as character )` | Atribui valor decimal se campo presente. |
+| `method public void SetValue( input-output valueField as integer, input nameField as character )` | Atribui valor integer se campo presente; aceita também o número entre aspas (`"10"`) e texto em branco mantém o valor. |
+| `method public void SetValue( input-output valueField as decimal, input nameField as character )` | Atribui valor decimal se campo presente; aceita também o número entre aspas (`"100"`, `"100.50"`: o ponto vira o separador da sessão) e texto em branco mantém o valor. |
 | `method public void SetValue( input-output valueField as date, input nameField as character )` | Atribui valor date se campo presente. |
 | `method public void SetValue( input-output valueField as logical, input nameField as character )` | Atribui valor logical se campo presente. |
 
@@ -686,3 +716,15 @@ assign compiler_:saveDirectory = 'C:\compilados'
 assign exporter = new JsonArrayCsvExporter( ',' ).
 exporter:export( result, 'C:\output\impacto.csv' ).
 ```
+
+## StringUtil — `parseDateTime` (2026-10-03, não compilado)
+
+`method public static final datetime parseDateTime( input dateString as character, input defaultValue as datetime )` — lê **somente** `yyyy-MM-ddTHH:mm` (hora local, sem segundos e sem fuso). Vazio ou `?` devolve `defaultValue`; qualquer outro formato lança `ThlError` ("Data e hora invalida…"). A classe passou a usar `thl-lib.core.error.ThlError`. Usado só pelas rotas de métricas ([extensions/thl.md](../extensions/thl.md)). O `parseDate` não mudou: continua devolvendo meia-noite e falha com data ISO que traga hora.
+
+## JsonUtil — `requireProperties` (2026-10-03, não compilado)
+
+`method public static final void requireProperties( input json as JsonObject, input propertyList as character, input ownerName as character )` — exige que o JSON traga todas as propriedades da lista (separada por vírgula); confere só a presença. Faltando alguma, lança `ThlError( ownerName, 'requireProperties', 'Campo obrigatorio nao informado: …' )` (17006) com todas as ausentes. Usado pelos Services de cadastro do THL em `initialize()`. A classe passou a usar `thl-lib.core.error.ThlError`.
+
+## `JsonUtil:nameListToCsv` (2026-10-05, não compilado)
+
+`method public static final character nameListToCsv( input jsonText as character )` — lista de nomes gravada no cadastro como array JSON de texto (`["a","b"]`) → nomes separados por vírgula. Em branco ou `[]` devolve `''`. JSON mal formado, valor que não é array ou item que não é texto lança `ThlError`. Usado por `InboundMessage` (campos obrigatórios e chave externa), `ObjetoParametroService` e pelo `Pi-validate` da aba REST (`thl0022a-v05.w`).

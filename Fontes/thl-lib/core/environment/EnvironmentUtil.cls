@@ -9,9 +9,10 @@
     Notes       : 
   -----------------------------------------------------------------------*/
 
-routine-level on error undo, throw.
+block-level on error undo, throw.
 
 using thl-lib.core.environment.repository.EnvironmentRepository.
+using thl-lib.util.string.StringUtil.
 
 class thl-lib.core.environment.EnvironmentUtil serializable. 
 
@@ -19,17 +20,13 @@ class thl-lib.core.environment.EnvironmentUtil serializable.
 
     method public static final character getEnvironment().
         
-        if environment <> '' then
+        if StringUtil:hasValue( environment ) then
             return environment.
         
-        assign environment = new EnvironmentRepository():findEnvironmentCodeByPropath( propath ).
+        assign environment = EnvironmentRepository:findEnvironmentCodeByPropath( propath ).
         
         return environment.
         
     end.
     
-    method public static final void reset().
-        assign environment = ''.
-    end method.
-
 end class.

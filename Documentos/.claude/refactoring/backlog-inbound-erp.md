@@ -1,3 +1,11 @@
+---
+tipo: guia
+camada: core
+status: backlog
+tags: [backlog, mensageria, erp]
+updated: 2026-10-13
+---
+
 # Backlog de Refatoração — Mensageria Inbound × Serviços ERP
 
 **Origem:** análise thl-architect de 2026-07-25 (sessão 2) sobre `thl-lib/integration/messaging/inbound/message` e `thl-lib/erp/service`.

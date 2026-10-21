@@ -1,4 +1,14 @@
+---
+tipo: guia
+camada: ambos
+status: vigente
+tags: [arquitetura]
+updated: 2026-10-13
+---
+
 # Arquitetura da THL-Library
+
+> ⚠️ **2026-10-04 — Message → Processor → Service.** A entrada passou a ter três camadas: `InboundMessage` (concreta) → `Processor` → `Service`. Onde esta nota mostra `createService()` + `execute(...)` na Message, leia `createProcessor():execute(...)`; o Service não tem mais `execute`. Ver [adr/inbound-message-processor-service.md](adr/inbound-message-processor-service.md).
 
 > Nota central (hub) criada em 2026-09-24 a partir do código em `Fontes\` (126 classes). Mostra as camadas, os fluxos e as **hierarquias de classe**: das classes-base até as filhas. Cada classe-base tem uma nota própria em [arquitetura/](arquitetura/Message.md); o detalhe de cada pacote continua nas notas de pacote (ver [INDEX.md](INDEX.md)).
 

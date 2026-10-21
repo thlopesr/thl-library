@@ -1,0 +1,111 @@
+<po-modal
+  #modal
+  [p-title]="modalTitle"
+  p-size="xl"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction"
+  (p-close)="onClose()">
+
+  @if (email) {
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-bar-left">
+        <po-tag
+          [p-value]="email.logEnvio"
+          [p-type]="statusTagType"
+          >
+        </po-tag>
+        <span class="status-descricao">{{ statusDescricao }}</span>
+      </div>
+      <div class="status-bar-right">
+        <span class="status-code-label">Código:</span>
+        <span class="status-code-value">{{ email.id }}</span>
+        <po-button
+          p-label="Copiar"
+          p-icon="an an-copy"
+          p-kind="tertiary"
+          p-size="small"
+          (p-click)="copyId()">
+        </po-button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <po-tabs>
+      <po-tab p-label="Informações" [p-active]="activeTab === 0" (p-click)="onTabChange(0)">
+        <div class="tab-content">
+          <po-divider p-label="DADOS DO E-MAIL"></po-divider>
+
+          <div class="po-row">
+            <po-info class="po-md-6" p-label="Remetente" [p-value]="email.remetente"></po-info>
+            <po-info class="po-md-6" p-label="Destinatário" [p-value]="email.destino"></po-info>
+          </div>
+
+          <div class="po-row">
+            <po-info class="po-md-12" p-label="Assunto" [p-value]="email.assunto"></po-info>
+          </div>
+
+          <div class="po-row">
+            <po-info class="po-md-4" p-label="Programa" [p-value]="email.codProgDtsul"></po-info>
+            <po-info class="po-md-4" p-label="Param. Ambiente" [p-value]="email.codParamAmbiente"></po-info>
+            <po-info class="po-md-4" p-label="Dt. Envio" [p-value]="email.dtEnvio"></po-info>
+          </div>
+
+          <po-divider p-label="STATUS"></po-divider>
+
+          <div class="po-row">
+            <div class="po-md-6">
+              <div class="field-label">Status Envio</div>
+              <po-tag
+                [p-value]="email.logEnvio"
+                [p-type]="statusTagType"
+                >
+              </po-tag>
+            </div>
+            @if (email.arqAnexo) {
+              <div class="po-md-6">
+                <div class="field-label">Arquivo Anexo</div>
+                <po-info p-label="" [p-value]="email.arqAnexo"></po-info>
+              </div>
+            }
+          </div>
+        </div>
+      </po-tab>
+
+      <po-tab p-label="Mensagem" [p-active]="activeTab === 1" (p-click)="onTabChange(1)">
+        <div class="tab-content">
+          @if (hasMensagem) {
+            <div class="email-body-preview" [innerHTML]="mensagemHtml"></div>
+          } @else {
+            <po-info p-label="Conteúdo" p-value="Nenhum conteúdo de mensagem disponível."></po-info>
+          }
+        </div>
+      </po-tab>
+
+      <po-tab [p-label]="retornoBadgeLabel"
+              [p-active]="activeTab === 2"
+              (p-click)="onTabChange(2)">
+        <div class="tab-content">
+          @if (hasRetorno) {
+            <pre class="retorno-block" [innerHTML]="retornoHtml"></pre>
+          } @else {
+            <div class="empty-retorno">
+              <po-info p-label="Sem retorno registrado" p-value="Nenhum retorno foi registrado para este e-mail."></po-info>
+            </div>
+          }
+        </div>
+      </po-tab>
+
+      <po-tab p-label="Parâmetro" [p-active]="activeTab === 3" (p-click)="onTabChange(3)">
+        <div class="tab-content">
+          @if (hasParametros) {
+            <pre class="retorno-block" [innerHTML]="parametrosHtml"></pre>
+          } @else {
+            <po-info p-label="Parâmetros" p-value="Nenhum parâmetro configurado."></po-info>
+          }
+        </div>
+      </po-tab>
+    </po-tabs>
+  }
+
+</po-modal>

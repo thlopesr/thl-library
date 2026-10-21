@@ -1,0 +1,23 @@
+<section class="thl-detalhe">
+  <div class="thl-detalhe__cabecalho">
+    <div>
+      <div class="thl-detalhe__titulo">{{ titulo }}</div>
+      @if (titulo !== chave) {
+        <div class="thl-detalhe__subtitulo">{{ chave }}</div>
+      }
+    </div>
+  </div>
+
+  <po-tabs>
+    @for (filho of def.children ?? []; track filho.resource; let i = $index) {
+      <po-tab [p-label]="rotulo(filho, i)" [p-active]="i === 0" (p-click)="abaAtiva = i">
+        <thl-crud-list
+          [def]="filho"
+          [parent]="row"
+          [visivel]="abaAtiva === i"
+          (countChange)="totais[i] = $event">
+        </thl-crud-list>
+      </po-tab>
+    }
+  </po-tabs>
+</section>

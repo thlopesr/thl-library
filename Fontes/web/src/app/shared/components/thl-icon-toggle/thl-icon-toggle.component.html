@@ -1,0 +1,10 @@
+<div class="thl-filter-tabs">
+  <button type="button"
+    class="thl-filter-tab thl-filter-tab--refresh thl-filter-tab--first thl-filter-tab--last"
+    [attr.aria-pressed]="ativo"
+    [attr.aria-label]="rotulo"
+    [p-tooltip]="rotulo"
+    (click)="alternar()">
+    <span [class]="ativo ? icone : iconeInativo" aria-hidden="true"></span>
+  </button>
+</div>

@@ -1,3 +1,11 @@
+---
+tipo: classe
+camada: core
+status: vigente
+tags: [classe, arquitetura, message]
+updated: 2026-10-13
+---
+
 # Message
 
 > Classe-base **abstrata** · `thl-lib.integration.messaging.core.Message` · `Fontes\thl-lib\integration\messaging\core\Message.cls` · volta ao [hub de arquitetura](../arquitetura.md)

@@ -1,3 +1,11 @@
+---
+tipo: modulo
+camada: extension
+status: vigente
+tags: [extensao, iacompras]
+updated: 2026-10-13
+---
+
 # Extensão: iacompras
 
 | Classe | Responsabilidade | Padrão | Depende de | Usado por |

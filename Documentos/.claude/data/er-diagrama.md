@@ -1,3 +1,11 @@
+---
+tipo: tabela
+camada: ambos
+status: vigente
+tags: [banco, diagrama, tabelas]
+updated: 2026-10-13
+---
+
 # Vínculos entre as tabelas THL
 
 > Nota criada em 2026-09-25. Mostra **só se existe vínculo** entre tabelas `thl-*` (sem cardinalidade e sem as tabelas do ERP). Campos completos, índices e divergências: [schema.md](schema.md).
@@ -30,6 +38,7 @@ flowchart LR
         aplicacao["thl-aplicacao"]
         objeto["thl-objeto"]
         objeto_parametro["thl-objeto-parametro"]
+        objeto_parametro_rest["thl-objeto-parametro-rest"]
         objeto_usuario["thl-objeto-usuario"]
         mensagem["thl-mensagem"]
         mensagem_conteudo["thl-mensagem-conteudo"]
@@ -43,8 +52,8 @@ flowchart LR
         conexao_rest_autenticacao["thl-conexao-rest-autenticacao"]
         conexao_rest_header["thl-conexao-rest-header"]
     end
-    subgraph inb["Inbound (thl004x)"]
-        inbound_rota["thl-inbound-rota"]
+    subgraph inb["Rota inbound (thl004x)"]
+        objeto_rota["thl-objeto-rota"]
     end
     subgraph aud["Auditoria (thl005x)"]
         audit_tabela["thl-audit-tabela"]
@@ -65,7 +74,6 @@ flowchart LR
     audit_registro_notificar ---|"id-registro"| audit_registro
     audit_tabela_acesso ---|"banco, tabela"| audit_tabela
     audit_tabela_notificacao ---|"banco, tabela"| audit_tabela
-    inbound_rota ---|"aplicacao, objeto"| objeto
     mensagem ---|"aplicacao, objeto"| objeto
     mensagem_conteudo ---|"codigo-mensagem"| mensagem
     mensagem_historico ---|"codigo-mensagem"| mensagem

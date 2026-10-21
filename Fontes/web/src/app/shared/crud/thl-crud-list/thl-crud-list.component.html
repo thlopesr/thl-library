@@ -1,0 +1,149 @@
+<ng-template #acoes let-row="row">
+  <thl-row-actions [actions]="rowActions" [row]="row"></thl-row-actions>
+</ng-template>
+
+@if (erro) {
+  <thl-error-state [detalhe]="erro" (retry)="tentarNovamente()"></thl-error-state>
+} @else if (modo === 'pagina' && !isLoading && visiveis.length === 0) {
+  <thl-empty-state [titulo]="vazioTitulo" [descricao]="vazioDescricao"
+    [acao]="vazioFiltrado || !podeAdicionar ? '' : 'Adicionar'"
+    (acaoClick)="abrirNovo()"></thl-empty-state>
+} @else if (modo === 'aba' && !isLoading && items.length === 0) {
+  <div class="thl-vinculos__vazio">
+    <span>{{ textoVazio }}</span>
+    <po-button p-label="Adicionar" p-icon="an an-plus" p-kind="secondary" (p-click)="abrirNovo()"></po-button>
+  </div>
+} @else {
+  @if (modo === 'aba') {
+    <div class="thl-vinculos__cabecalho">
+      <span>{{ textoVinculos }}</span>
+      @if (podeAdicionar) {
+        <po-button p-label="Adicionar" p-icon="an an-plus" p-kind="secondary" (p-click)="abrirNovo()"></po-button>
+      }
+    </div>
+  }
+
+  @if (visivel) {
+    @if (expandTemplate) {
+      <po-table
+        [p-columns]="columns"
+        [p-items]="visiveis"
+        [p-loading]="isLoading"
+        [p-sort]="true"
+        [p-striped]="true"
+        [p-hide-columns-manager]="semGerenciadorColunas"
+        p-container>
+        <ng-template p-table-cell-template let-row="row">
+          <ng-container *ngTemplateOutlet="acoes; context: { row: row }"></ng-container>
+        </ng-template>
+        <ng-template p-table-row-template let-rowItem>
+          <ng-container *ngTemplateOutlet="expandTemplate; context: { $implicit: rowItem }"></ng-container>
+        </ng-template>
+      </po-table>
+    } @else {
+      <po-table
+        [p-columns]="columns"
+        [p-items]="visiveis"
+        [p-loading]="isLoading"
+        [p-sort]="true"
+        [p-striped]="true"
+        [p-hide-columns-manager]="semGerenciadorColunas"
+        [p-container]="containerTabela">
+        <ng-template p-table-cell-template let-row="row">
+          <ng-container *ngTemplateOutlet="acoes; context: { row: row }"></ng-container>
+        </ng-template>
+      </po-table>
+    }
+    @if (temMais) {
+      <div class="thl-crud-aviso">
+        A API devolveu mais registros do que os exibidos. Use um filtro mais específico para alcançar os demais.
+      </div>
+    }
+  }
+}
+
+<po-modal #modalForm
+  [p-title]="tituloForm"
+  p-size="lg"
+  [p-primary-action]="salvarAction"
+  [p-secondary-action]="cancelarAction">
+  @if (formAberto) {
+    <ng-template #conteudoForm let-aba>
+      @if (aba.fields.length) {
+        <po-dynamic-form [p-fields]="aba.fields" [p-value]="registro"></po-dynamic-form>
+      }
+      @if (abaFormAtiva === aba.titulo) {
+        @for (editor of editoresForm[aba.titulo]; track editor.campo.property) {
+          @if (editor.convertido) {
+            <div class="thl-crud-editor__aviso">
+              Esta mensagem estava em texto puro. Ao salvar pelo editor ela passa a ser gravada como HTML.
+            </div>
+          }
+          <po-rich-text
+            [p-label]="editor.campo.label"
+            [p-help]="editor.campo.help ?? ''"
+            [p-placeholder]="editor.campo.placeholder ?? ''"
+            [p-height]="240"
+            [ngModel]="registro[editor.campo.property]"
+            (ngModelChange)="registro[editor.campo.property] = $event">
+          </po-rich-text>
+        }
+      }
+    </ng-template>
+
+    <div class="thl-crud-form">
+      @if (abasForm.length > 1) {
+        <po-tabs>
+          @for (aba of abasForm; track aba.titulo; let primeiro = $first) {
+            <po-tab [p-label]="aba.titulo" [p-active]="primeiro" (p-click)="abaFormAtiva = aba.titulo">
+              <ng-container *ngTemplateOutlet="conteudoForm; context: { $implicit: aba }"></ng-container>
+            </po-tab>
+          }
+        </po-tabs>
+      } @else {
+        <ng-container *ngTemplateOutlet="conteudoForm; context: { $implicit: abasForm[0] }"></ng-container>
+      }
+    </div>
+  }
+</po-modal>
+
+<po-modal #modalDetalhe
+  [p-title]="'Detalhe - ' + def.singular"
+  p-size="lg"
+  [p-primary-action]="fecharDetalheAction">
+  <ng-template #conteudo let-aba>
+    @if (aba.fields.length) {
+      <po-dynamic-form [p-fields]="aba.fields" [p-value]="detalhe"></po-dynamic-form>
+    }
+    @for (campo of htmlDetalhe[aba.titulo]; track campo.label) {
+      @if (campo.conteudo && !campo.textoPuro) {
+        <div class="thl-crud-html__cabecalho">
+          <po-button-group [p-buttons]="campo.botoes" p-toggle="single" p-size="small"></po-button-group>
+        </div>
+      }
+      @if (!campo.conteudo) {
+        <!-- Vazio aparece como o travessão dos demais campos do detalhe, em caixa menor. -->
+        <po-rich-text [p-label]="campo.label" p-readonly [p-height]="80"
+          [p-hide-toolbar-actions]="semBarraEdicao" [ngModel]="'—'"></po-rich-text>
+      } @else if (campo.modo === 'codigo') {
+        <div class="po-field-container-label thl-crud-html__titulo">{{ campo.label }}</div>
+        <pre class="thl-crud-html thl-crud-html--codigo">{{ campo.conteudo }}</pre>
+      } @else {
+        <po-rich-text [p-label]="campo.label" p-readonly [p-height]="240"
+          [p-hide-toolbar-actions]="semBarraEdicao" [ngModel]="campo.conteudo"></po-rich-text>
+      }
+    }
+  </ng-template>
+
+  @if (abasDetalhe.length > 1) {
+    <po-tabs>
+      @for (aba of abasDetalhe; track aba.titulo; let primeiro = $first) {
+        <po-tab [p-label]="aba.titulo" [p-active]="primeiro">
+          <ng-container *ngTemplateOutlet="conteudo; context: { $implicit: aba }"></ng-container>
+        </po-tab>
+      }
+    </po-tabs>
+  } @else if (abasDetalhe.length) {
+    <ng-container *ngTemplateOutlet="conteudo; context: { $implicit: abasDetalhe[0] }"></ng-container>
+  }
+</po-modal>

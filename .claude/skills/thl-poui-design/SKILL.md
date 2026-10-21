@@ -18,10 +18,17 @@ Você é designer de produto/UX sênior especializado em **PO UI + Angular** no 
    |---|---|---|
    | `thl-page-header` | Cabeçalho da página | `title`, `subtitle`, `lastUpdate` |
    | `thl-search-bar` | Busca rápida + acesso ao filtro avançado | `placeholder`, `value`, `showAdvanced`; eventos `search`, `advanced` |
-   | `thl-filter-tabs` | Abas de filtro rápido (ex.: por situação) | `options: ThlFilterTab[]`, `selected`, `showRefresh`; eventos `selectedChange`, `refresh` |
+   | `thl-filter-tabs` | Abas de filtro rápido (ex.: por situação) e atalhos de período. Cada opção pode ser texto, `icone` da fonte ou `glifo` SVG com número dentro (a fonte Animalia não permite — o `an-calendar` tem "12" fixo) | `options: ThlFilterTab[]` (`label`, `tooltip`, `glifo`, `icone`), `rotulo`, `rotuloIcone`, `selected`, `showRefresh`; eventos `selectedChange`, `refresh` |
    | `thl-stat-chips` | Indicadores/contadores clicáveis | `chips: StatChip[]`, `equalWidth`; evento `chipClick` |
 | `thl-row-actions` | Menu "⋯" da linha em coluna "Ação" do `po-table` (`type: 'cellTemplate'`) — padrão em todas as tabelas do cadastro, mesmo com uma única ação | `actions: PoPopupAction[]`, `row` |
-   Cadastros (app `cadastro`): especifique como definição do **motor genérico** `shared\crud\` — browse reduzido, coluna "Ação" com Detalhar/Editar/Excluir, formulário e Detalhar em modal com abas por bloco. O contrato completo (`CrudResource`, `CrudField`, regras, domínios) está em [`web\motor-cadastro.md`](../../../Documentos/.claude/web/motor-cadastro.md): use os nomes de lá na especificação (`column`, `columnLabel`, `tab`, `group`, `options`, `tagColumn`, `optionsFrom`, `icon`, `placeholder`, `richText`, `html`, `single`, `noUpdate`, `children`). Só proponha tela própria se o motor não atender.
+| `thl-error-state` | Falha de carregamento: mensagem do backend + "Tentar novamente", no lugar da lista | `titulo`, `detalhe`, `rotuloAcao`; evento `retry` |
+| `thl-period-filter` | Período das telas de métricas: atalhos + faixa com data e hora | `atalho`; eventos `faixaChange`, `refresh` |
+| `thl-metric-card` | Cartão de métrica (total, linhas, barra, ação) | `card: MetricCard`; evento `acaoClick` |
+| `thl-empty-state` | Vazio com orientação (distinto do erro) | `titulo`, `descricao`, `acao`, `icone`; evento `acaoClick` |
+| `thl-nav-card` | Destino de navegação (Painel de Cadastros): ícone, nome e uma linha do que serve. É `<a [routerLink]>`, não botão — Ctrl+clique e leitor de tela dependem disso | `card: NavCard` |
+| `thl-icon-toggle` | Alternar só com ícone, no visual dos atalhos de período (ex.: tráfego interno). Fundo branco sempre (sem seleção); estado no ícone, ação no tooltip | `ativo`, `icone`, `iconeInativo`, `rotuloLigar`, `rotuloDesligar`; evento `ativoChange` |
+| `thl-date-shortcuts` | Atalhos de período dos filtros avançados (Hoje · 7 dias · Mês · Mês anterior), como links discretos abaixo do campo. **Preenche os campos de data à vista**, não filtra escondido; aviso opcional de retenção | `selecionado`, `ini`, `limite`; eventos `selecionadoChange`, `faixaChange` |
+   Cadastros (app `cadastro`): especifique como definição do **motor genérico** `shared\crud\` — browse reduzido, coluna "Ação" com Detalhar/Editar/Excluir, formulário e Detalhar em modal com abas por bloco. O contrato completo (`CrudResource`, `CrudField`, regras, domínios) está em [`web\motor-cadastro.md`](../../../Documentos/.claude/web/motor-cadastro.md): use os nomes de lá na especificação (`column`, `columnLabel`, `tab`, `group`, `options`, `tagColumn`, `optionsFrom`, `icon`, `placeholder`, `richText`, `html`, `single`, `noUpdate`, `children`). Só proponha tela própria se o motor não atender — e o critério é objetivo: **fluxo com passos** (assistente, "testar conexão antes de salvar"), **unidade que não é a linha** (de-para, diagrama, matriz) ou **forma da tela que muda conforme o dado**. Fora disso, componente por cadastro custa ~5x no bundle, não muda nada em runtime e multiplica cada correção pelo número de telas (números medidos em [`web\motor-cadastro.md`](../../../Documentos/.claude/web/motor-cadastro.md)).
 2. **PO UI** (`@po-ui/ng-components`, `@po-ui/ng-templates` — `^21.30.1`, Angular `^21`): primeiro os **templates de página** (`po-page-list`, `po-page-dynamic-table`, `po-page-dynamic-search`, `po-page-edit`, `po-page-detail`, `po-page-dynamic-edit/detail`), depois componentes (`po-table`, `po-dynamic-form`, `po-modal`, `po-disclaimer-group`, `po-info`, `po-widget`, `po-chart`, `po-notification`, `po-loading-overlay`…).
 3. **TOTVS**: tema **`@totvs/po-theme`** (AnimaliaDS, já instalado — não criar estilos que conflitem). `dts-backoffice-util` (MenuDatasulService, ProfileService, RPW/Report) e `dts-backoffice-kendo-grid` **não estão instalados** e a versão documentada é 19.x: só propor com a observação "⚠️ exige instalar e validar compatibilidade com Angular/PO UI 21".
 4. Componente novo só quando nada acima atende — e, se for reutilizável, propor como `shared/components/thl-<nome>`.
@@ -58,7 +65,11 @@ Você é designer de produto/UX sênior especializado em **PO UI + Angular** no 
 
 **Detalhar tem a mesma aparência do Editar** — mesmo formulário com os campos em `readonly` (nunca `disabled`, que tira do teclado e do leitor de tela).
 
-**Erro nunca parece vazio** — falha de carregamento mostra a mensagem do backend e "Tentar novamente"; "Nenhum registro encontrado — ajuste os filtros" só quando a consulta realmente voltou vazia.
+**Período é sempre o mesmo seletor** — `thl-period-filter`, com 1h · 24h · 7 dias · 21 dias · Personalizado (data e hora). Não invente conjuntos por tela: o dashboard tinha um atalho de 30 dias que o `faixaDoAtalho` não conhecia e que buscava 24 horas calado. 21 dias é o teto porque é a retenção das mensagens com sucesso.
+
+**A raiz resume, as telas de assunto detalham** — a tela `/` mostra um cartão por assunto com o número principal e o atalho para `<assunto>/metricas`. Não reconstrua um painel completo na raiz: ele duplica as telas de métricas e os números divergem.
+
+**Erro nunca parece vazio** — falha de carregamento mostra a mensagem do backend e "Tentar novamente" (`thl-error-state`); "Nenhum registro encontrado — ajuste os filtros" só quando a consulta realmente voltou vazia (`thl-empty-state`). Não especifique o bloco à mão: são dois componentes compartilhados, e as cópias antigas tinham ficado sem estilo nenhum.
 
 **Texto honesto** — se a busca filtra só o que está carregado, o placeholder diz isso. Se a lista pode estar truncada, a tela avisa.
 

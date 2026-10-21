@@ -1,0 +1,249 @@
+/* Mesmas cores do integration-card da mensageria, para os cartões lerem igual. */
+
+/* Sombra do cartão. Fica numa variável porque os modificadores de estado também usam
+   `box-shadow` (a barra lateral `inset`) — declarar lá sem repetir esta apagaria a sombra. */
+$thl-metric-sombra: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+
+.thl-metric {
+  box-shadow: #{$thl-metric-sombra};
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-neutral-light-20, #e0e4e8);
+  border-radius: 8px;
+  background: #fff;
+  height: 100%;
+
+  /* Telas de assunto: a moldura **acompanha o estado** — erro, pendente, sucesso na
+     mensageria e no e-mail; ação predominante na auditoria. Mesmo tratamento do chip
+     selecionado (borda colorida, fundo quase branco), porque fundo lavado faz uma tela
+     de cartões saudáveis virar tapete verde.
+     `--estado-*` e não `--erro`: as classes de cor de texto usam `.thl-metric--erro`, e
+     os dois colidiram — cada número da tabela de fases ganhava borda e fundo de cartão. */
+  &--estado-erro {
+    border-color: #c23934;
+    background: #FAFBFF;
+    box-shadow: inset 3px 0 0 0 #c23934, #{$thl-metric-sombra};
+  }
+
+  &--estado-alerta {
+    border-color: #d4a017;
+    background: #FAFBFF;
+    box-shadow: inset 3px 0 0 0 #d4a017, #{$thl-metric-sombra};
+  }
+
+  &--estado-sucesso {
+    border-color: #0f7346;
+    background: #FAFBFF;
+    box-shadow: inset 3px 0 0 0 #0f7346, #{$thl-metric-sombra};
+  }
+
+  /* Tela geral: a cor **não** fala de sucesso ou falha — ela só separa um assunto do
+     outro. Vem do cartão (`acento`) e nunca coincide com verde/vermelho/âmbar, para
+     ninguém ler estado onde não há. */
+  &--acento {
+    border-color: var(--thl-metric-acento);
+    background: #FAFBFF;
+    box-shadow: inset 4px 0 0 0 var(--thl-metric-acento), #{$thl-metric-sombra};
+  }
+
+  /* Cartão da tela geral: são só três e eles **são** o conteúdo da tela, então a escala
+     é outra — o resumo é para ser lido de longe, inclusive num painel na parede. */
+  &--grande {
+    gap: 16px;
+    padding: 26px 28px;
+
+    .thl-metric__titulo { font-size: 20px; gap: 12px; }
+    .thl-metric__titulo-icone { font-size: 32px; color: var(--thl-metric-acento, #0056b4); }
+    .thl-metric__total { font-size: 34px; }
+    .thl-metric__linhas { gap: 9px; }
+    .thl-metric__linha { font-size: 17px; }
+    .thl-metric__rotulo { gap: 11px; }
+    .thl-metric__rotulo-icone { font-size: 22px; }
+    .thl-metric__barra-topo { font-size: 15px; }
+    .thl-metric__barra { height: 10px; border-radius: 5px; }
+    .thl-metric__rodape { font-size: 13.5px; }
+  }
+
+  &__topo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__titulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a202c;
+    overflow-wrap: anywhere;
+  }
+
+  &__total { font-size: 18px; font-weight: 600; color: #1a202c; }
+
+  &__etiquetas { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  &__etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: #eef1f4;
+    color: #4a5568;
+
+    /* O ícone não acompanha o corpo do texto: a 11px o avião (decolagem × pouso)
+       virava mancha, e é ele que diferencia entrada de saída.
+       O `::ng-deep` é necessário porque quem desenha é o `<i>` **dentro** do `po-icon`,
+       criado por aquele componente — ele não recebe o atributo de encapsulamento deste. */
+    po-icon,
+    ::ng-deep .po-icon {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    /* Sem texto, o balão encolhe para caber o ícone e nada mais. */
+    &--icone {
+      padding: 4px 8px;
+      gap: 0;
+    }
+  }
+
+  &__linhas { display: flex; flex-direction: column; gap: 6px; }
+
+  &__fases { display: flex; flex-direction: column; }
+
+  &__fase {
+    display: flex;
+    align-items: center;
+    font-size: 12.5px;
+
+    /* Os ícones do cabeçalho são a legenda da tabela inteira: a 13px ficavam ilegíveis
+       e o usuário não distinguia o "x" do "relógio". 18px é o tamanho em que as quatro
+       formas se separam sem empurrar a largura das colunas. */
+    &--cabecalho {
+      margin-bottom: 3px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--color-neutral-light-10, #eef1f4);
+      font-size: 18px;
+      line-height: 1;
+    }
+  }
+
+  &__fase-nome {
+    flex: 1;
+    min-width: 0;
+    color: #4a5568;
+    overflow-wrap: anywhere;
+  }
+
+  &__fase-valor {
+    width: 34px;
+    flex: 0 0 auto;
+    padding: 3px 0;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* Zero em cinza claro: é o que faz a coluna do erro saltar. O olho pula o que não importa. */
+  &--zero {
+    width: 34px;
+    flex: 0 0 auto;
+    padding: 3px 0;
+    text-align: right;
+    color: #c3cbd3;
+    font-weight: 400;
+  }
+
+  &__linha { display: flex; justify-content: space-between; font-size: 13px; }
+
+  &__rotulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #4a5568;
+  }
+
+  /* O ícone da linha toma a cor da própria linha: ele é reforço do que o número já diz. */
+  &__rotulo-icone { font-size: 16px; line-height: 1; }
+
+  &__titulo-icone {
+    font-size: 20px;
+    line-height: 1;
+    color: var(--color-action-default, #0056b4);
+  }
+
+  &__valor { font-weight: 600; }
+
+  &__barra-area { display: flex; flex-direction: column; gap: 4px; }
+
+  &__barra-topo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #4a5568;
+  }
+
+  &__barra {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #eef1f4;
+  }
+
+  &__faixa { height: 6px; }
+
+  &__rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    po-button { flex: 0 0 auto; white-space: nowrap; }
+    padding-top: 8px;
+    border-top: 1px solid var(--color-neutral-light-20, #e0e4e8);
+    font-size: 12px;
+    color: #718096;
+  }
+}
+
+.thl-metric__valor.thl-metric--sucesso { color: #0f7346; }
+.thl-metric__valor.thl-metric--alerta  { color: #d4a017; }
+.thl-metric__valor.thl-metric--erro    { color: #c23934; }
+.thl-metric__valor.thl-metric--neutro  { color: #4a5568; }
+.thl-metric__valor.thl-metric--info    { color: #2c85c8; }
+
+.thl-metric__fase-valor.thl-metric--sucesso { color: #0f7346; }
+.thl-metric__fase-valor.thl-metric--alerta  { color: #d4a017; }
+.thl-metric__fase-valor.thl-metric--erro    { color: #c23934; }
+.thl-metric__fase-valor.thl-metric--neutro  { color: #7d8b99; }
+
+.thl-metric__rotulo-icone.thl-metric--sucesso { color: #0f7346; }
+.thl-metric__rotulo-icone.thl-metric--alerta  { color: #d4a017; }
+.thl-metric__rotulo-icone.thl-metric--erro    { color: #c23934; }
+.thl-metric__rotulo-icone.thl-metric--info    { color: #2c85c8; }
+.thl-metric__rotulo-icone.thl-metric--neutro  { color: #7d8b99; }
+
+.thl-metric__faixa.thl-metric--sucesso { background: #0f7346; }
+.thl-metric__faixa.thl-metric--alerta  { background: #d4a017; }
+.thl-metric__faixa.thl-metric--erro    { background: #c23934; }
+.thl-metric__faixa.thl-metric--neutro  { background: #b8c6d6; }
+.thl-metric__faixa.thl-metric--info    { background: #2c85c8; }
+
+.thl-metric__etiqueta.thl-metric--sucesso { background: #e6f4ec; color: #0f7346; }
+.thl-metric__etiqueta.thl-metric--alerta  { background: #fdf3dd; color: #8a6400; }
+.thl-metric__etiqueta.thl-metric--erro    { background: #fbe9e8; color: #93271f; }
+.thl-metric__etiqueta.thl-metric--info    { background: #e6f1fb; color: #0c447c; }

@@ -1,4 +1,4 @@
-&ANALYZE-SUSPEND _VERSION-NUMBER UIB_v8r12 GUI ADM1
+&ANALYZE-SUSPEND _VERSION-NUMBER UIB_v8r12 GUI
 &ANALYZE-RESUME
 /* Connected Databases 
           mg               ORACLE
@@ -14,14 +14,14 @@
 ** parcial ou total por qualquer meio, so podera ser feita mediante
 ** autorizacao expressa.
 *******************************************************************************/
-{include/i-prgvrs.i B99XX999 9.99.99.999}
+{include/i-prgvrs.i thl0002-b01 12.00.00.000}
 
-/* Chamada a include do gerenciador de licen‡as. Necessario alterar os parametros */
+/* Chamada a include do gerenciador de licencas. Necessario alterar os parametros */
 /*                                                                                */
 /* <programa>:  Informar qual o nome do programa.                                 */
-/* <m¢dulo>:  Informar qual o m¢dulo a qual o programa pertence.                  */
+/* <modulo>:  Informar qual o modulo a qual o programa pertence.                  */
 /*                                                                                */
-/* OBS: Para os smartobjects o parametro m¢dulo dever  ser MUT                    */
+/* OBS: Para os smartobjects o parametro modulo devera ser MUT                    */
 
 &IF "{&EMSFND_VERSION}" >= "1.00" &THEN
     {include/i-license-manager.i <programa> MUT}
@@ -39,9 +39,18 @@ CREATE WIDGET-POOL.
 &Scop adm-attribute-dlg support/browserd.w
 
 /* Parameters Definitions ---                                           */
-
+ 
 /* Local Variable Definitions ---                                       */
-define variable c-lista-valor as character init '':U no-undo.
+
+/*:T Variaveis usadas internamente pelo estilo, favor nao elimina-las     */
+
+/*:T variaveis de uso globla */
+def  var v-row-parent    as rowid no-undo.
+
+/*:T variaveis de uso local */
+def var v-row-table  as rowid no-undo.
+
+/*:T fim das variaveis utilizadas no estilo */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -51,7 +60,7 @@ define variable c-lista-valor as character init '':U no-undo.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
-&Scoped-define PROCEDURE-TYPE SmartBrowser
+&Scoped-define PROCEDURE-TYPE BrowserCadastro2
 &Scoped-define DB-AWARE no
 
 &Scoped-define ADM-SUPPORTED-LINKS Record-Source,Record-Target,TableIO-Target
@@ -60,30 +69,41 @@ define variable c-lista-valor as character init '':U no-undo.
 &Scoped-define FRAME-NAME F-Main
 &Scoped-define BROWSE-NAME br-table
 
+/* External Tables                                                      */
+&Scoped-define EXTERNAL-TABLES thl-ambiente-param
+&Scoped-define FIRST-EXTERNAL-TABLE thl-ambiente-param
+
+
+/* Need to scope the external tables to this procedure                  */
+DEFINE QUERY external_tables FOR thl-ambiente-param.
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
-&Scoped-define INTERNAL-TABLES thl-ambiente
+&Scoped-define INTERNAL-TABLES thl-ambiente-param-variavel thl-ambiente
 
 /* Define KEY-PHRASE in case it is used by any query. */
 &Scoped-define KEY-PHRASE TRUE
 
 /* Definitions for BROWSE br-table                                      */
 &Scoped-define FIELDS-IN-QUERY-br-table thl-ambiente.cod-ambiente ~
-thl-ambiente.nome-ambiente thl-ambiente.ip 
+thl-ambiente.nome-ambiente thl-ambiente-param-variavel.cod-variavel ~
+thl-ambiente-param-variavel.descr-variavel ~
+thl-ambiente-param-variavel.valor-variavel 
 &Scoped-define ENABLED-FIELDS-IN-QUERY-br-table 
-&Scoped-define QUERY-STRING-br-table FOR EACH thl-ambiente WHERE ~{&KEY-PHRASE} NO-LOCK ~
+&Scoped-define QUERY-STRING-br-table FOR EACH thl-ambiente-param-variavel OF thl-ambiente-param WHERE ~{&KEY-PHRASE} NO-LOCK, ~
+      EACH thl-ambiente OF thl-ambiente-param-variavel NO-LOCK ~
     ~{&SORTBY-PHRASE} INDEXED-REPOSITION
-&Scoped-define OPEN-QUERY-br-table OPEN QUERY br-table FOR EACH thl-ambiente WHERE ~{&KEY-PHRASE} NO-LOCK ~
+&Scoped-define OPEN-QUERY-br-table OPEN QUERY br-table FOR EACH thl-ambiente-param-variavel OF thl-ambiente-param WHERE ~{&KEY-PHRASE} NO-LOCK, ~
+      EACH thl-ambiente OF thl-ambiente-param-variavel NO-LOCK ~
     ~{&SORTBY-PHRASE} INDEXED-REPOSITION.
-&Scoped-define TABLES-IN-QUERY-br-table thl-ambiente
-&Scoped-define FIRST-TABLE-IN-QUERY-br-table thl-ambiente
+&Scoped-define TABLES-IN-QUERY-br-table thl-ambiente-param-variavel ~
+thl-ambiente
+&Scoped-define FIRST-TABLE-IN-QUERY-br-table thl-ambiente-param-variavel
+&Scoped-define SECOND-TABLE-IN-QUERY-br-table thl-ambiente
 
 
 /* Definitions for FRAME F-Main                                         */
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS fi-cod-ambiente-ini fi-cod-ambiente-fin ~
-bt-confirma IMAGE-1 IMAGE-2 br-table 
-&Scoped-Define DISPLAYED-OBJECTS fi-cod-ambiente-ini fi-cod-ambiente-fin 
+&Scoped-Define ENABLED-OBJECTS br-table bt-incluir bt-modificar bt-eliminar 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -99,8 +119,8 @@ bt-confirma IMAGE-1 IMAGE-2 br-table
 &BROWSE-NAME
 </KEY-OBJECT>
 <FOREIGN-KEYS>
-ip|||mgnitro.thl-ambiente.ip
-cod-ambiente|||mgnitro.thl-ambiente.cod-ambiente
+cod-ambiente|||mgnitro.thl-ambiente-param-variavel.cod-ambiente
+cod-param-ambiente|||mgnitro.thl-ambiente-param-variavel.cod-param-ambiente
 </FOREIGN-KEYS> 
 <EXECUTING-CODE>
 **************************
@@ -148,57 +168,49 @@ RUN set-attribute-list IN THIS-PROCEDURE ('
 
 
 /* Definitions of the field level widgets                               */
-DEFINE BUTTON bt-confirma 
-     IMAGE-UP FILE "image\im-sav":U
-     LABEL "Button 1" 
-     SIZE 5.14 BY 1.
+DEFINE BUTTON bt-eliminar 
+     LABEL "&Eliminar" 
+     SIZE 10 BY 1.
 
-DEFINE VARIABLE fi-cod-ambiente-fin AS CHARACTER FORMAT "X(3)" INITIAL "ZZZ" 
-     VIEW-AS FILL-IN 
-     SIZE 5.57 BY .88 NO-UNDO.
+DEFINE BUTTON bt-incluir 
+     LABEL "&Incluir" 
+     SIZE 10 BY 1.
 
-DEFINE VARIABLE fi-cod-ambiente-ini AS CHARACTER FORMAT "X(3)" 
-     VIEW-AS FILL-IN 
-     SIZE 5.5 BY .88 NO-UNDO.
-
-DEFINE IMAGE IMAGE-1
-     FILENAME "image\ii-fir":U
-     SIZE 2.86 BY 1.
-
-DEFINE IMAGE IMAGE-2
-     FILENAME "image\ii-las":U
-     SIZE 2.86 BY 1.
+DEFINE BUTTON bt-modificar 
+     LABEL "&Modificar" 
+     SIZE 10 BY 1.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
 DEFINE QUERY br-table FOR 
-      thl-ambiente
-    FIELDS(thl-ambiente.cod-ambiente
-      thl-ambiente.nome-ambiente
-      thl-ambiente.ip) SCROLLING.
+      thl-ambiente-param-variavel, 
+      thl-ambiente SCROLLING.
 &ANALYZE-RESUME
 
 /* Browse definitions                                                   */
 DEFINE BROWSE br-table
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS br-table B-table-Win _STRUCTURED
   QUERY br-table NO-LOCK DISPLAY
-      thl-ambiente.cod-ambiente FORMAT "x(3)":U
-      thl-ambiente.nome-ambiente FORMAT "x(40)":U
-      thl-ambiente.ip FORMAT "x(20)":U
+      thl-ambiente.cod-ambiente COLUMN-LABEL "Amb." FORMAT "x(3)":U
+      thl-ambiente.nome-ambiente FORMAT "x(40)":U WIDTH 20
+      thl-ambiente-param-variavel.cod-variavel COLUMN-LABEL "Variavel" FORMAT "x(30)":U
+            WIDTH 20
+      thl-ambiente-param-variavel.descr-variavel COLUMN-LABEL "Descricao" FORMAT "x(140)":U
+            WIDTH 50
+      thl-ambiente-param-variavel.valor-variavel COLUMN-LABEL "Valor" FORMAT "x(4000)":U
+            WIDTH 100
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ASSIGN SEPARATORS SIZE 80 BY 9.
+    WITH NO-ASSIGN SEPARATORS SIZE 86 BY 6.5.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME F-Main
-     fi-cod-ambiente-ini AT ROW 1 COL 7 COLON-ALIGNED NO-LABEL
-     fi-cod-ambiente-fin AT ROW 1 COL 42.43 COLON-ALIGNED NO-LABEL
-     bt-confirma AT ROW 1 COL 76
-     br-table AT ROW 2.17 COL 1
-     IMAGE-1 AT ROW 1 COL 15
-     IMAGE-2 AT ROW 1 COL 41
+     br-table AT ROW 1 COL 1
+     bt-incluir AT ROW 7.5 COL 1
+     bt-modificar AT ROW 7.5 COL 11
+     bt-eliminar AT ROW 7.5 COL 21
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1 SCROLLABLE 
@@ -209,21 +221,13 @@ DEFINE FRAME F-Main
 
 &ANALYZE-SUSPEND _PROCEDURE-SETTINGS
 /* Settings for THIS-PROCEDURE
-   Type: SmartBrowser
+   Type: BrowserCadastro2
+   External Tables: mgnitro.thl-ambiente-param
    Allow: Basic,Browse
    Frames: 1
-   Add Fields to: EXTERNAL-TABLES
-   Other Settings: PERSISTENT-ONLY COMPILE
+   Add Fields to: External-Tables
+   Other Settings: COMPILE
  */
-
-/* This procedure should always be RUN PERSISTENT.  Report the error,  */
-/* then cleanup and return.                                            */
-IF NOT THIS-PROCEDURE:PERSISTENT THEN DO:
-  MESSAGE "{&FILE-NAME} should only be RUN PERSISTENT.":U
-          VIEW-AS ALERT-BOX ERROR BUTTONS OK.
-  RETURN.
-END.
-
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
 
 /* *************************  Create Window  ************************** */
@@ -231,8 +235,8 @@ END.
 &ANALYZE-SUSPEND _CREATE-WINDOW
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW B-table-Win ASSIGN
-         HEIGHT             = 10.17
-         WIDTH              = 80.14.
+         HEIGHT             = 7.5
+         WIDTH              = 86.14.
 /* END WINDOW DEFINITION */
                                                                         */
 &ANALYZE-RESUME
@@ -240,9 +244,9 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _INCLUDED-LIB B-table-Win 
 /* ************************* Included-Libraries *********************** */
 
-{src/adm/method/browser.i}
-{include/c-brwzoo.i}
 {utp/ut-glob.i}
+{src/adm/method/browser.i}
+{include/c-brows3.i}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -257,7 +261,7 @@ END.
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
 /* SETTINGS FOR FRAME F-Main
    NOT-VISIBLE FRAME-NAME Size-to-Fit L-To-R                            */
-/* BROWSE-TAB br-table IMAGE-2 F-Main */
+/* BROWSE-TAB br-table 1 F-Main */
 ASSIGN 
        FRAME F-Main:SCROLLABLE       = FALSE
        FRAME F-Main:HIDDEN           = TRUE.
@@ -270,12 +274,19 @@ ASSIGN
 
 &ANALYZE-SUSPEND _QUERY-BLOCK BROWSE br-table
 /* Query rebuild information for BROWSE br-table
-     _TblList          = "mgnitro.thl-ambiente"
+     _TblList          = "mgnitro.thl-ambiente-param-variavel OF mgnitro.thl-ambiente-param,mgnitro.thl-ambiente OF mgnitro.thl-ambiente-param-variavel"
      _Options          = "NO-LOCK INDEXED-REPOSITION KEY-PHRASE SORTBY-PHRASE"
-     _TblOptList       = "USED"
-     _FldNameList[1]   = mgnitro.thl-ambiente.cod-ambiente
-     _FldNameList[2]   = mgnitro.thl-ambiente.nome-ambiente
-     _FldNameList[3]   = mgnitro.thl-ambiente.ip
+     _TblOptList       = ","
+     _FldNameList[1]   > mgnitro.thl-ambiente.cod-ambiente
+"thl-ambiente.cod-ambiente" "Amb." ? "character" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[2]   > mgnitro.thl-ambiente.nome-ambiente
+"thl-ambiente.nome-ambiente" ? ? "character" ? ? ? ? ? ? no ? no no "20" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[3]   > mgnitro.thl-ambiente-param-variavel.cod-variavel
+"thl-ambiente-param-variavel.cod-variavel" "Variavel" ? "character" ? ? ? ? ? ? no ? no no "20" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[4]   > mgnitro.thl-ambiente-param-variavel.descr-variavel
+"thl-ambiente-param-variavel.descr-variavel" "Descricao" ? "character" ? ? ? ? ? ? no ? no no "50" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[5]   > mgnitro.thl-ambiente-param-variavel.valor-variavel
+"thl-ambiente-param-variavel.valor-variavel" "Valor" ? "character" ? ? ? ? ? ? no ? no no "100" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is NOT OPENED
 */  /* BROWSE br-table */
 &ANALYZE-RESUME
@@ -289,13 +300,6 @@ ASSIGN
 
  
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _XFTR "SmartBrowserCues" B-table-Win _INLINE
-/* Actions: adecomm/_so-cue.w ? adecomm/_so-cued.p ? adecomm/_so-cuew.p */
-/*:T SmartBrowser,uib,50010
-Destroy on next read */
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 
 
 /* ************************  Control Triggers  ************************ */
@@ -305,7 +309,7 @@ Destroy on next read */
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL br-table B-table-Win
 ON MOUSE-SELECT-DBLCLICK OF br-table IN FRAME F-Main
 DO:
-    RUN New-State('DblClick':U).
+    RUN New-State("DblClick, SELF":U).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -316,10 +320,7 @@ END.
 ON ROW-ENTRY OF br-table IN FRAME F-Main
 DO:
   /* This code displays initial values for newly added or copied rows. */
-  {src/adm/template/brsentry.i}
-  
-  run new-state('New-Line|':U + string(rowid({&FIRST-TABLE-IN-QUERY-{&BROWSE-NAME}}))).
-  run seta-valor.
+  {src/adm/template/brsentry.i}  
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -344,21 +345,40 @@ DO:
   /* This ADM trigger code must be preserved in order to notify other
      objects when the browser's current row changes. */
   {src/adm/template/brschnge.i}
-  run new-state('New-Line|':U + string(rowid({&FIRST-TABLE-IN-QUERY-{&BROWSE-NAME}}))).
-  run new-state('Value-Changed|':U + string(this-procedure)).
+  /* run new-state('New-Line|':U + string(rowid({&FIRST-TABLE-IN-QUERY-{&BROWSE-NAME}}))). */
 END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME bt-confirma
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-confirma B-table-Win
-ON CHOOSE OF bt-confirma IN FRAME F-Main /* Button 1 */
+&Scoped-define SELF-NAME bt-eliminar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-eliminar B-table-Win
+ON CHOOSE OF bt-eliminar IN FRAME F-Main /* Eliminar */
 DO:
-  assign input frame {&frame-name} fi-cod-ambiente-ini fi-cod-ambiente-fin.
-  RUN dispatch IN THIS-PROCEDURE ('open-query':U).
-  apply 'value-changed':U to {&browse-name}.
+   RUN pi-eliminar.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bt-incluir
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-incluir B-table-Win
+ON CHOOSE OF bt-incluir IN FRAME F-Main /* Incluir */
+DO:
+  RUN pi-Incmod ('incluir':U).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bt-modificar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bt-modificar B-table-Win
+ON CHOOSE OF bt-modificar IN FRAME F-Main /* Modificar */
+DO:
+  RUN pi-Incmod ('modificar':U).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -416,6 +436,15 @@ PROCEDURE adm-row-available :
 
   /* Define variables needed by this internal procedure.             */
   {src/adm/template/row-head.i}
+
+  /* Create a list of all the tables that we need to get.            */
+  {src/adm/template/row-list.i "thl-ambiente-param"}
+
+  /* Get the record ROWID's from the RECORD-SOURCE.                  */
+  {src/adm/template/row-get.i}
+
+  /* FIND each record specified by the RECORD-SOURCE.                */
+  {src/adm/template/row-find.i "thl-ambiente-param"}
 
   /* Process the newly available records (i.e. display fields,
      open queries, and/or pass records on to any RECORD-TARGETS).    */
@@ -491,6 +520,8 @@ PROCEDURE send-records :
   {src/adm/template/snd-head.i}
 
   /* For each requested table, put it's ROWID in the output list.      */
+  {src/adm/template/snd-list.i "thl-ambiente-param"}
+  {src/adm/template/snd-list.i "thl-ambiente-param-variavel"}
   {src/adm/template/snd-list.i "thl-ambiente"}
 
   /* Deal with any unexpected table requests before closing.           */
@@ -519,12 +550,6 @@ PROCEDURE state-changed :
   run pi-trata-state (p-issuer-hdl, p-state).
 END PROCEDURE.
 
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _XFTR "RetornaValorCampo" B-table-Win _INLINE
-/* Actions: ? ? ? ? support/brwrtval.p */
-/* Procedure desativada */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
