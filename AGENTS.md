@@ -32,7 +32,8 @@ Utils/                       scripts de compilação/xcode, exemplos, testes
 | Arquitetura, impacto de mudança, dúvidas OpenEdge/PASOE, divergência código × documentação (protocolo de sincronização) | [`.claude/skills/thl-architect/SKILL.md`](.claude/skills/thl-architect/SKILL.md) |
 | Registrar/avaliar decisão de arquitetura (ADR) | [`.claude/skills/thl-adr/SKILL.md`](.claude/skills/thl-adr/SKILL.md) |
 | Identificar e priorizar dívida técnica | [`.claude/skills/thl-tech-debt/SKILL.md`](.claude/skills/thl-tech-debt/SKILL.md) |
-| Fechar tarefa: atualizar notas, INDEX, Notion, Postman e propor ajustes em skills | [`.claude/skills/thl-docs/SKILL.md`](.claude/skills/thl-docs/SKILL.md) |
+| Fechar tarefa ou "atualizar tudo": notas, INDEX, Obsidian, Notion, Postman e skills | [`.claude/skills/thl-docs/SKILL.md`](.claude/skills/thl-docs/SKILL.md) |
+| Git: status, commit, push, merge feature → develop → main, apagar branches (sessão dedicada) | [`.claude/skills/thl-git/SKILL.md`](.claude/skills/thl-git/SKILL.md) |
 | Especificar tela (UX) em PO UI | [`.claude/skills/thl-poui-design/SKILL.md`](.claude/skills/thl-poui-design/SKILL.md) |
 | Código Angular/PO UI em `Fontes/web` | [`.claude/skills/thl-web-coding/SKILL.md`](.claude/skills/thl-web-coding/SKILL.md) |
 | Testar/auditar tela web (PO UI + TOTVS) | [`.claude/skills/thl-web-qa/SKILL.md`](.claude/skills/thl-web-qa/SKILL.md) |
