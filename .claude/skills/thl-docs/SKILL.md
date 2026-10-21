@@ -1,6 +1,6 @@
 ---
 name: thl-docs
-description: "Fechar uma tarefa da THL-Library atualizando a documentação — notas de Documentos/.claude (fonte de verdade e vault do Obsidian), guias, Notion, Postman e, com aprovação, skills afetadas. Use ao final de cada tarefa de uma sessão de tópico ou quando o usuário chamar /thl-docs."
+description: "Fechar uma tarefa da THL-Library atualizando a documentação — notas de Documentos/.claude (fonte de verdade e vault do Obsidian), guias, Notion, Postman e, com aprovação, skills afetadas. Use ao final de cada tarefa de uma sessão de tópico, quando o usuário chamar /thl-docs ou disser \"atualizar tudo\" (atualiza todas as frentes de uma vez)."
 ---
 
 # thl-docs — fechamento documental da THL-Library
@@ -52,6 +52,22 @@ Qualquer sessão pode **acrescentar a linha de changelog** no topo do `INDEX` (r
 Arquivos transversais — só **propor**, salvo pedido explícito do usuário: estrutura do `INDEX`, `convencoes.md`, `arquitetura.md`, `moc/moc-geral.md`, `AGENTS.md`, `CLAUDE.md`, ADRs (via `thl-adr`). Nota de outra sessão afetada pela tarefa → registrar como pendência para a sessão dona, não editar.
 
 Antes de editar, consultar `git status` e preservar alterações locais fora da tarefa.
+
+## Comando: atualizar tudo
+
+Quando o usuário disser **"atualizar tudo"** (ou `/thl-docs atualizar tudo`), a skill roda o processo abaixo em **todas as frentes de uma vez**, sem pedir aprovação por frente: notas da KB, `INDEX` e MOCs, guias de `negocio/` e `tecnico/`, vault do Obsidian, Notion, Postman e skills. O comando é a autorização explícita que os passos 3 e 5 pedem. Ele **não** autoriza commit, push, apagar arquivos, nem mexer em código de `Fontes/`.
+
+Ordem e regras do modo:
+
+1. **Levantar** (passo 1) sobre o que mudou desde a "Última sincronização" do `INDEX`: `git log` e `git diff` de `Fontes/`, mais `git status`. Se a tarefa não tiver sessão definida, tratar como transversal.
+2. **Notas e guias** (passos 2 e 3): atualizar cada nota afetada, inclusive arquivos transversais (`INDEX`, `moc/`, `arquitetura.md`, `convencoes.md`), alterando só o trecho tornado falso. ADR nova continua sendo do `thl-adr`.
+3. **Obsidian**: validar links relativos, frontmatter, wikilinks e MOCs de toda a KB, e corrigir o que estiver quebrado. Nota nova entra no `INDEX` e no MOC.
+4. **Skills** (passo 5): aplicar as correções de skills contraditas pela mudança, uma por vez e só o trecho afetado, e **mostrar no relatório cada diff aplicado**. Conferir também se cada skill em `SKILLS` tem entrada em `SKILLS_CODEX` e linha na tabela do `AGENTS.md`; criar a entrada Codex que faltar, copiando `name` e `description` idênticos. A `thl-docs` só é alterada por pedido explícito do usuário.
+5. **Notion** (passo 6): atualizar só as páginas listadas no `NOTION_MAP`, conferindo antes (`fetch`) que a página é de publicação e não um checklist ou banco de trabalho. Sem mapa, sem ferramenta ou página de outro tipo: não escrever, listar como candidata.
+6. **Postman** (passo 7): só se algum endpoint mudou; do contrário registrar "sem alteração de API".
+7. **Validar** (passo 8) em toda a KB e fechar com o changelog (passo 4) e o relatório (passo 9), incluindo os itens "não executado" e o que ficou pendente por falta de ferramenta ou permissão.
+
+Dúvida sobre o que uma mudança afeta: registrar como pendência no relatório, em vez de adivinhar.
 
 ## Processo
 

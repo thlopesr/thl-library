@@ -1,6 +1,6 @@
 ---
 name: thl-docs
-description: "Fechar uma tarefa da THL-Library atualizando a documentação — notas de Documentos/.claude (fonte de verdade e vault do Obsidian), guias, Notion, Postman e, com aprovação, skills afetadas. Use ao final de cada tarefa de uma sessão de tópico ou quando o usuário chamar /thl-docs."
+description: "Fechar uma tarefa da THL-Library atualizando a documentação — notas de Documentos/.claude (fonte de verdade e vault do Obsidian), guias, Notion, Postman e, com aprovação, skills afetadas. Use ao final de cada tarefa de uma sessão de tópico, quando o usuário chamar /thl-docs ou disser \"atualizar tudo\" (atualiza todas as frentes de uma vez)."
 ---
 
 # thl-docs — entrada Codex
