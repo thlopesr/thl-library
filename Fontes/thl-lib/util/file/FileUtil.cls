@@ -74,4 +74,57 @@ class thl-lib.util.file.FileUtil serializable.
 
     end method.
 
+    //Decodifica o base64 e grava o arquivo (sobrescreve se ja existir). A pasta precisa existir.
+    method public static final void saveBase64AsFile( input filePath      as character,
+                                                      input base64Content as longchar ).
+
+        define variable fileMemptr as memptr no-undo.
+
+        if not StringUtil:hasValue( filePath ) then
+            undo, throw new ThlError( 'FileUtil', 'saveBase64AsFile', 'Caminho do arquivo nao informado.' ).
+
+        if not StringUtil:hasValue( base64Content ) then
+            undo, throw new ThlError( 'FileUtil', 'saveBase64AsFile', substitute( 'Conteudo do arquivo &1 nao informado.', filePath ) ).
+
+        assign fileMemptr = base64-decode( base64Content ).
+
+        copy-lob from fileMemptr to file filePath.
+
+        finally.
+            assign set-size( fileMemptr ) = 0.
+        end finally.
+
+    end method.
+
+    //Nome (ou extensao) de arquivo seguro: sem separador de pasta, caractere invalido nem ponto no inicio.
+    method public static final character sanitizeFileName( input rawName as character ).
+
+        define variable cleaned as character no-undo.
+        define variable counter as integer   no-undo.
+        define variable charAt  as character no-undo.
+
+        if rawName = ? then
+            return ''.
+
+        do counter = 1 to length( rawName ).
+
+            assign charAt = substring( rawName, counter, 1 ).
+
+            if index( '/~\:*?"<>|', charAt ) > 0 or asc( charAt ) < 32 then
+                next.
+
+            assign cleaned = cleaned + charAt.
+
+        end.
+
+        assign cleaned = trim( cleaned ).
+
+        do while cleaned begins '.'.
+            assign cleaned = substring( cleaned, 2 ).
+        end.
+
+        return cleaned.
+
+    end method.
+
 end class.

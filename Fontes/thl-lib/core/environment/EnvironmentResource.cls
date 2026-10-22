@@ -52,6 +52,27 @@ class thl-lib.core.environment.EnvironmentResource.
         return trim( EnvironmentRepository:findVariableValue( this-object:environment, this-object:parameterCode, StringUtil:enumToCode( variable ) ) ).
     end method.
 
+    // Variavel obrigatoria: valor sem espacos nas pontas; ausente ou em branco lanca ThlError (17006)
+    // dizendo a variavel, o parametro e o ambiente onde configurar.
+    method public character getRequiredEnvironmentVariable( variableCode as character ).
+
+        define variable valueTextError as character no-undo.
+
+        assign valueTextError = substitute( 'Variavel &1 nao configurada no parametro &2 (ambiente &3) do thl0002.',
+                                            variableCode, this-object:parameterCode, this-object:environment ).
+
+        return StringUtil:requireValue( this-object:getEnvironmentVariable( variableCode ),
+                                        this-object:GetClass():TypeName,
+                                        'getRequiredEnvironmentVariable',
+                                        valueTextError ).
+
+    end method.
+
+    // Mesma regra, com a variavel indicada por um enum (codigo = nome do membro em minusculas, '_' -> '.')
+    method public character getRequiredEnvironmentVariable( variable as Progress.Lang.Enum ).
+        return this-object:getRequiredEnvironmentVariable( StringUtil:enumToCode( variable ) ).
+    end method.
+
     // Mesma variavel, como logico (yes ou no) ou inteiro, com valor padrao: variavel ausente ou em
     // branco devolve o padrao; valor que nao converte lanca ThlError com o nome da variavel.
     method public logical getEnvironmentVariable( variable as Progress.Lang.Enum, defaultValue as logical ).
