@@ -12,7 +12,7 @@ updated: 2026-10-13
 |---|---|---|---|---|
 | LpcoMessage (outbound) | Mensagem outbound que serializa um LPCO (`nit-lpco`) para envio ao Automatizador | Template Method | OutboundMessage | OutboundMessageService (via config) |
 | LpcoMessage (inbound) | Mensagem inbound de CRUD de LPCO: POST/PATCH/DELETE pelos defaults de `InboundMessage`; GET com listagem paginada | Template Method + Factory Method | InboundMessage, LpcoService, MethodTypeEnum | InboundMessageService (via `thl-objeto.classe-objeto`) |
-| ProcessoExportacaoMessage (outbound) | Lote de processos de exportacao (`processo-exp`) para o RPA, modo Multiple, corpo `{ "processos": [...] }` | Template Method | OutboundMessage | OutboundMessageService (via config) |
+| ProcessoExportacaoMessage (outbound) | Lote de processos de exportacao (`processo-exp`) para o RPA, modo Multiple, corpo `{ "processos": [...] }` (o payload é criado só na primeira chamada de `appendPayloadObject`; as demais acrescentam ao array — corrigido em 22/10/2026, não compilado) | Template Method | OutboundMessage | OutboundMessageService (via config) |
 | LpcoService | Serviço de domínio do LPCO: criação (com numeração sequencial por emitente), atualização, exclusão física e listagem paginada | Service (Template Method via `Service`) | Service, JsonSetter, PaginationHelper, ThlError | LpcoMessage (inbound) |
 
 > **Movidas em 2026-09-24:** `LpcoMessage` (inbound) e `LpcoService` saíram de `thl-lib` (`…messaging.inbound.message` e `erp.service`) porque dependem do schema do cliente (`nit-lpco`). ⚠️ O registro de `thl-objeto.classe-objeto` da mensagem inbound precisa apontar para o novo nome completo.

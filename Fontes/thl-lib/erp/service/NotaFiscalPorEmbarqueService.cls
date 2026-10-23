@@ -18,11 +18,13 @@
 using Progress.Lang.*.
 using Progress.Json.ObjectModel.*.
 
+using thl-lib.core.environment.EnvironmentResource.
 using thl-lib.core.error.*.
 using thl-lib.erp.core.ServiceResponse.
 using thl-lib.erp.enum.ActionEnum.
 using thl-lib.erp.enum.SituacaoNfeEnum.
 using thl-lib.erp.service.NotaFiscalBaseService.
+using thl-lib.util.string.StringUtil.
 
 block-level on error undo, throw.
 
@@ -35,11 +37,29 @@ class thl-lib.erp.service.NotaFiscalPorEmbarqueService inherits NotaFiscalBaseSe
     end method.
 
     method public override void initialize().
+        
         super:initialize().
+
         find first b-embarque no-lock
             where b-embarque.cdd-embarq = this-object:inContext:GetDecimal('codigoEmbarque') no-error.
+
         if not available b-embarque then
             this-object:error:throwError( 'initialize', 'Embarque nao localizado.' ).
+
+    end method.
+
+    //inContext:diretorio quando houver; senao o diretorio temporario da sessao (padrao da base)
+    method protected override character getDirectory().
+
+        define variable directory as character no-undo.
+
+        assign directory = new EnvironmentResource():getEnvironmentVariable( 'diretorio.nota.fiscal' ).
+
+        if not StringUtil:hasValue( directory ) then
+            return super:getDirectory().
+
+        return directory.
+
     end method.
 
     //Um metodo por acao: criar = gerar as notas do embarque. As demais etapas

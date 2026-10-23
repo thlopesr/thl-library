@@ -10,6 +10,8 @@ updated: 2026-10-21
 
 **Última sincronização:** 13/10/2026, por inventário e leitura estática. Nenhuma compilação ou validação de implantação nesta revisão.
 
+**Atualização 22/10/2026 (diretório da NF por embarque):** `NotaFiscalBaseService:getDirectory()` (novo hook, padrão `session:temp-directory`) e `NotaFiscalPorEmbarqueService` (variável `diretorio.nota.fiscal` do thl0002 guardada em `inContext:diretorio`); o `esft1932rp.p` (ERP, pasta `ftp`) lê a mesma variável. Nota: [erp/erp-services.md](erp/erp-services.md). Não compilado; configurar a variável e vincular `esft1932rp` ao parâmetro no thl0002.
+
 **Atualização 19/10/2026 (skill thl-docs):** instalada a skill `thl-docs` (fechamento documental) em [.claude/skills/thl-docs/SKILL.md](../../.claude/skills/thl-docs/SKILL.md) e registrada na tabela de tarefas do `AGENTS.md`; criado o [notion-map.md](notion-map.md) vazio, com candidatas a publicação. Verificado por leitura e comparação de frontmatter, sem execução.
 
 **Atualização 21/10/2026 (limpeza do INDEX e links):** as 44 entradas de changelog anteriores a 19/10 foram movidas, sem alteração, para o [CHANGELOG](CHANGELOG.md); os dois links quebrados de [integration/messaging-inbound.md](integration/messaging-inbound.md) foram retirados (as classes `ObjetoMessage` e `NotaFiscalMessage` inbound não existem mais) e a pasta `Documentos/obsidian/` foi apagada, pois as notas estão em [thl/cadastros/](thl/cadastros/cadastros-thl.md). Verificado por leitura e checagem de links.
