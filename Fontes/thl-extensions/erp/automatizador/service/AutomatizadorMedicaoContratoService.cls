@@ -1,41 +1,35 @@
 /*------------------------------------------------------------------------
     File        : AutomatizadorMedicaoContratoService
     Purpose     : Medicao de contrato do Automatizador: regras de validacao,
-                  tabelas customizadas (RPA / lotacao) e arquivos em base64,
-                  em volta da API padrao cnapi040 do MedicaoContratoService.
+                  tabelas customizadas (RPA / lotacao / boleto), em volta da
+                  API padrao cnapi040 do MedicaoContratoService.
     Author(s)   : Lopes
     Created     : 2026-10-21
     Notes       : Regras extraidas das UPCs escn0302a-u00 a u06 (ver
                   Documentos/relatorios/regras-medicao-implementacao.md).
                   Ordem na transacao: validar, gravar es_ext_medicao_contrat,
-                  es_mla_lotacao_docto e rpa_nf_xml, executar a API, atualizar
-                  integra_rpa_item (usa a quantidade ja calculada) e gravar os
-                  arquivos. Se algo falha, o banco desfaz e os arquivos ja
-                  gravados sao apagados.
+                  es_mla_lotacao_docto, rpa_nf_xml e nit-integra-rpa-boleto,
+                  executar a API e atualizar integra_rpa_item (usa a quantidade
+                  ja calculada). Se algo falha, o banco desfaz tudo.
                   JSON: campos da medicao na raiz; matrizRateio[] (filha);
-                  notaFiscal { codEmitente, chaveNf, tipoNf } (filha 1 para
-                  0..1; o numero e o vencimento da NF vem de
-                  integra_rpa.nro_docto e integra_rpa.data_vencto);
-                  automatizador { codLotacao,
-                  preenchimentoManual, arquivos[ { nome, extensao,
-                  conteudoBase64 } ] }.
+                  notaFiscal { codEmitente, chaveNf, tipoNf, codigoBarra }
+                  (filha 1 para 0..1; o numero e o vencimento da NF vem de
+                  integra_rpa.nro_docto e integra_rpa.data_vencto; codigoBarra
+                  e opcional: quando informado grava nit-integra-rpa-boleto);
+                  automatizador { codLotacao, preenchimentoManual }.
                   A NF do RPA (integra_rpa) e localizada uma vez pela chave
                   primaria (estabelecimento do contrato + chaveNf + tipoNf, com
                   tipoNf NFE, NFS, NFT ou NFR) e fica em b-integra-rpa para
                   V-13 e integra_rpa_item. chaveNf e tipoNf sao sempre
                   obrigatorios (exceto quando V-09 desvia as regras do RPA).
-                  A pasta dos arquivos vem do thl0002 (variavel
-                  medicao.pasta.arquivos do parametro vinculado a esta classe).
                   V-13 e V-15 geram avisos; V-14 nao foi implementada.
   ----------------------------------------------------------------------*/
 
 using Progress.Json.ObjectModel.*.
 using Progress.Lang.*.
 
-using thl-lib.core.environment.EnvironmentResource.
 using thl-lib.core.error.ThlError.
 using thl-lib.erp.service.MedicaoContratoService.
-using thl-lib.util.file.Base64Files.
 using thl-lib.util.json.JsonSetter.
 using thl-lib.util.json.JsonUtil.
 
@@ -47,6 +41,7 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
     define private buffer b-emitente     for emitente.
     define private buffer b-emitente-ctr for emitente.
     define private buffer b-integra-rpa  for integra_rpa.
+    define private buffer b-boleto       for nit-integra-rpa-boleto.
 
     define private variable invoiceData       as JsonObject no-undo.
     define private variable automatizadorData as JsonObject no-undo.
@@ -55,11 +50,11 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
     define private variable invoiceNumber     as character  no-undo.
     define private variable invoiceKey        as character  no-undo.
     define private variable invoiceType       as character  no-undo.
+    define private variable invoiceBarcode    as character  no-undo.
     define private variable dueDate           as date       no-undo.
     define private variable lotationCode      as character  no-undo initial '0'.
     define private variable manualFilling     as logical    no-undo initial false.
     define private variable skipRpaRules      as logical    no-undo initial false.
-    define private variable attachedFiles     as Base64Files no-undo.
 
     method protected override void validateMedicao().
 
@@ -79,6 +74,7 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
                invoiceNumber = ''
                invoiceKey    = trim( JsonUtil:getText( invoiceData, 'chaveNf' ) )
                invoiceType   = caps( trim( JsonUtil:getText( invoiceData, 'tipoNf' ) ) )
+               invoiceBarcode = trim( JsonUtil:getText( invoiceData, 'codigoBarra' ) )
                lotationCode  = trim( JsonUtil:getText( automatizadorData, 'codLotacao' ) ).
 
         if lotationCode = '' then
@@ -346,6 +342,41 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
         this-object:saveMedicaoExtension().
         this-object:saveLotation().
         this-object:saveInvoiceXml().
+        this-object:saveBoleto().
+
+    end method.
+
+    //nit-integra-rpa-boleto: codigo de barras da NF (cria se nao existir), so quando informado e quando a
+    //V-09 nao desviou as regras do RPA. A chave e a mesma da integra_rpa (estabelecimento + chave + tipo).
+    method private void saveBoleto().
+
+        if skipRpaRules or invoiceBarcode = '' then
+            return.
+
+        if length( invoiceKey ) > 60 then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'saveBoleto',
+                'Chave da nota fiscal maior que o campo do boleto (60 caracteres).' ).
+
+        if length( invoiceBarcode ) > 50 then
+            undo, throw new ThlError( this-object:GetClass():TypeName, 'saveBoleto',
+                'Codigo de barras maior que o campo do boleto (50 caracteres).' ).
+
+        find first b-boleto exclusive-lock
+            where b-boleto.cod-estabel      = establishmentCode
+              and b-boleto.chave-nota-fisc  = invoiceKey
+              and b-boleto.tipo-nota-fiscal = invoiceType no-error.
+
+        if not available b-boleto then do.
+
+            create b-boleto.
+
+            assign b-boleto.cod-estabel      = establishmentCode
+                   b-boleto.chave-nota-fisc  = invoiceKey
+                   b-boleto.tipo-nota-fiscal = invoiceType.
+
+        end.
+
+        assign b-boleto.codigo-barra = invoiceBarcode.
 
     end method.
 
@@ -495,24 +526,9 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
 
     end method.
 
-    //Depois da API: integra_rpa_item e arquivos. Os arquivos em base64 ficam em
-    //<medicao.pasta.arquivos do thl0002>/<nrContrato>; quem monta, grava e desfaz e o Base64Files.
+    //Depois da API: integra_rpa_item
     method protected override void afterExecuteApi().
-
-        define variable folderPath as character no-undo.
-
         this-object:updateRpaItem().
-
-        if not automatizadorData:Has( 'arquivos' ) then
-            return.
-
-        assign folderPath = new EnvironmentResource():getRequiredEnvironmentVariable( 'medicao.pasta.arquivos' ).
-
-        assign attachedFiles = Base64Files:fromJson( automatizadorData:GetJsonArray( 'arquivos' ),
-                                                     substitute('&1/&2', folderPath, outContext:getInteger('nrContrato') ) ).
-
-        attachedFiles:save().
-
     end method.
 
     //integra_rpa_item: atualiza o item da NF do RPA com o codigo do item da medicao (it_codigo), com a
@@ -571,14 +587,6 @@ class thl-extensions.erp.automatizador.service.AutomatizadorMedicaoContratoServi
                integra_rpa_item.nr_contrato     = ordem-compra.nr-contrato
                integra_rpa_item.num_seq_item    = tt-medicao.num-seq-item
                integra_rpa_item.num_seq_medicao = tt-medicao.num-seq-medicao.
-
-    end method.
-
-    //Falha na criacao: o banco ja foi desfeito; apaga os arquivos que foram gravados
-    method protected override void onCreateFailed().
-
-        if valid-object( attachedFiles ) then
-            attachedFiles:rollback().
 
     end method.
 
