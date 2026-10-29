@@ -37,8 +37,11 @@ class thl-extensions.integration.automatizador.messaging.outbound.message.Proces
         define variable processo  as JsonObject no-undo.
         define variable processos as JsonArray  no-undo.
 
-        this-object:initializeObjectPayload().
-        cast( payload, JsonObject ):add( 'processos', new JsonArray() ).
+        // chamado uma vez por processo (modo Multiple): so a primeira cria o payload; as demais acrescentam
+        if not valid-object( payload ) then do.
+            this-object:initializeObjectPayload().
+            cast( payload, JsonObject ):add( 'processos', new JsonArray() ).
+        end.
 
         assign processos = cast( payload, JsonObject ):GetJsonArray( 'processos' )
                processo  = new JsonObject().

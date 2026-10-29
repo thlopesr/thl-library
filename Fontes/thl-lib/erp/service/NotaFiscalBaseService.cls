@@ -104,6 +104,12 @@ class thl-lib.erp.service.NotaFiscalBaseService abstract inherits BusinessObject
         pause this-object:getEnvironmentIntegerCapped( 'intervalo.processamento', 60 ).
     end method.
 
+    //Diretorio dos arquivos da nota (XML e documento impresso), sempre com separador no fim.
+    //Padrao: diretorio temporario da sessao; o Service que configura outro sobrescreve.
+    method protected character getDirectory().
+        return session:temp-directory.
+    end method.
+
     /*--------------------------------------------------------------------------
       Exporta o XML NF-e da faixa de notas informada via ftp/ft0910rp.p.
       resultMessage: return-value do programa. Retorna o arquivo temporario.
@@ -120,7 +126,7 @@ class thl-lib.erp.service.NotaFiscalBaseService abstract inherits BusinessObject
         empty temp-table tt-param      no-error.
         empty temp-table tt-raw-digita no-error.
 
-        assign tempFile = session:temp-directory + 'FT0910.tmp'.
+        assign tempFile = this-object:getDirectory() + 'FT0910.tmp'.
 
         create tt-param.
         assign tt-param.usuario            = new EnvironmentResource():getEnvironmentVariable( 'usuario.nfe' )
@@ -224,7 +230,7 @@ class thl-lib.erp.service.NotaFiscalBaseService abstract inherits BusinessObject
         assign printOption = if inPayload:Has('opcao') then inPayload:GetInteger('opcao')
                                                        else 1
                invoiceFile = substitute( '&1&2-&3-&4-.doc'         ,
-                                         session:temp-directory    ,
+                                         this-object:getDirectory(),
                                          b-nota-fiscal.cod-estabel ,
                                          b-nota-fiscal.serie       ,
                                          b-nota-fiscal.nr-nota-fis ).
