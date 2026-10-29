@@ -69,7 +69,7 @@ Essas chamadas criam dependência da `thl-lib` para a camada Datasul (diagnósti
 
 ## 5.1 Módulo no menu Datasul
 
-Os programas estão cadastrados no módulo **TOTVS Helper Library**, no menu **Foundation** (informado pelo usuário em 2026-10-21, com capturas do menu; conferido só nas imagens, não no cadastro do Datasul). A tela do módulo agrupa por abas — **Tarefas** (5: `thl0210`, `thl0220`, `thl0221`, `thl0222`, `thl0250`), **Relatórios** (0), **Consultas** (4) e **Cadastros** (15). Os mesmos recursos de consulta e cadastro existem em PO UI, nos apps `web` (Consulta Geral: métricas gerais, de mensageria, de e-mail e de auditoria) e `cadastro` (Painel de Cadastros), descritos em [web/app-web.md](../web/app-web.md). Rascunho do comunicado aos usuários: [relatorios/comunicado-programas-thl.md](../../relatorios/comunicado-programas-thl.md).
+Os programas estão cadastrados no módulo **Technical Helper Library**, no menu **Foundation** (informado pelo usuário em 2026-10-21, com capturas do menu; conferido só nas imagens, não no cadastro do Datasul; as capturas ainda mostram o nome anterior, "TOTVS Helper Library", então o cadastro do módulo no Datasul precisa ser renomeado). A tela do módulo agrupa por abas — **Tarefas** (5: `thl0210`, `thl0220`, `thl0221`, `thl0222`, `thl0250`), **Relatórios** (0), **Consultas** (4) e **Cadastros** (15). Os mesmos recursos de consulta e cadastro existem em PO UI, nos apps `web` (Consulta Geral: métricas gerais, de mensageria, de e-mail e de auditoria) e `cadastro` (Painel de Cadastros), descritos em [web/app-web.md](../web/app-web.md). Rascunho do comunicado aos usuários: [relatorios/comunicado-programas-thl.md](../../relatorios/comunicado-programas-thl.md).
 
 ## 6. Includes
 

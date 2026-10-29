@@ -40,6 +40,35 @@ class thl-lib.util.date.DateTimeUtil.
         return addInterval( baseDateTime, years, 'years' ).
     end method.
 
+    //Data no formato dd/MM/yyyy. Base desconhecida (?) devolve ''.
+    method public static final character formatDate( input baseDateTime as datetime-tz ).
+
+        if baseDateTime = ? then
+            return ''.
+
+        return string( baseDateTime , '99/99/9999' ).
+
+    end method.
+
+    //Data e hora no formato ddMMyyyyHHmmss (serve para nome de arquivo).
+    //Base desconhecida (?) devolve ''.
+    method public static final character formatTimestamp( input baseDateTime as datetime-tz ).
+
+        define variable baseDateTimeFormat as character no-undo.
+
+        if baseDateTime = ? then
+            return ''.
+            
+        assign baseDateTimeFormat = string( baseDateTime , '99/99/9999 HH:MM:SS' )
+               baseDateTimeFormat = replace( baseDateTimeFormat, '/', '' )
+               baseDateTimeFormat = replace( baseDateTimeFormat, ':', '' )
+               baseDateTimeFormat = replace( baseDateTimeFormat, ' ', '' ).
+
+        //O mascara 99/99/9999 segue o formato de data da sessao: assume dmy (padrao do Datasul)
+        return baseDateTimeFormat.
+
+    end method.
+
     method private static datetime addInterval( input baseDateTime as datetime-tz ,
                                                 input amount       as integer     ,
                                                 input intervalUnit as character   ).

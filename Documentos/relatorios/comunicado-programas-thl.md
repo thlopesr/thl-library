@@ -1,8 +1,8 @@
-**Assunto:** Biblioteca THL (TOTVS Helper Library) — programas disponíveis no menu Datasul e suas funções
+**Assunto:** Biblioteca THL (Technical Helper Library) — programas disponíveis no menu Datasul e suas funções
 
 Prezados,
 
-Segue a relação dos programas da Biblioteca THL (TOTVS Helper Library) disponíveis no Datasul, agrupados por finalidade. A THL é uma biblioteca de apoio ao desenvolvimento de customizações para o ERP TOTVS, com funcionalidades de integração, variáveis de ambiente, e-mail (monitorado) e auditoria.
+Segue a relação dos programas da Biblioteca THL (Technical Helper Library) disponíveis no Datasul, agrupados por finalidade. A THL é uma biblioteca de apoio ao desenvolvimento de customizações para o ERP TOTVS, com funcionalidades de integração, variáveis de ambiente, e-mail (monitorado) e auditoria.
 
 **1. Cadastros**
 

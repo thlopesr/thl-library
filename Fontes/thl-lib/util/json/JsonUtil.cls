@@ -106,4 +106,20 @@ class thl-lib.util.json.JsonUtil.
 
     end method.
 
+    //Texto de uma propriedade que pode vir como string ou como numero (nota fiscal, codigos).
+    //Ausente, nula ou de outro tipo devolve em branco.
+    method public static final character getText( input json         as JsonObject,
+                                                  input propertyName as character ).
+
+        if not valid-object( json ) or not json:Has( propertyName ) or json:IsNull( propertyName ) then
+            return ''.
+
+        case json:GetType( propertyName ).
+            when JsonDataType:STRING then return json:GetCharacter( propertyName ).
+            when JsonDataType:NUMBER then return string( json:GetInt64( propertyName ) ).
+            otherwise return ''.
+        end case.
+
+    end method.
+
 end class.

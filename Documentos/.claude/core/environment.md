@@ -105,6 +105,8 @@ updated: 2026-10-13
 | `constructor public EnvironmentResource()` | Resolve parâmetro automaticamente pelo call stack via `EnvironmentContext:setParameterCode()`. |
 | `method public character getEnvironmentVariable()` | Retorna o valor da variável padrão do parâmetro (variableCode = ''). |
 | `method public character getEnvironmentVariable( variableCode as character )` | Retorna o valor de uma variável específica do parâmetro. |
+| `method public character getRequiredEnvironmentVariable( variableCode as character )` | Variável obrigatória: valor sem espaços nas pontas; ausente ou em branco lança `ThlError` (17006) dizendo a variável, o parâmetro e o ambiente a configurar no thl0002. A validação é `StringUtil:requireValue` (versão com classe e método): o erro sai com origem `EnvironmentResource.getRequiredEnvironmentVariable`. |
+| `method public character getRequiredEnvironmentVariable( variable as Progress.Lang.Enum )` | Mesma regra, com o código vindo do membro do enum (`StringUtil:enumToCode`). |
 | `method public static character getEnvironmentVariable( codeParameter as character, variableCode as character )` | Consulta direta sem instância, para o ambiente corrente. |
 | `method public static character getEnvironmentVariable( environment as character, codeParameter as character, variableCode as character )` | Consulta direta com ambiente, parâmetro e variável explícitos. |
 

@@ -37,6 +37,26 @@ class thl-lib.util.string.StringUtil serializable.
         return replace( enumValue:toString(), '_', '.' ).
     end method.
 
+    //Exige valor: texto sem conteudo (vazio, so espacos ou ?) lanca ThlError (17006) com errorText,
+    //com origem StringUtil.requireValue; com conteudo, devolve o texto sem espacos nas pontas.
+    method public static final character requireValue( input valueText as longchar ,
+                                                       input errorText as character ).
+        return requireValue( valueText, 'StringUtil', 'requireValue', errorText ).
+    end method.
+
+    //Mesma regra, com o erro apontando para a classe e o metodo de quem chamou.
+    method public static final character requireValue( input valueText  as longchar ,
+                                                       input className  as character,
+                                                       input methodName as character,
+                                                       input errorText  as character ).
+
+        if not hasValue( valueText ) then
+            undo, throw new ThlError( className, methodName, errorText ).
+
+        return trim( getText( valueText ) ).
+
+    end method.
+
     method public static final longchar removeCr( input valueText as longchar ).
         return replace( getText(valueText), chr(13), '||' ).
     end method.

@@ -72,7 +72,7 @@ class thl-extensions.integration.loogai.messaging.outbound.message.EntregaPedido
         find first fam-comerc  of item      no-lock no-error.
         find first ped-venda   of ped-item  no-lock no-error.
         find first canal-venda of ped-venda no-lock no-error.
-        find first estabelec   of ped-venda no-lock no-error.
+        find first estabelec   of ped-venda No-lock no-error.
         
         find first emitente    no-lock 
             where emitente.nome-abrev = ped-venda.nome-abrev 
@@ -277,7 +277,7 @@ class thl-extensions.integration.loogai.messaging.outbound.message.EntregaPedido
                    ASSIGN c-rota-detalha = "Transp: " + transporte.nome + " - Nome: " + es_status_carregamento.contato-co + " - CNPJ: " + transporte.cgc + " - Telefone: " + es_status_carregamento.telefone-co + CHR(10) + chr(13) + "Obs.: " + es_status_carregamento.rotaDetalhada.
                 END.
                 ELSE DO:
-                   ASSIGN c-rota-detalha = "Nome: " + es_status_carregamento.contato-co + " - CPF: " + ENTRY(1,c-tmp, "|") + " - Telefone: " + es_status_carregamento.telefone-co + " - CNH: " + ENTRY(5,c-tmp, "|") + " (" + ENTRY(6,c-tmp, "|") + ") - Placa: " + ENTRY(2,c-tmp, "|") + " - Ve¡culo: " + ENTRY(3,c-tmp, "|") + " RENAVAM: " + ENTRY(4,c-tmp, "|") + CHR(10) + chr(13) + "Obs.: " + es_status_carregamento.rotaDetalhada.
+                   ASSIGN c-rota-detalha = "Nome: " + es_status_carregamento.contato-co + " - CPF: " + ENTRY(1,c-tmp, "|") + " - Telefone: " + es_status_carregamento.telefone-co + " - CNH: " + ENTRY(5,c-tmp, "|") + " (" + ENTRY(6,c-tmp, "|") + ") - Placa: " + ENTRY(2,c-tmp, "|") + " - Veï¿½culo: " + ENTRY(3,c-tmp, "|") + " RENAVAM: " + ENTRY(4,c-tmp, "|") + CHR(10) + chr(13) + "Obs.: " + es_status_carregamento.rotaDetalhada.
                 END.
             END.
         END.

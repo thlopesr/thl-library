@@ -14,8 +14,10 @@ updated: 2026-10-13
 | DateTimeUtil | Soma de horas, dias, meses e anos devolvendo `datetime` (sem fuso); faz num lugar só a conversão do `datetime-tz` do `now` | Métodos `static` | — | MensageriaService, EmailService e AuditoriaService (padrão das faixas de data: últimas 24 horas, na listagem de mensageria e nos `consultMetrics`) |
 | JsonSetter | Mapeia campos de um `JsonObject` para variáveis ABL de diferentes tipos, sem lançar erro para campos ausentes | Nenhum | ThlError | resourcen.p, OutboundMessage, EmbarqueService, UsuarioService, LpcoService, ItemService, CentroCustoService, RequisicaoService |
 | JsonWriter | Serializa buffer handle para JSON e converte listas delimitadas para JsonArray | Nenhum | — | AuditLogService |
-| JsonUtil | Consultas estáticas sobre `JsonObject` (`hasAnyProperty`) | Nenhum | — | EmbarqueService, LoogAiEmbarqueService |
+| JsonUtil | Consultas estáticas sobre `JsonObject` (`hasAnyProperty`, `requireProperties`, `getText`) | Nenhum | — | EmbarqueService, LoogAiEmbarqueService |
 | FileUtil | Utilitários estáticos para verificação e leitura de arquivos | Nenhum | StringUtil, ThlError | PedidoMessage, NinahubNotaFiscalService, StatusDocumento, ItemRequisicaoMessage, RequisicaoMessage (gestãoEPI) |
+| Base64File | Um arquivo em base64: `fileName`, `extension`, `content`; nome e extensão limpos por `FileUtil:sanitizeFileName`; nome e conteúdo obrigatórios; `save( diretorio )` grava e devolve o caminho | Nenhum | FileUtil, StringUtil, ThlError | Base64Files |
+| Base64Files | Conjunto de `Base64File` com `directory`: `fromJson( JsonArray, diretorio )` (`[ { nome, extensao, conteudoBase64 } ]`), `add`, `save()` (cria a pasta se faltar; mesmo nome sobrescreve), `rollback()` (apaga o que gravou) | Nenhum | Base64File, JsonUtil, StringUtil, ThlError | AutomatizadorMedicaoContratoService |
 | PaginationHelper | Infraestrutura reutilizável de paginação offset-based (skip/stop para FOR EACH paginados) | Helper | — | LpcoService, ItemService, EmailService, MensageriaService, CentroCustoService, MensageriaConteudoService, AuditoriaService, LpcoMessage, AuditoriaMessage, EmailMessage, MensageriaMessage |
 | SchemaUtil | Consulta o Data Dictionary via handles dinâmicos de schema; retorna campos do índice PRIMARY e propriedades completas dos campos via `getFieldSchema` | Métodos `static` | ThlError (apenas em `getFieldSchema`) | thl0050-v01.w, thl0051h.w |
 | **JsonArrayCsvExporter** | Exporta JsonArray para arquivo CSV (RFC 4180). Auto-detecta colunas ou aceita lista explícita | Nenhum | — | exampleFileScanner.p, exampleTableImpactCompiler.p |
@@ -54,6 +56,8 @@ updated: 2026-10-13
 | `method public static final character getText( variavel as decimal )` | Converte decimal para string e aplica `getText(longchar)`. |
 | `method public static final logical hasValue( input valueText as longchar )` | Retorna `true` se `trim(getText(valueText)) <> ''`. |
 | `method public static final character enumToCode( input enumValue as Progress.Lang.Enum )` | Código de variável a partir do membro do enum: `replace( enumValue:toString(), '_', '.' )` (`MENSAGEM_ENTRADA` → `MENSAGEM.ENTRADA`; a busca não diferencia maiúsculas, então acha `mensagem.entrada`). Usado pelo `EnvironmentResource:getEnvironmentVariable( enum )`. |
+| `method public static final character requireValue( input valueText as longchar, input errorText as character )` | Exige valor: vazio, só espaços ou `?` lança `ThlError` (17006, origem `StringUtil.requireValue`) com `errorText`; com conteúdo devolve o texto sem espaços nas pontas. |
+| `method public static final character requireValue( input valueText as longchar, input className as character, input methodName as character, input errorText as character )` | Mesma regra, com a origem do erro apontando para a classe e o método informados (quem chamou). Usado por `EnvironmentResource:getRequiredEnvironmentVariable`. |
 | `method public static final longchar removeCr( input valueText as longchar )` | Substitui `chr(13)` (CR) por `'||'`. |
 | `method public static final longchar removeLf( input valueText as longchar )` | Substitui `chr(10)` (LF) por `'||'`. |
 | `method public static final character removeCrLf( input valueText as longchar )` | Aplica `removeLf(removeCr(valueText))` e converte para `character`. |
@@ -81,6 +85,10 @@ updated: 2026-10-13
 | `method public static final datetime addDays( input baseDateTime as datetime-tz, input days as integer )` | Soma (ou subtrai) dias |
 | `method public static final datetime addMonths( input baseDateTime as datetime-tz, input months as integer )` | Soma (ou subtrai) meses |
 | `method public static final datetime addYears( input baseDateTime as datetime-tz, input years as integer )` | Soma (ou subtrai) anos |
+| `method public static final character formatDate( input baseDateTime as datetime-tz )` | Data no formato `dd/MM/yyyy`; base `?` devolve `''` |
+| `method public static final character formatTime()` | Hora atual no formato `HH:mm:ss` (`string( time, 'HH:MM:SS' )`) |
+| `method public static final character formatTime( input baseDateTime as datetime-tz )` | Hora no formato `HH:mm:ss`; base `?` devolve `''` |
+| `method public static final character formatTimestamp( input baseDateTime as datetime-tz )` | Data e hora no formato `ddMMyyyyHHmmss` (serve para nome de arquivo); base `?` devolve `''` |
 
 Uso: `DateTimeUtil:addHours( now, -24 )` (padrão: últimas 24 horas) e `DateTimeUtil:currentDateTime()`, nos `consultMetrics` dos três serviços de consulta e na listagem de mensageria.
 
@@ -132,6 +140,8 @@ Uso típico: validar PATCH com campos opcionais — `if not JsonUtil:hasAnyPrope
 
 ---
 
+`JsonUtil:getText( json, propertyName )` (2026-10-21, não compilado): texto de uma propriedade que pode vir como string ou número (nota fiscal, códigos); ausente, nula ou de outro tipo devolve `''`.
+
 ## JsonWriter
 
 **Caminho:** `thl-lib\util\json\JsonWriter.cls`
@@ -171,7 +181,7 @@ Uso típico: validar PATCH com campos opcionais — `if not JsonUtil:hasAnyPrope
 
 **Diretiva de erro:** `block-level on error undo, throw.`
 
-**Dependências diretas THL:** `StringUtil`, `ThlError`.
+**Dependências diretas THL:** `StringUtil`, `DateTimeUtil`, `ThlError`.
 
 > ⚠️ Header do arquivo diz "TextoUtil" (copy-paste de StringUtil).
 
@@ -182,6 +192,10 @@ Uso típico: validar PATCH com campos opcionais — `if not JsonUtil:hasAnyPrope
 | `method public static final logical exists( input filePath as character )` | Retorna `true` se arquivo encontrado via `FILE-INFO`. Retorna `false` para path vazio. |
 | `method public static final character getFullPathName( input filePath as character )` | Retorna `file-info:full-pathname` ou `?` se não encontrado. |
 | `method public static final longchar loadFileAsBase64( input filePath as character )` | Carrega arquivo em memptr via `COPY-LOB` e retorna `BASE64-ENCODE`. Lança `ThlError` se path vazio ou arquivo não encontrado. Libera memptr no `FINALLY`. |
+| `method public static final void saveBase64AsFile( input filePath as character, input base64Content as longchar )` | Decodifica o base64 e grava o arquivo com `COPY-LOB` (sobrescreve se existir; a pasta precisa existir). Erro (`ThlError`) se caminho ou conteúdo vazios. |
+| `method public static final character sanitizeFileName( input rawName as character )` | Nome (ou extensão) de arquivo seguro: remove barras, dois-pontos, asterisco, interrogação, aspas, sinais de menor/maior, pipe, caracteres de controle e pontos no início. `?` devolve `''`. |
+| `method public static final character formatFileNameWithTimestamp( input filePath as character )` | Acrescenta `_ddMMyyyyHHmmss` (agora) antes da extensão: `C:\TEMP\a.xls` → `C:\TEMP\a_28102026105700.xls`. Sem extensão, acrescenta no fim; ponto em nome de pasta não conta como extensão; path vazio devolve `?`. |
+| `method public static final character formatFileNameWithTimestamp( input filePath as character, input baseDateTime as datetime-tz )` | Igual ao anterior, com a data e hora informadas |
 
 **Método privado:** `getRequiredFullPathName(filePath)` — helper que valida existência e lança `ThlError`; usado por `loadFileAsBase64`.
 

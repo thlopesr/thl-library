@@ -10,15 +10,21 @@ updated: 2026-10-21
 
 **Última sincronização:** 13/10/2026, por inventário e leitura estática. Nenhuma compilação ou validação de implantação nesta revisão.
 
+**Atualização 28/10/2026:** `DateTimeUtil:formatTime`/`formatTimestamp` e `FileUtil:formatFileNameWithTimestamp` (nome de arquivo com data e hora); nota em [util/util.md](util/util.md). Não compilado.
+
 **Atualização 22/10/2026 (diretório da NF por embarque):** `NotaFiscalBaseService:getDirectory()` (novo hook, padrão `session:temp-directory`) e `NotaFiscalPorEmbarqueService` (variável `diretorio.nota.fiscal` do thl0002 guardada em `inContext:diretorio`); o `esft1932rp.p` (ERP, pasta `ftp`) lê a mesma variável. Nota: [erp/erp-services.md](erp/erp-services.md). Não compilado; configurar a variável e vincular `esft1932rp` ao parâmetro no thl0002.
 
 **Atualização 19/10/2026 (skill thl-docs):** instalada a skill `thl-docs` (fechamento documental) em [.claude/skills/thl-docs/SKILL.md](../../.claude/skills/thl-docs/SKILL.md) e registrada na tabela de tarefas do `AGENTS.md`; criado o [notion-map.md](notion-map.md) vazio, com candidatas a publicação. Verificado por leitura e comparação de frontmatter, sem execução.
+
+**Atualização 21/10/2026 (medição de contrato):** `MedicaoContratoService` (`thl-lib/erp/service`, API `cnapi040`) e `AutomatizadorMedicaoContratoService` (`thl-extensions/erp/automatizador/service`, regras das UPCs cn0302a, tabelas do RPA/lotação e arquivos base64); `FileUtil:saveBase64AsFile` e `sanitizeFileName`, `JsonUtil:getText` e as classes `Base64File` e `Base64Files` (arquivos base64 com rollback). Notas: [erp-services](erp/erp-services.md), [automatizador](extensions/automatizador.md), [util](util/util.md). Não compilado; falta cadastrar objeto/operação/rota `medicao-contrato/automatizador`. Atualização 23/10/2026: arquivos base64 deixaram de ser recebidos; `notaFiscal.codigoBarra` grava `nit-integra-rpa-boleto`.
+
+**Atualização 27/10/2026 (nome da THL):** a sigla THL passa a ser escrita **Technical Helper Library** (antes, "TOTVS Helper Library") nos guias de [negocio/](../negocio/funcionalidades-thl.md), em [thl/camada-datasul.md](thl/camada-datasul.md), no comunicado de [relatorios/](../relatorios/comunicado-programas-thl.md) e na página do Notion. Pendente: renomear o módulo no cadastro do menu Foundation do Datasul. Verificado por busca de texto.
 
 **Atualização 21/10/2026 (limpeza do INDEX e links):** as 44 entradas de changelog anteriores a 19/10 foram movidas, sem alteração, para o [CHANGELOG](CHANGELOG.md); os dois links quebrados de [integration/messaging-inbound.md](integration/messaging-inbound.md) foram retirados (as classes `ObjetoMessage` e `NotaFiscalMessage` inbound não existem mais) e a pasta `Documentos/obsidian/` foi apagada, pois as notas estão em [thl/cadastros/](thl/cadastros/cadastros-thl.md). Verificado por leitura e checagem de links.
 
 **Atualização 21/10/2026 (funcionalidades em nível de negócio):** seis guias novos em `Documentos/negocio/` — [funcionalidades-thl.md](../negocio/funcionalidades-thl.md) (índice) e um por funcionalidade: Utils (com exemplos de chamada, incluindo `scanner` e `compile`), Integração (com o `PaginationHelper`, restrito à entrada), E-mail, Variável de ambiente e Auditoria, com a explicação dos cadastros de cada uma. Escritos a partir das notas e do código por leitura; exemplos não compilados. Publicados no Notion (espaço Informações THL, página "THL-Library — Funcionalidades" com 5 subpáginas); mapa em [notion-map.md](notion-map.md).
 
-**Atualização 21/10/2026 (atualizar tudo):** a skill [thl-docs](../../.claude/skills/thl-docs/SKILL.md) ganhou o comando **"atualizar tudo"** (todas as frentes de uma vez); criadas as entradas Codex de `thl-adr`, `thl-tech-debt` e `thl-git` em `.agents/skills/`; nova seção 5.1 em [thl/camada-datasul.md](thl/camada-datasul.md) sobre o módulo TOTVS Helper Library no menu Foundation; o [notion-map.md](notion-map.md) deixou de listar as 4 páginas de checklist de teste como publicação. Verificado por leitura, sem execução.
+**Atualização 21/10/2026 (atualizar tudo):** a skill [thl-docs](../../.claude/skills/thl-docs/SKILL.md) ganhou o comando **"atualizar tudo"** (todas as frentes de uma vez); criadas as entradas Codex de `thl-adr`, `thl-tech-debt` e `thl-git` em `.agents/skills/`; nova seção 5.1 em [thl/camada-datasul.md](thl/camada-datasul.md) sobre o módulo Technical Helper Library no menu Foundation; o [notion-map.md](notion-map.md) deixou de listar as 4 páginas de checklist de teste como publicação. Verificado por leitura, sem execução.
 
 **Atualização 19/10/2026 (skill thl-docs, Postman):** o passo 7 da skill [thl-docs](../../.claude/skills/thl-docs/SKILL.md) virou um procedimento executável pelo conector do Postman (subpasta junto, examples por cenário, segredos fora do repositório, apagar só com confirmação), e o caminho da collection foi corrigido para `THL-Library > THL`. Verificado por leitura; o fluxo não foi executado contra o Postman.
 
@@ -109,7 +115,7 @@ Comece por [convencoes.md](convencoes.md) e [arquitetura.md](arquitetura.md); ab
 
 ## Distribuição por pacote
 
-Contagem em 13/10/2026: **148 classes = 95 em `thl-lib` + 53 em `thl-extensions`** (arquivos `.cls.old` não contam). Inclui interfaces e enums em arquivos `.cls`; exclui worktrees e gerados.
+Contagem em 13/10/2026: **152 classes = 98 em `thl-lib` + 54 em `thl-extensions`** (arquivos `.cls.old` não contam). Inclui interfaces e enums em arquivos `.cls`; exclui worktrees e gerados.
 
 | Pacote | Arquivos `.cls` |
 |---|---:|

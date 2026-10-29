@@ -1,4 +1,4 @@
-# Funcionalidades da Biblioteca THL (TOTVS Helper Library)
+# Funcionalidades da Biblioteca THL (Technical Helper Library)
 
 A THL é uma biblioteca de apoio ao desenvolvimento de customizações para o ERP TOTVS. Este conjunto de guias descreve, em nível de negócio, cada funcionalidade e os cadastros que a configuram.
 

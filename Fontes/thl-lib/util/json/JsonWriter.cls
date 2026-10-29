@@ -14,7 +14,10 @@ block-level on error undo, throw.
 using Progress.Json.ObjectModel.JsonArray.
 using Progress.Lang.*.
 
-class thl-lib.util.json.JsonWriter serializable.
+class thl-lib.util.json.JsonWriter final.
+
+    constructor private JsonWriter().
+    end constructor.
 
     //Serializa um BUFFER handle (record buffer) para JSON
     method public static longchar toJsonFromBuffer( input bufferHandle as handle   ,
@@ -29,6 +32,8 @@ class thl-lib.util.json.JsonWriter serializable.
             return ''. 
         
         create temp-table ttHandle.
+        assign ttHandle:undo = false.
+         
         ttHandle:create-like-sequential(bufferHandle).
         ttHandle:temp-table-prepare(bufferHandle:table).
         
@@ -36,13 +41,13 @@ class thl-lib.util.json.JsonWriter serializable.
         ttBuffer:buffer-create().
         ttBuffer:buffer-copy(bufferHandle).
         
-        ttBuffer:write-json('LONGCHAR', context, true).
+        ttBuffer:write-json('LONGCHAR', context, false).
                 
         return context.
         
-        finally:
+        finally.
+            //delete object ttBuffer no-error.
             delete object ttHandle no-error.
-            delete object ttBuffer no-error.
         end finally.
         
     end method.
