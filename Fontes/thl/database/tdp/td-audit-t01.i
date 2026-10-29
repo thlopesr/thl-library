@@ -15,12 +15,12 @@ using thl-lib.logging.audit.AuditLogService.
 {include/i-prgvrs.i td-audit-t01 12.00.00.000}
 
 //Definitions
-define parameter buffer b-{1}   for {1}.
+define parameter buffer b-{1}  for {1}.
 
 //Main Block
 new AuditLogService():deleteRecord( buffer b-{1}:handle ).
 
-run {2} ( buffer b-{1}:handle ).
+run {2} ( input buffer b-{1}:handle ).
           
 if return-value = 'NOK' then 
     return 'NOK'.

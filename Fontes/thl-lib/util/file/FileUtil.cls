@@ -10,6 +10,7 @@
   ----------------------------------------------------------------------*/
 using Progress.Lang.*.
 using thl-lib.util.string.StringUtil.
+using thl-lib.util.date.DateTimeUtil.
 using thl-lib.core.error.ThlError.
 
 block-level on error undo, throw.
@@ -124,6 +125,30 @@ class thl-lib.util.file.FileUtil serializable.
         end.
 
         return cleaned.
+
+    end method.
+
+    //Acrescenta _ddMMyyyyHHmmss (agora) antes da extensao: C:\TEMP\a.xls -> C:\TEMP\a_28102026105700.xls.
+    //Sem extensao, acrescenta no fim. Caminho sem valor devolve ?.
+    method public static final character formatFileNameWithTimestamp( input filePath as character ).
+        return formatFileNameWithTimestamp( filePath, DateTimeUtil:currentDateTime() ).
+    end method.
+
+    //Igual ao formatFileNameWithTimestamp( filePath ), usando a data e hora informadas.
+    method public static final character formatFileNameWithTimestamp( input filePath     as character   ,
+                                                                      input baseDateTime as datetime-tz ).
+
+        define variable timestamp   as character no-undo.
+        define variable dotPosition as integer   no-undo.
+
+        if not StringUtil:hasValue( filePath ) then
+            return ?.
+
+        assign timestamp         = DateTimeUtil:formatTimestamp( baseDateTime )
+               dotPosition       = r-index( filePath, '.' ).
+
+        //Ponto numa pasta (antes do ultimo separador) nao e extensao
+        return substitute( '&1_&2&3', substring( filePath, 1, dotPosition - 1 ), timestamp, substring( filePath, dotPosition ) ).
 
     end method.
 

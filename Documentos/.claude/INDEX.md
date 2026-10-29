@@ -10,6 +10,8 @@ updated: 2026-10-21
 
 **Última sincronização:** 13/10/2026, por inventário e leitura estática. Nenhuma compilação ou validação de implantação nesta revisão.
 
+**Atualização 28/10/2026:** `DateTimeUtil:formatTime`/`formatTimestamp` e `FileUtil:formatFileNameWithTimestamp` (nome de arquivo com data e hora); nota em [util/util.md](util/util.md). Não compilado.
+
 **Atualização 19/10/2026 (skill thl-docs):** instalada a skill `thl-docs` (fechamento documental) em [.claude/skills/thl-docs/SKILL.md](../../.claude/skills/thl-docs/SKILL.md) e registrada na tabela de tarefas do `AGENTS.md`; criado o [notion-map.md](notion-map.md) vazio, com candidatas a publicação. Verificado por leitura e comparação de frontmatter, sem execução.
 
 **Atualização 21/10/2026 (medição de contrato):** `MedicaoContratoService` (`thl-lib/erp/service`, API `cnapi040`) e `AutomatizadorMedicaoContratoService` (`thl-extensions/erp/automatizador/service`, regras das UPCs cn0302a, tabelas do RPA/lotação e arquivos base64); `FileUtil:saveBase64AsFile` e `sanitizeFileName`, `JsonUtil:getText` e as classes `Base64File` e `Base64Files` (arquivos base64 com rollback). Notas: [erp-services](erp/erp-services.md), [automatizador](extensions/automatizador.md), [util](util/util.md). Não compilado; falta cadastrar objeto/operação/rota `medicao-contrato/automatizador`. Atualização 23/10/2026: arquivos base64 deixaram de ser recebidos; `notaFiscal.codigoBarra` grava `nit-integra-rpa-boleto`.

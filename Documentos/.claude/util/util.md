@@ -85,6 +85,10 @@ updated: 2026-10-13
 | `method public static final datetime addDays( input baseDateTime as datetime-tz, input days as integer )` | Soma (ou subtrai) dias |
 | `method public static final datetime addMonths( input baseDateTime as datetime-tz, input months as integer )` | Soma (ou subtrai) meses |
 | `method public static final datetime addYears( input baseDateTime as datetime-tz, input years as integer )` | Soma (ou subtrai) anos |
+| `method public static final character formatDate( input baseDateTime as datetime-tz )` | Data no formato `dd/MM/yyyy`; base `?` devolve `''` |
+| `method public static final character formatTime()` | Hora atual no formato `HH:mm:ss` (`string( time, 'HH:MM:SS' )`) |
+| `method public static final character formatTime( input baseDateTime as datetime-tz )` | Hora no formato `HH:mm:ss`; base `?` devolve `''` |
+| `method public static final character formatTimestamp( input baseDateTime as datetime-tz )` | Data e hora no formato `ddMMyyyyHHmmss` (serve para nome de arquivo); base `?` devolve `''` |
 
 Uso: `DateTimeUtil:addHours( now, -24 )` (padrão: últimas 24 horas) e `DateTimeUtil:currentDateTime()`, nos `consultMetrics` dos três serviços de consulta e na listagem de mensageria.
 
@@ -177,7 +181,7 @@ Uso típico: validar PATCH com campos opcionais — `if not JsonUtil:hasAnyPrope
 
 **Diretiva de erro:** `block-level on error undo, throw.`
 
-**Dependências diretas THL:** `StringUtil`, `ThlError`.
+**Dependências diretas THL:** `StringUtil`, `DateTimeUtil`, `ThlError`.
 
 > ⚠️ Header do arquivo diz "TextoUtil" (copy-paste de StringUtil).
 
@@ -190,6 +194,8 @@ Uso típico: validar PATCH com campos opcionais — `if not JsonUtil:hasAnyPrope
 | `method public static final longchar loadFileAsBase64( input filePath as character )` | Carrega arquivo em memptr via `COPY-LOB` e retorna `BASE64-ENCODE`. Lança `ThlError` se path vazio ou arquivo não encontrado. Libera memptr no `FINALLY`. |
 | `method public static final void saveBase64AsFile( input filePath as character, input base64Content as longchar )` | Decodifica o base64 e grava o arquivo com `COPY-LOB` (sobrescreve se existir; a pasta precisa existir). Erro (`ThlError`) se caminho ou conteúdo vazios. |
 | `method public static final character sanitizeFileName( input rawName as character )` | Nome (ou extensão) de arquivo seguro: remove barras, dois-pontos, asterisco, interrogação, aspas, sinais de menor/maior, pipe, caracteres de controle e pontos no início. `?` devolve `''`. |
+| `method public static final character formatFileNameWithTimestamp( input filePath as character )` | Acrescenta `_ddMMyyyyHHmmss` (agora) antes da extensão: `C:\TEMP\a.xls` → `C:\TEMP\a_28102026105700.xls`. Sem extensão, acrescenta no fim; ponto em nome de pasta não conta como extensão; path vazio devolve `?`. |
+| `method public static final character formatFileNameWithTimestamp( input filePath as character, input baseDateTime as datetime-tz )` | Igual ao anterior, com a data e hora informadas |
 
 **Método privado:** `getRequiredFullPathName(filePath)` — helper que valida existência e lança `ThlError`; usado por `loadFileAsBase64`.
 
